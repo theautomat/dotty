@@ -56,27 +56,40 @@
 - [ ] Document remaining sound files and their purposes
 
 ### Simplify Entry Experience
+- [ ] Update entry screen branding: "Mancer" → "Dotty"
+- [ ] Remove spinning object from entry screen
 - [ ] Remove or simplify entry screen complexity
 - [ ] Consider removing Preact dependency from entry screen
 - [ ] Create simple start screen for Dotty
 - [ ] Remove arcade cabinet aesthetic if not needed
 
+### Audio & Sound Updates
+- [ ] Replace spaceship movement sounds with appropriate sounds for Dotty
+- [ ] Remove or replace all spaceship/alien/asteroid sound effects
+- [ ] Add simple movement sounds for walking/exploration
+- [ ] Keep treasure collection sounds (may be reusable)
+- [ ] Plan sound scheme for top-down exploration game
+
 ## 🎮 Game Foundation: Top-Down Mechanics
 
 ### Camera System
-- [ ] Implement top-down orthographic camera
-- [ ] Set up camera to follow player character
+- [x] Implement top-down orthographic camera
+- [x] Set up camera to follow player character
+- [x] Camera locked to player position (X and Z)
 - [ ] Implement zoom controls (mouse wheel)
 - [ ] Define and enforce min/max zoom levels
-- [ ] Test camera smoothing and follow behavior
+- [ ] Test camera smoothing and follow behavior (if needed)
 
 ### Player Character (Dotty)
-- [ ] Create simple circular player character
-- [ ] Implement WASD movement controls
-- [ ] Set up player physics (speed, acceleration)
-- [ ] Add player position tracking
-- [ ] Create player visual representation (start with simple circle)
-- [ ] Test movement feel and responsiveness
+- [x] Create simple circular player character (green dot)
+- [x] Implement WASD movement controls
+- [x] Simplified movement system (direct, no momentum)
+- [x] Camera follows player perfectly
+- [x] Added grid ground plane for visual reference
+- [x] Removed crosshair (not needed for top-down)
+- [x] Modified Controls.js to move player instead of camera
+- [ ] Move player dot code to /src/objects/Player.js or Dotty.js
+- [ ] Replace green circle with actual Dotty sprite/character art
 
 ### World & Boundaries
 - [ ] Define 2D world boundaries
@@ -161,3 +174,15 @@
 - [x] Registered web app in Firebase console
 - [x] Updated .env file with new Dotty Firebase credentials
 - [x] Verified build works with new Firebase configuration
+
+### Top-Down Game Foundation
+- [x] Changed camera from PerspectiveCamera to OrthographicCamera
+- [x] Positioned camera above world looking straight down
+- [x] Created player character as green circle (Dotty)
+- [x] Added grid ground plane for visual reference
+- [x] Modified Controls.js to accept player object reference
+- [x] Simplified movement to direct WASD (no momentum/acceleration)
+- [x] Fixed camera to follow player position perfectly
+- [x] Removed crosshair from UI (not needed for top-down)
+- [x] Disabled asteroid/enemy spawning temporarily
+- [x] Tested all four movement keys (W/A/S/D working properly)

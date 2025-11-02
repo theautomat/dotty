@@ -23,6 +23,7 @@ class Controls {
      * @param {Object} params - Configuration parameters
      * @param {THREE.Camera} params.camera - The player camera to control
      * @param {THREE.Renderer} params.renderer - The renderer (for pointer lock)
+     * @param {THREE.Object3D} params.player - The player object to move (DOTTY)
      * @param {Function} params.shootCallback - Function to call when player shoots
      * @param {Function} params.helpToggleCallback - Function to call when help menu is toggled
      * @param {Function} params.hudClickCallback - Function to call to let HUD handle clicks
@@ -32,6 +33,7 @@ class Controls {
         // Store references to passed objects
         this.camera = params.camera;
         this.renderer = params.renderer;
+        this.player = params.player || null; // DOTTY: Reference to player object
         this.helpToggleCallback = params.helpToggleCallback || (() => {});
         this.hudClickCallback = params.hudClickCallback || null;
         this.worldBoundaryToggleCallback = params.worldBoundaryToggleCallback || (() => {});
@@ -735,53 +737,76 @@ class Controls {
      * @returns {THREE.Vector3} The updated velocity vector
      */
     update() {
-        // Calculate current magnitude of velocity
-        const currentSpeed = this.velocity.length();
-        
-        // Handle thrust and direction changes - get fresh direction vector
-        const direction = new THREE.Vector3(0, 0, -1);
-        direction.applyQuaternion(this.camera.quaternion);
-        
-        // Create right vector for strafing (perpendicular to direction)
-        const rightVector = new THREE.Vector3(1, 0, 0);
-        rightVector.applyQuaternion(this.camera.quaternion);
-        
-        // Apply acceleration based on input
-        if (this.moveForward) {
-            // Gradually accelerate in the direction we're facing
-            this.velocity.add(direction.clone().multiplyScalar(this.ACCELERATION));
-        } else if (this.moveBackward) {
-            // Brake/reverse more gently than acceleration
-            this.velocity.add(direction.clone().multiplyScalar(-this.DECELERATION));
-        }
-        
-        // Apply strafing movement
-        if (this.strafeLeft) {
-            // Move left (negative on the right vector axis)
-            this.velocity.add(rightVector.clone().multiplyScalar(-this.ACCELERATION));
-        } else if (this.strafeRight) {
-            // Move right (positive on the right vector axis)
-            this.velocity.add(rightVector.clone().multiplyScalar(this.ACCELERATION));
-        }
-        
-        // Apply drag regardless of input (minimal in space)
-        this.velocity.multiplyScalar(this.DRAG);
-        
-        // Enforce maximum speed limit
-        if (this.velocity.length() > this.MAX_SPEED) {
-            this.velocity.normalize().multiplyScalar(this.MAX_SPEED);
-        }
-        
-        // Enforce minimum speed threshold (to prevent never-ending drift)
-        if (this.velocity.length() < 0.001 && 
-            !this.moveForward && !this.moveBackward && 
-            !this.strafeLeft && !this.strafeRight) {
+        // DOTTY: Super simple 2D top-down movement
+        if (this.player) {
+            const moveSpeed = 0.5; // Direct movement speed (units per frame)
+
+            // Reset velocity each frame - direct movement, no momentum
             this.velocity.set(0, 0, 0);
+
+            // Simple WASD movement
+            if (this.moveForward) {
+                this.velocity.z -= moveSpeed; // W = move up (negative Z)
+            }
+            if (this.moveBackward) {
+                this.velocity.z += moveSpeed; // S = move down (positive Z)
+            }
+            if (this.strafeLeft) {
+                this.velocity.x -= moveSpeed; // A = move left (negative X)
+            }
+            if (this.strafeRight) {
+                this.velocity.x += moveSpeed; // D = move right (positive X)
+            }
+
+            // Normalize diagonal movement so it's not faster
+            if ((this.moveForward || this.moveBackward) && (this.strafeLeft || this.strafeRight)) {
+                this.velocity.normalize().multiplyScalar(moveSpeed);
+            }
+
+            // DOTTY: Move the player object directly
+            this.player.position.add(this.velocity);
+
+            // DOTTY: Camera follows player (only X and Z, Y stays fixed above)
+            this.camera.position.x = this.player.position.x;
+            this.camera.position.z = this.player.position.z;
+
+        } else {
+            // OLD: Original 3D movement code (keeping as fallback for now)
+            const currentSpeed = this.velocity.length();
+
+            const direction = new THREE.Vector3(0, 0, -1);
+            direction.applyQuaternion(this.camera.quaternion);
+
+            const rightVector = new THREE.Vector3(1, 0, 0);
+            rightVector.applyQuaternion(this.camera.quaternion);
+
+            if (this.moveForward) {
+                this.velocity.add(direction.clone().multiplyScalar(this.ACCELERATION));
+            } else if (this.moveBackward) {
+                this.velocity.add(direction.clone().multiplyScalar(-this.DECELERATION));
+            }
+
+            if (this.strafeLeft) {
+                this.velocity.add(rightVector.clone().multiplyScalar(-this.ACCELERATION));
+            } else if (this.strafeRight) {
+                this.velocity.add(rightVector.clone().multiplyScalar(this.ACCELERATION));
+            }
+
+            this.velocity.multiplyScalar(this.DRAG);
+
+            if (this.velocity.length() > this.MAX_SPEED) {
+                this.velocity.normalize().multiplyScalar(this.MAX_SPEED);
+            }
+
+            if (this.velocity.length() < 0.001 &&
+                !this.moveForward && !this.moveBackward &&
+                !this.strafeLeft && !this.strafeRight) {
+                this.velocity.set(0, 0, 0);
+            }
+
+            this.camera.position.add(this.velocity);
         }
-        
-        // Update camera position
-        this.camera.position.add(this.velocity);
-        
+
         // Return the current velocity for external use
         return this.velocity;
     }

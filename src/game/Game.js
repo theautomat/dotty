@@ -168,17 +168,37 @@ class Game {
         
         // Create the scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(GameTheme.scene.background);
-        
-        // Create camera (player's ship view) with reduced FOV to minimize motion sickness
-        this.camera = new THREE.PerspectiveCamera(
-            60, // Reduced FOV from 70 to 60 to reduce peripheral distortion and motion sickness
-            window.innerWidth / window.innerHeight, 
-            0.1, // Keep near plane at 0.1
-            13000 // Increased far plane to accommodate world size of 6000 units plus padding for stars
+        this.scene.background = new THREE.Color(0x000000); // Black background for now
+
+        // DOTTY: Top-down orthographic camera looking down at the world
+        const aspect = window.innerWidth / window.innerHeight;
+        const viewSize = 50; // How much of the world we can see
+        this.camera = new THREE.OrthographicCamera(
+            -viewSize * aspect, // left
+            viewSize * aspect,  // right
+            viewSize,           // top
+            -viewSize,          // bottom
+            0.1,                // near
+            1000                // far
         );
-        this.camera.position.set(0, 0, 0);
+        // Position camera above the world, looking straight down
+        this.camera.position.set(0, 100, 0);
+        this.camera.lookAt(0, 0, 0);
         this.scene.add(this.camera);
+
+        // DOTTY: Add a grid ground plane so we can see movement
+        const gridHelper = new THREE.GridHelper(200, 20, 0x444444, 0x222222); // size 200, 20 divisions
+        gridHelper.rotation.x = 0; // Grid is already horizontal
+        this.scene.add(gridHelper);
+
+        // DOTTY: Create the player character (simple circle for now)
+        // TODO: Move this to /src/objects/Player.js or Dotty.js
+        const dotGeometry = new THREE.CircleGeometry(2, 32); // radius 2, 32 segments for smooth circle
+        const dotMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green dot
+        this.playerDot = new THREE.Mesh(dotGeometry, dotMaterial);
+        this.playerDot.rotation.x = -Math.PI / 2; // Rotate to face up (circle is in XY plane by default)
+        this.playerDot.position.set(0, 0.1, 0); // Slightly above ground so it's visible
+        this.scene.add(this.playerDot);
         
         // Make camera available globally for Hunter and other enemies to use
         window.mainCamera = this.camera;
@@ -286,6 +306,7 @@ class Game {
         this.controls = new Controls({
             camera: this.camera,
             renderer: this.renderer,
+            player: this.playerDot, // DOTTY: Pass player object to controls
             helpToggleCallback: (visible) => {
                 // Handle help menu toggle
                 this.helpMenuVisible = visible;
@@ -374,10 +395,11 @@ class Game {
                 console.warn("No renderer.domElement found to request pointer lock");
             }
             
+            // DOTTY: Temporarily disable level/asteroid/enemy spawning
             // Start the game using the LevelManager
             // LevelManager will handle loading the first level
-            this.levelManager.startGame();
-            
+            // this.levelManager.startGame();
+
             // Transition to PLAYING state
             gameStateMachine.transitionTo(GAME_STATES.PLAYING);
         });

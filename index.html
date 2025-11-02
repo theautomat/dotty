@@ -299,38 +299,7 @@
             margin-bottom: 5px;
         }
         
-        /* Crosshair overlay */
-        #crosshair {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            pointer-events: none;
-            z-index: 1000;
-        }
-        
-        #crosshair::before,
-        #crosshair::after {
-            content: '';
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.7);
-        }
-        
-        #crosshair::before {
-            top: 9px;
-            left: 0;
-            width: 20px;
-            height: 2px;
-        }
-        
-        #crosshair::after {
-            top: 0;
-            left: 9px;
-            width: 2px;
-            height: 20px;
-        }
+        /* DOTTY: Crosshair removed - not needed for top-down view */
     </style>
 </head>
 <body>
@@ -352,10 +321,9 @@
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); font-size: 30px;">↻</div>
             </div>
         </div>
-        
-        <!-- Crosshair overlay - initially hidden until pointer is locked -->
-        <div id="crosshair" style="display: none;"></div>
-        
+
+        <!-- DOTTY: Crosshair removed - not needed for top-down view -->
+
         <!-- Help menu -->
         <div id="help-menu">
             <h3>CONTROLS</h3>
