@@ -1,50 +1,144 @@
-# Asteroids Game Tasks
+# Dotty Game Development Tasks
 
-## Active Development Tasks
+## 🔥 High Priority: Infrastructure & Security
 
-### Scoring and Leaderboard
-- [ ] Create persistent leaderboard system
-- [ ] Implement score tracking for different actions (asteroid types, enemy types, ores collected)
-- [ ] Add player name input for high scores
-- [ ] Design leaderboard UI with filtering options
-- [ ] Ensure proper data storage and retrieval
+### Environment & Security Setup
+- [ ] Create `.env` file with environment variable structure
+- [ ] Create `.env.example` template for deployment
+- [ ] Move Firebase config to environment variables
+- [ ] Move FingerprintJS API key to environment variables (or remove if not needed)
+- [ ] Update `.gitignore` to ensure `.env` is excluded
+- [ ] Test environment variable loading in both dev and prod
 
-### Enemy System Implementation
-- [x] Create basic enemy architecture
-- [x] Implement enemy behaviors (follow, patrol, attack)
-- [x] Add enemy spawning system
-- [ ] Create enemy weapons
-  - [ ] Implement heat-seeking projectiles for advanced enemies
-- [ ] Balance enemy difficulty
+### Firebase Migration
+- [ ] Create new Firebase project for Dotty
+- [ ] Set up Firestore database with new collection structure
+- [ ] Update firebase-config.js with new project credentials
+- [ ] Plan new data schema for treasure collection tracking
+- [ ] Migrate/adapt Firebase service layer for Dotty-specific data
+- [ ] Test Firebase connection and data persistence
 
-### Behavior Framework
-- [x] Create targeting/tracking system to follow player
-- [x] Implement attack patterns (shooting, charging)
-- [ ] Add evasive maneuvers to avoid bullets
-- [x] Develop patrol patterns and waypoint system
-- [x] Create behavior state machine for enemies
-- [x] Add behavior triggers (health percentage, distance to player)
+## 🧹 Core Cleanup: Remove Multiplayer & Unused Features
 
-### Asteroid Enhancements
-- [x] Implement large asteroid splitting into smaller fragments when destroyed
-- [x] Add directional spawning toward player
-- [x] Create special "hunter" asteroids that track player
-- [x] Implement asteroid field patterns (Level 3 Asteroid Bananza)
-- [x] Add FlyByAsteroid type that doesn't wrap around boundaries
+### Remove WebRTC/Multiplayer Infrastructure
+- [ ] Remove Socket.IO server code from `server.js`
+- [ ] Delete `webrtc-signaling.js` file
+- [ ] Remove WebRTC client scripts from `src/scripts/` directory
+- [ ] Remove `WebRTCDebugPanel` component
+- [ ] Remove multiplayer-related routes (`/games/:gameId`)
+- [ ] Clean up `window.ENABLE_MULTIPLAYER` flag in main.js
+- [ ] Remove socket.io and socket.io-client from package.json dependencies
 
-### UI/UX Improvements
-- [ ] Add enemy health indicators
-- [ ] Create minimap or radar system
-- [ ] Improve player feedback for damage
+### Simplify Server & Build System
+- [ ] Simplify `server.js` to focus on static file serving
+- [ ] Remove unnecessary routes (keep leaderboard route)
+- [ ] Consider replacing LiveReload with Vite's HMR
+- [ ] Document simplified server architecture
+- [ ] Test dev and prod server modes after cleanup
 
-## Completed Tasks
-- [x] Unified collectible rendering system with GeometryFactory
-- [x] Improved ore and power-up displays
-- [x] Implemented three enemy types: UFO, Hunter, and Patroller
-- [x] Added diverse enemy behaviors with state-based transitions
-- [x] Integrated enemy sound effects and explosions
-- [x] Fixed ore mining count bug where silver and gold were counting multiple times
-- [x] Improved GameStats API with clearer ore tracking methods
-- [x] Refactored to use GameStats directly for ore counts, removing redundant local storage
-- [x] Enhanced scoring system with multipliers for ores and enemies
-- [x] Updated leaderboard to use the new score calculation
+## 🎨 Branding & Asset Cleanup
+
+### Update Branding (Mancer → Dotty)
+- [ ] Update `index.html` title and meta tags
+- [ ] Update Open Graph tags for social sharing
+- [ ] Update leaderboard page branding
+- [ ] Replace or remove Mancer-branded images
+- [ ] Update any remaining references in HTML/CSS
+
+### Clean Up Sound Assets
+- [ ] Remove spaceship engine sounds
+- [ ] Remove alien/UFO sounds
+- [ ] Remove asteroid explosion sounds
+- [ ] Remove enemy-specific sounds (hunter, tetra, etc.)
+- [ ] Keep generic sounds that might be reusable (power-up, collection, etc.)
+- [ ] Document remaining sound files and their purposes
+
+### Simplify Entry Experience
+- [ ] Remove or simplify entry screen complexity
+- [ ] Consider removing Preact dependency from entry screen
+- [ ] Create simple start screen for Dotty
+- [ ] Remove arcade cabinet aesthetic if not needed
+
+## 🎮 Game Foundation: Top-Down Mechanics
+
+### Camera System
+- [ ] Implement top-down orthographic camera
+- [ ] Set up camera to follow player character
+- [ ] Implement zoom controls (mouse wheel)
+- [ ] Define and enforce min/max zoom levels
+- [ ] Test camera smoothing and follow behavior
+
+### Player Character (Dotty)
+- [ ] Create simple circular player character
+- [ ] Implement WASD movement controls
+- [ ] Set up player physics (speed, acceleration)
+- [ ] Add player position tracking
+- [ ] Create player visual representation (start with simple circle)
+- [ ] Test movement feel and responsiveness
+
+### World & Boundaries
+- [ ] Define 2D world boundaries
+- [ ] Implement world size and coordinate system
+- [ ] Add boundary visualization (optional)
+- [ ] Prevent player from leaving world bounds
+- [ ] Plan world chunking for larger worlds (future)
+
+### Treasure System Foundation
+- [ ] Design treasure data structure
+- [ ] Implement treasure placement system
+- [ ] Create proximity detection for treasure reveal
+- [ ] Add treasure visibility toggle based on distance
+- [ ] Create basic treasure visual (placeholder)
+- [ ] Test reveal mechanics with different distances
+
+### Interaction System
+- [ ] Implement collision detection with treasures
+- [ ] Create dialog/modal system for treasure collection
+- [ ] Add "mine" or "collect" button functionality
+- [ ] Implement inventory data structure
+- [ ] Connect treasure collection to Firebase/inventory
+- [ ] Test treasure collection flow
+
+## 🔮 Future Features
+
+### Wallet Integration
+- [ ] Research Phantom Wallet SDK integration
+- [ ] Plan authentication flow with Phantom
+- [ ] Design wallet connection UI
+- [ ] Implement wallet connection logic
+- [ ] Test wallet detection and connection
+
+### NFT/Crypto Assets
+- [ ] Define digital asset types (NFTs, tokens, etc.)
+- [ ] Design asset metadata structure
+- [ ] Plan on-chain vs off-chain data storage
+- [ ] Implement asset minting/claiming logic
+- [ ] Create asset display in inventory
+
+### Leaderboard Evolution
+- [ ] Adapt leaderboard for treasure collection stats
+- [ ] Update scoring system for Dotty mechanics
+- [ ] Design leaderboard categories (treasures found, rare items, etc.)
+- [ ] Implement player identification system
+- [ ] Test leaderboard with new data schema
+
+### Visual Polish
+- [ ] Create alien character sprite for Dotty
+- [ ] Design alien landscape visuals
+- [ ] Add particle effects for treasure reveal
+- [ ] Implement visual feedback for collection
+- [ ] Add ambient effects (fog, lighting, etc.)
+
+## ✅ Completed Tasks
+
+### Project Setup
+- [x] Created dotty project directory
+- [x] Copied asteroids codebase as starting point
+- [x] Created conversations folder for documentation
+- [x] Updated README with Dotty game concept
+- [x] Updated package.json with dotty details
+- [x] Initialized new git repository
+- [x] Created GitHub repository (https://github.com/theautomat/dotty)
+- [x] Pushed initial commit to GitHub
+- [x] Analyzed complete infrastructure stack
+- [x] Documented build system, server setup, and external services
