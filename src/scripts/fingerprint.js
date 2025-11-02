@@ -1,15 +1,25 @@
 // Fingerprint JS integration for user identification
 // Using the FingerprintJS library via CDN
+// API key loaded from environment variables
 
 // Initialize visitor identification
 async function initFingerprint() {
     try {
+        // Get API key from environment variables
+        const apiKey = import.meta.env.VITE_FINGERPRINT_API_KEY;
+
+        if (!apiKey) {
+            console.warn('FingerprintJS API key not found in environment variables.');
+            console.warn('Falling back to localStorage-based identifier.');
+            throw new Error('Missing VITE_FINGERPRINT_API_KEY');
+        }
+
         // Use the open-source version from CDN
         const FingerprintJS = await import('https://openfpcdn.io/fingerprintjs/v3/esm.min.js');
-        
+
         // Initialize the agent
         const fpPromise = FingerprintJS.load({
-            apiKey: "RHEaF0EGX8xFfpGKebI4"
+            apiKey: apiKey
         });
         
         // Get the visitor ID
