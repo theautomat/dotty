@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta property="og:title" content="Mancer">
+    <meta property="og:description" content="3D space mining adventure where you collect valuable ores while avoiding dangerous asteroids">
+    <meta property="og:image" content="https://mancer.fun/assets/images/mancer-preview-image.png">
+    <meta property="og:url" content="https://mancer.fun">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="www.mancer.fun">
+    <meta name="twitter:creator" content="@vapormensch">
+    <meta name="twitter:title" content="Mancer">
+    <meta name="twitter:description" content="3D space mining adventure where you collect valuable ores while avoiding dangerous asteroids">
+    <meta name="twitter:image" content="https://mancer.fun/assets/images/mancer-preview-image.png">
+    <title>Mancer</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    
+    <!-- Main entry point script - managed by Vite -->
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+        /* Import fonts for the entry screen */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            /* Prevent pull-to-refresh and other gestures */
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        /* Entry screen related variables and core styles */
+        :root {
+            --cabinet-color: #333;
+            --cabinet-trim: #222;
+            --cabinet-accent: #ff0000;
+            --screen-color: #000;
+            --screen-glow: #0f0;
+            --text-color: #33ff33;
+            --text-highlight: #88ff88;
+            --button-color: #ff0000;
+            --button-text: #ffffff;
+            --joystick-color: #000;
+        }
+        /* Score info display temporarily disabled
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            border-radius: 5px;
+            font-family: monospace;
+            display: none;
+        } */
+        #fps-counter {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        /* Portrait mode warning */
+        #portrait-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        /* Only show portrait warning on mobile in portrait mode */
+        @media (max-width: 768px) and (orientation: portrait) {
+            #portrait-warning {
+                display: flex;
+            }
+            /* Apply a transform to game content to force landscape layout */
+            #game-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vh; /* Swap dimensions */
+                height: 100vw;
+                transform: translate(calc((100vw - 100vh) / 2), calc((100vh - 100vw) / 2)) rotate(90deg);
+                transform-origin: center;
+            }
+        }
+        /* Styles for mobile controls */
+        .mobile-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+        }
+        .mobile-button {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 25px;
+            margin-bottom: 10px;
+            touch-action: manipulation;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Virtual joysticks containers */
+        #joystick-left, #joystick-right {
+            position: fixed;
+            bottom: 20px;
+            width: 120px;
+            height: 120px;
+            opacity: 0.7;
+            z-index: 999;
+        }
+        #joystick-left {
+            left: 20px;
+        }
+        #joystick-right {
+            right: 20px;
+        }
+        /* Initially hide mobile controls - will show via JS if on mobile */
+        .mobile-controls, #joystick-left, #joystick-right {
+            display: none;
+        }
+        /* Fullscreen button - temporarily disabled */
+        #fullscreen-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 900;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: monospace;
+            display: none; /* Hide for now */
+        }
+        /* Hide fullscreen button on mobile */
+        @media (max-width: 768px) {
+            #fullscreen-button {
+                display: none;
+            }
+        }
+        */ /* End of temporarily disabled fullscreen button section */
+         
+        /* Collision overlay */
+        #collision-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        #collision-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 24px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 1001;
+        }
+        /* Help menu */
+        #help-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            z-index: 1002;
+            display: none;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        #help-menu h3 {
+            margin-top: 0;
+        }
+        .help-section {
+            margin-bottom: 20px;
+        }
+        .key-command {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            margin-bottom: 5px;
+        }
+        .key {
+            background-color: #333;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-align: center;
+        }
+        /* Volume controls */
+        .volume-container {
+            margin-top: 15px;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+        }
+        #volume-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .volume-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .volume-button {
+            background-color: #555;
+            color: white;
+            border: 1px solid #888;
+            border-radius: 4px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .volume-button:hover {
+            background-color: #777;
+        }
+        /* Debug info section */
+        .debug-section {
+            margin-top: 15px;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+        }
+        .debug-section h4 {
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+        /* Crosshair overlay */
+        #crosshair {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        #crosshair::before,
+        #crosshair::after {
+            content: '';
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        #crosshair::before {
+            top: 9px;
+            left: 0;
+            width: 20px;
+            height: 2px;
+        }
+        #crosshair::after {
+            top: 0;
+            left: 9px;
+            width: 2px;
+            height: 20px;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/main-SK6jyTFi.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Score display temporarily disabled
+        <div id="info">Score: <span id="score">0</span></div> -->
+        <!-- FPS counter temporarily hidden -->
+        <div id="fps-counter" style="display: none;"></div>
+        
+        <!-- Collision feedback elements -->
+        <div id="collision-overlay"></div>
+        <div id="collision-message">Ship Destroyed!</div>
+        
+        <!-- Portrait mode warning (mobile only) -->
+        <div id="portrait-warning">
+            <h2>Please rotate your device</h2>
+            <p>This game is best played in landscape mode</p>
+            <div style="width: 50px; height: 100px; border: 2px solid white; border-radius: 10px; margin: 20px; position: relative;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); font-size: 30px;">↻</div>
+            </div>
+        </div>
+        
+        <!-- Crosshair overlay - initially hidden until pointer is locked -->
+        <div id="crosshair" style="display: none;"></div>
+        
+        <!-- Help menu -->
+        <div id="help-menu">
+            <h3>CONTROLS</h3>
+            
+            <div class="help-section">
+                <div class="key-command">
+                    <div class="key">W</div>
+                    <div>Thrust forward</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">S</div>
+                    <div>Thrust backward</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">A/D</div>
+                    <div>Strafe left/right</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">Mouse</div>
+                    <div>Look around</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">Click</div>
+                    <div>Shoot</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">Space</div>
+                    <div>Alternative shoot</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">H</div>
+                    <div>Show/hide this help</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">G</div>
+                    <div>Show/hide world boundary</div>
+                </div>
+                <div class="key-command">
+                    <div class="key">ESC</div>
+                    <div>Release mouse pointer</div>
+                </div>
+            </div>
+            
+            <div class="volume-container">
+                <h3>VOLUME</h3>
+                <input type="range" id="volume-slider" min="0" max="100" value="25">
+                <div>Volume: <span id="volume-value">25%</span></div>
+                <div class="volume-buttons">
+                    <button id="mute-button" class="volume-button">Mute</button>
+                </div>
+            </div>
+
+            <div class="debug-section">
+                <h4>DEBUG INFO</h4>
+                <div id="debug-fps">FPS: 0</div>
+                <div id="debug-objects">Asteroids: 0 | Bullets: 0 | Ores: 0</div>
+                <div id="debug-collab-data">Received state updates: 0</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Entry screen container - hidden by default -->
+    <div id="entry-screen" style="display: none;"></div>
+</body>
+</html>

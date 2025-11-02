@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MANCER Leaderboard</title>
+  
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:title" content="MANCER Leaderboard">
+  <meta property="og:description" content="See how you rank against other miners in this 3D space mining adventure.">
+  <meta property="og:image" content="https://mancer.fun/assets/images/mancer-leaderboard.png">
+  <meta property="og:url" content="https://mancer.fun/leaderboard">
+  <meta property="og:type" content="website">
+  
+  <!-- Twitter Card tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="www.mancer.fun">
+  <meta name="twitter:creator" content="@vapormensch">
+  <meta name="twitter:title" content="Mancer Leaderboard">
+  <meta name="twitter:description" content="See how you rank against other miners in this 3D space mining adventure.">
+  <meta name="twitter:image" content="https://mancer.fun/assets/images/mancer-leaderboard.png">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  
+  <!-- Google Font - Press Start 2P -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+  
+  <!-- Firebase SDK -->
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app": "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js",
+      "firebase/analytics": "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js"
+    }
+  }
+  </script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: 'Press Start 2P', monospace;
+      line-height: 1.5;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      font-weight: 300;
+    }
+    
+    .leaderboard-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Press Start 2P', monospace;
+      color: #fff;
+      font-weight: 300;
+      z-index: 100;
+    }
+    
+    .leaderboard-container {
+      width: 90%;
+      max-width: 800px;
+      text-align: center;
+    }
+    
+    .leaderboard-title {
+      font-size: 42px;
+      margin: 0 0 40px 0;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(0, 100, 255, 0.7);
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 2px;
+      font-weight: 300;
+      text-transform: lowercase;
+      text-align: center;
+    }
+    
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0 auto;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      font-weight: 300;
+      text-transform: lowercase;
+    }
+    
+    .leaderboard-table th {
+      color: #ffffff;
+      font-weight: 300;
+      text-align: left;
+      padding: 10px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .leaderboard-table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .leaderboard-table tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .rank-col {
+      width: 15%;
+      text-align: center;
+    }
+    
+    .id-col {
+      width: 35%;
+    }
+    
+    .score-col {
+      width: 50%;
+      text-align: right;
+    }
+    
+    .player-highlight {
+      background-color: rgba(0, 100, 255, 0.2);
+    }
+    
+    .back-button {
+      margin-top: 40px;
+      padding: 15px 40px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 16px;
+      background-color: transparent;
+      color: white;
+      border: 2px solid #ffffff;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 300;
+      text-transform: lowercase;
+    }
+    
+    .back-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    
+    .loading {
+      font-size: 18px;
+      margin: 40px 0;
+      font-family: 'Press Start 2P', monospace;
+    }
+    
+    .error {
+      color: #ff6b6b;
+      font-size: 16px;
+      margin: 40px 0;
+      font-family: 'Press Start 2P', monospace;
+    }
+    
+    /* Add scanlines and CRT effect */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, 
+        rgba(0,0,0,0.15), 
+        rgba(0,0,0,0.15) 1px, 
+        transparent 1px, 
+        transparent 2px);
+      background-size: 100% 4px;
+      z-index: 101;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+    
+    /* Top 3 ranks special styling */
+    .rank-1 {
+      color: #ffdd00;
+      text-shadow: 0 0 5px rgba(255, 221, 0, 0.5);
+    }
+    
+    .rank-2 {
+      color: #c0c0c0;
+      text-shadow: 0 0 5px rgba(192, 192, 192, 0.5);
+    }
+    
+    .rank-3 {
+      color: #cd7f32;
+      text-shadow: 0 0 5px rgba(205, 127, 50, 0.5);
+    }
+    
+    /* Media queries for responsiveness */
+    @media (max-width: 768px) {
+      .leaderboard-title {
+        font-size: 32px;
+        margin-bottom: 30px;
+      }
+      
+      .leaderboard-table {
+        font-size: 12px;
+      }
+      
+      .back-button {
+        padding: 12px 30px;
+        font-size: 14px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .leaderboard-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+      
+      .leaderboard-table {
+        font-size: 10px;
+      }
+      
+      .leaderboard-table th,
+      .leaderboard-table td {
+        padding: 8px 5px;
+      }
+      
+      .back-button {
+        padding: 10px 20px;
+        font-size: 12px;
+      }
+      
+      .rank-col {
+        width: 20%;
+      }
+      
+      .id-col {
+        width: 30%;
+      }
+      
+      .score-col {
+        width: 50%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+  
+  <div id="leaderboard-app"></div>
+  
+  <script type="module">
+    // Prevent the main.js game initialization from running on the leaderboard page
+    // This stops the GameSessionManager from redirecting to root URL
+    document.addEventListener('DOMContentLoaded', (event) => {
+      // Check if window.game is about to be initialized 
+      if (window.game || window.GAME_INITIALIZING) {
+        console.log('Detected game initialization - preventing it on leaderboard page');
+        
+        // Set a flag to stop any initialization
+        window.LEADERBOARD_PAGE = true;
+        
+        // If game object exists, prevent its methods from running
+        if (window.game) {
+          window.game.init = () => console.log('Game initialization prevented on leaderboard page');
+        }
+        
+        // If GameSessionManager exists, override its updateGameUrl method
+        if (window.gameSessionManager) {
+          window.gameSessionManager.updateGameUrl = () => console.log('URL update prevented on leaderboard page');
+        }
+      }
+    });
+    
+    // Using ES modules with HTM as recommended in Preact docs
+    import { html, render, useState, useEffect } from 'https://esm.sh/htm/preact/standalone';
+    
+    // Import Firebase config
+    const initFirebase = async () => {
+      // Import the firebase module
+      const firebaseModule = await import('./src/scripts/firebase-module.js');
+      return firebaseModule.initializeFirebase();
+    };
+    
+    // Main Leaderboard component
+    function Leaderboard() {
+      const [leaderboard, setLeaderboard] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [currentPlayerId, setCurrentPlayerId] = useState(null);
+      
+      // Version 0.1 cutoff date: March 23, 2025, 3:00 PM
+      const VERSION_CUTOFF_DATE = new Date("2025-03-23T15:00:00Z").getTime();
+      console.log('Cutoff timestamp:', VERSION_CUTOFF_DATE, 'Cutoff date:', new Date(VERSION_CUTOFF_DATE).toISOString());
+      
+      useEffect(() => {
+        const fetchData = async () => {
+          try {
+            setLoading(true);
+            
+            // Initialize Firebase
+            const firebase = await initFirebase();
+            const db = firebase.db;
+            
+            // Try to get user fingerprint
+            try {
+              const { initFingerprint } = await import('./src/scripts/fingerprint.js');
+              const fingerprint = await initFingerprint();
+              setCurrentPlayerId(fingerprint);
+            } catch(e) {
+              console.warn("Could not get fingerprint:", e);
+            }
+            
+            // Import Firebase Firestore functions
+            const { collection, query, orderBy, limit, getDocs, where } = await import('firebase/firestore');
+            
+            // Reference to games collection
+            const gamesRef = collection(db, "games");
+            
+            // Get all scores first, without date filtering
+            const q = query(
+              gamesRef,
+              orderBy('score', 'desc'), 
+              limit(100)
+            );
+            
+            const snapshot = await getDocs(q);
+            
+            const games = [];
+            
+            // For debugging
+            let recordsBeforeCutoff = 0;
+            let recordsAfterCutoff = 0;
+            
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              games.push({
+                id: doc.id,
+                ...data
+              });
+              
+              // Count records before/after cutoff for debugging
+              if (data.created) {
+                const createdDate = new Date(data.created);
+                // Make sure both are in milliseconds and same timezone
+                const createdTimestamp = typeof data.created === 'number' ? data.created : createdDate.getTime();
+                console.log(`Comparing created: ${createdTimestamp} >= cutoff: ${VERSION_CUTOFF_DATE} = ${createdTimestamp >= VERSION_CUTOFF_DATE}`);
+                if (createdTimestamp >= VERSION_CUTOFF_DATE) {
+                  recordsAfterCutoff++;
+                } else {
+                  recordsBeforeCutoff++;
+                }
+              }
+            });
+            
+            console.log(`Date summary: ${recordsAfterCutoff} records after cutoff, ${recordsBeforeCutoff} records before cutoff`);
+            
+            // Sort by score
+            games.sort((a, b) => b.score - a.score);
+            
+            // Only filter by date if we have some records after the cutoff
+            if (recordsAfterCutoff > 0) {
+              console.log(`Found ${recordsAfterCutoff} records after cutoff, filtering older records`);
+              
+              // Enable proper filtering now that we understand the issue
+              const filteredGames = games.filter(game => {
+                if (!game.created) return false;
+                const createdTimestamp = typeof game.created === 'number' ? game.created : new Date(game.created).getTime();
+                return createdTimestamp >= VERSION_CUTOFF_DATE;
+              });
+              console.log(`Filtered from ${games.length} to ${filteredGames.length} records`);
+              setLeaderboard(filteredGames);
+            } else {
+              console.log('No records found after cutoff date, showing all records');
+              setLeaderboard(games);
+            }
+            
+            setLoading(false);
+          } catch (err) {
+            console.error('Error fetching leaderboard:', err);
+            setError('Failed to fetch leaderboard data. Please try again later.');
+            setLoading(false);
+          }
+        };
+        
+        fetchData();
+      }, []);
+      
+      // Format player ID (last 4 digits)
+      const formatPlayerId = (id) => {
+        if (!id) return 'ANON';
+        return `#${id.slice(-4)}`;
+      };
+      
+      // Check if this entry is the current player
+      const isCurrentPlayer = (entry) => {
+        const entryId = String(entry.playerId || "");
+        const currentId = String(currentPlayerId || "");
+        return currentId && entryId && entryId === currentId;
+      };
+      
+      // Handle back button click
+      const handleBackClick = () => {
+        window.location.href = '/';
+      };
+      
+      if (loading) {
+        return html`
+          <div class="leaderboard-overlay">
+            <div class="leaderboard-container">
+              <h1 class="leaderboard-title">leaderboard</h1>
+              <div class="loading">loading scores...</div>
+            </div>
+          </div>
+        `;
+      }
+      
+      if (error) {
+        return html`
+          <div class="leaderboard-overlay">
+            <div class="leaderboard-container">
+              <h1 class="leaderboard-title">leaderboard</h1>
+              <div class="error">${error}</div>
+              <button class="back-button" onClick=${handleBackClick}>back</button>
+            </div>
+          </div>
+        `;
+      }
+      
+      return html`
+        <div class="leaderboard-overlay">
+          <div class="leaderboard-container">
+            <h1 class="leaderboard-title">leaderboard</h1>
+            
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th class="rank-col">rank</th>
+                  <th class="id-col">player</th>
+                  <th class="score-col">score</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${leaderboard.map((entry, index) => html`
+                  <tr class="${isCurrentPlayer(entry) ? 'player-highlight' : ''}">
+                    <td class="rank-col ${index < 3 ? `rank-${index + 1}` : ''}">${index + 1}</td>
+                    <td class="id-col">${formatPlayerId(entry.playerId)}</td>
+                    <td class="score-col">${entry.score}</td>
+                  </tr>
+                `)}
+              </tbody>
+            </table>
+            
+            <button class="back-button" onClick=${handleBackClick}>back</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Render the app
+    render(html`<${Leaderboard} />`, document.getElementById('leaderboard-app'));
+  </script>
+</body>
+</html>
