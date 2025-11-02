@@ -11,9 +11,11 @@
 - [x] Test environment variable loading in both dev and prod
 
 ### Firebase Migration
-- [ ] Create new Firebase project for Dotty
+- [x] Create new Firebase project for Dotty (Project ID: dotty-7f173)
+- [x] Register web app in Firebase console
+- [x] Update .env with new Dotty Firebase credentials
+- [x] Test build with new Firebase configuration
 - [ ] Set up Firestore database with new collection structure
-- [ ] Update firebase-config.js with new project credentials
 - [ ] Plan new data schema for treasure collection tracking
 - [ ] Migrate/adapt Firebase service layer for Dotty-specific data
 - [ ] Test Firebase connection and data persistence
@@ -153,3 +155,9 @@
 - [x] Tested environment variable loading with production build
 - [x] Added validation for required Firebase environment variables
 - [x] Committed and pushed security improvements to GitHub
+
+### Firebase Migration (Initial Setup)
+- [x] Created new Firebase project "dotty" (Project ID: dotty-7f173)
+- [x] Registered web app in Firebase console
+- [x] Updated .env file with new Dotty Firebase credentials
+- [x] Verified build works with new Firebase configuration
