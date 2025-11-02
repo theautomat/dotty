@@ -56,8 +56,8 @@
 - [ ] Document remaining sound files and their purposes
 
 ### Simplify Entry Experience
-- [ ] Update entry screen branding: "Mancer" → "Dotty"
-- [ ] Remove spinning object from entry screen
+- [x] Update entry screen branding: "Mancer" → "Dotty"
+- [x] Remove spinning object from entry screen
 - [ ] Remove or simplify entry screen complexity
 - [ ] Consider removing Preact dependency from entry screen
 - [ ] Create simple start screen for Dotty

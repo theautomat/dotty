@@ -337,33 +337,33 @@ function EntryScreen(props) {
   } = props;
   
   
-  // Initialize ore renderer when theme screen is shown
-  if (step === 'theme' && props.visible) {
-    setTimeout(() => {
-      initOreRenderer();
-      
-      // Attach ore renderer to DOM
-      const oreContainer = document.getElementById('ore-display');
-      if (oreContainer && ironOreRenderer) {
-        // Clear any existing content
-        while (oreContainer.firstChild) {
-          oreContainer.removeChild(oreContainer.firstChild);
-        }
-        
-        // Add the renderer to the container and ensure it's centered
-        oreContainer.appendChild(ironOreRenderer.domElement);
-        
-        // Ensure the canvas is centered within the container
-        if (ironOreRenderer.domElement) {
-          // Set canvas in the middle
-          ironOreRenderer.domElement.style.position = 'absolute';
-          ironOreRenderer.domElement.style.left = '50%';
-          ironOreRenderer.domElement.style.top = '50%';
-          ironOreRenderer.domElement.style.transform = 'translate(-50%, -50%)';
-        }
-      }
-    }, 0);
-  }
+  // DOTTY: Ore renderer removed - no longer needed for entry screen
+  // if (step === 'theme' && props.visible) {
+  //   setTimeout(() => {
+  //     initOreRenderer();
+  //
+  //     // Attach ore renderer to DOM
+  //     const oreContainer = document.getElementById('ore-display');
+  //     if (oreContainer && ironOreRenderer) {
+  //       // Clear any existing content
+  //       while (oreContainer.firstChild) {
+  //         oreContainer.removeChild(oreContainer.firstChild);
+  //       }
+  //
+  //       // Add the renderer to the container and ensure it's centered
+  //       oreContainer.appendChild(ironOreRenderer.domElement);
+  //
+  //       // Ensure the canvas is centered within the container
+  //       if (ironOreRenderer.domElement) {
+  //         // Set canvas in the middle
+  //         ironOreRenderer.domElement.style.position = 'absolute';
+  //         ironOreRenderer.domElement.style.left = '50%';
+  //         ironOreRenderer.domElement.style.top = '50%';
+  //         ironOreRenderer.domElement.style.transform = 'translate(-50%, -50%)';
+  //       }
+  //     }
+  //   }, 0);
+  // }
   
   // Handle button click with event stopping
   const handleEnterClick = (e) => {
@@ -429,15 +429,15 @@ function EntryScreen(props) {
     `;
   } else if (step === 'theme') {
       return html`
-      <div 
+      <div
         class="entry-screen-overlay theme-screen ${props.visible ? '' : 'hidden'}"
         onClick=${(e) => {}}
       >
         <div class="scanlines"></div>
-        <h1 class="entry-title">mancer</h1>
-        <div id="ore-display" class="ore-display"></div>
-        <button 
-          class="start-button" 
+        <h1 class="entry-title">dotty</h1>
+        <!-- DOTTY: Removed spinning ore display -->
+        <button
+          class="start-button"
           onClick=${handleStartGameClick}
           style="font-family: 'Press Start 2P', monospace; font-weight: 300;"
         >
