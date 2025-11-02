@@ -3,8 +3,8 @@
  * Shows collected ores, asteroid count, enemies destroyed and total score using GeometryFactory
  */
 import GeometryFactory from '../shapes/GeometryFactory.js';
-import { ORE_TYPES } from '../ores/index.js';
-import OreConfig from '../ores/OreConfig.js';
+import { COLLECTIBLE_TYPES } from '../collectibles/index.js';
+import CollectibleConfig from '../collectibles/CollectibleConfig.js';
 import EnemyConfig from '../enemies/EnemyConfig.js';
 
 class GameOverStatsDisplay {
@@ -329,7 +329,7 @@ class GameOverStatsDisplay {
             const xPos = (i - 2) * spacing;
             
             // Get ore config to preserve original colors
-            const oreConfig = OreConfig.getOreConfig(oreType);
+            const oreConfig = CollectibleConfig.getCollectibleConfig(oreType);
             
             // Create ore mesh using GeometryFactory's collectible method
             // This is the same approach used in MiningDisplay

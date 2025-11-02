@@ -368,7 +368,7 @@ class SoundManager {
      * Play iron ore retrieved sound
      * @returns {Audio|null} The Audio object that was played
      */
-    playIronOreRetrieved() {
+    playIronCollectibleRetrieved() {
         return this.play('/sounds/ores/iron-treasure-retrieved.mp3');
     }
     
@@ -376,7 +376,7 @@ class SoundManager {
      * Play copper ore retrieved sound
      * @returns {Audio|null} The Audio object that was played
      */
-    playCopperOreRetrieved() {
+    playCopperCollectibleRetrieved() {
         return this.play('/sounds/ores/copper-treasure-retrieved.mp3');
     }
     
@@ -384,7 +384,7 @@ class SoundManager {
      * Play silver ore retrieved sound
      * @returns {Audio|null} The Audio object that was played
      */
-    playSilverOreRetrieved() {
+    playSilverCollectibleRetrieved() {
         return this.play('/sounds/ores/silver-treasure-retrieved.mp3');
     }
     
@@ -392,7 +392,7 @@ class SoundManager {
      * Play gold ore retrieved sound
      * @returns {Audio|null} The Audio object that was played
      */
-    playGoldOreRetrieved() {
+    playGoldCollectibleRetrieved() {
         return this.play('/sounds/ores/gold-treasure-retrieved.mp3');
     }
     
@@ -400,7 +400,7 @@ class SoundManager {
      * Play platinum ore retrieved sound
      * @returns {Audio|null} The Audio object that was played
      */
-    playPlatinumOreRetrieved() {
+    playPlatinumCollectibleRetrieved() {
         return this.play('/sounds/ores/platinum-treasure-retrieved.mp3');
     }
     

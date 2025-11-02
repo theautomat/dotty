@@ -9,7 +9,7 @@ import { html, render, useEffect, useRef } from 'https://esm.sh/htm/preact/stand
 // Import game dependencies
 import gameStateMachine, { GAME_STATES } from '../game/GameStateMachine.js';
 import gameStats from '../game/GameStats.js';
-import OreConfig from '../objects/ores/OreConfig.js';
+import CollectibleConfig from '../objects/collectibles/CollectibleConfig.js';
 import EnemyConfig from '../objects/enemies/EnemyConfig.js';
 import GeometryFactory from '../objects/shapes/GeometryFactory.js';
 
@@ -282,7 +282,7 @@ class MiniRenderer {
         
       case 'ore':
         // Get ore config to use original colors
-        const oreConfig = OreConfig.getOreConfig(this.config.oreType);
+        const oreConfig = CollectibleConfig.getCollectibleConfig(this.config.oreType);
         this.object = GeometryFactory.createCollectibleMesh(this.config.oreType, 'ore', {
           size: 0.8,
           transparent: true,

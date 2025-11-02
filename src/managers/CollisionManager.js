@@ -15,7 +15,7 @@ class CollisionManager {
         // Initialize all references to null - they'll be set via init()
         this.asteroidManager = null;
         this.bulletManager = null;
-        this.oreManager = null;
+        this.collectibleManager = null;
         this.explosionManager = null;
         this.enemyManager = null;
         this.camera = null;
@@ -37,7 +37,7 @@ class CollisionManager {
         // Update all manager references
         this.asteroidManager = params.asteroidManager || this.asteroidManager;
         this.bulletManager = params.bulletManager || this.bulletManager;
-        this.oreManager = params.oreManager || this.oreManager;
+        this.collectibleManager = params.collectibleManager || this.collectibleManager;
         this.explosionManager = params.explosionManager || this.explosionManager;
         this.enemyManager = params.enemyManager || this.enemyManager; // Store enemyManager reference
         this.camera = params.camera || this.camera;
@@ -71,9 +71,9 @@ class CollisionManager {
         const enemies = this.enemyManager ? this.enemyManager.enemies : [];
         const enemyProjectiles = this.enemyManager ? this.enemyManager.enemyProjectiles : [];
 
-        // Check for ore collisions if oreManager exists
-        if (this.oreManager) {
-            this.checkOreCollisions(playerPosition);
+        // Check for collectible collisions if collectibleManager exists
+        if (this.collectibleManager) {
+            this.checkCollectibleCollisions(playerPosition);
         }
 
         // Check player-asteroid collisions
@@ -113,15 +113,15 @@ class CollisionManager {
     }
     
     /**
-     * Check for collisions between the player and nearby ores
-     * Delegates handling to the oreManager
+     * Check for collisions between the player and nearby collectibles
+     * Delegates handling to the collectibleManager
      * @param {THREE.Vector3} playerPosition - The position of the player
      */
-    checkOreCollisions(playerPosition) {
-        if (!this.oreManager || !playerPosition) return;
-        
-        // Simply delegate to oreManager's collectNearbyOre method
-        this.oreManager.collectNearbyOre(playerPosition);
+    checkCollectibleCollisions(playerPosition) {
+        if (!this.collectibleManager || !playerPosition) return;
+
+        // Simply delegate to collectibleManager's collectNearbyCollectible method
+        this.collectibleManager.collectNearbyCollectible(playerPosition);
     }
     
     /**

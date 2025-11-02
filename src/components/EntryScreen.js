@@ -10,7 +10,7 @@ import { html, render } from 'https://esm.sh/htm/preact/standalone';
 import gameStateMachine, { GAME_STATES } from '../game/GameStateMachine.js';
 import soundManager from '../managers/SoundManager.js';
 // Import ore configuration and geometry factory
-import OreConfig from '../objects/ores/OreConfig.js';
+import CollectibleConfig from '../objects/collectibles/CollectibleConfig.js';
 import GeometryFactory from '../objects/shapes/GeometryFactory.js';
 // Import the controls bar
 import { showControlsBar, toggleControlsBar } from './ControlsBar.js';
@@ -232,11 +232,11 @@ function createIronOreMesh() {
   if (!ironOreScene) return;
   
   try {
-    // Get the ore config for parameters
-    const oreConfig = OreConfig.getOreConfig('iron');
-    
+    // Get the collectible config for parameters
+    const collectibleConfig = CollectibleConfig.getCollectibleConfig('iron');
+
     // Use a larger size for display - 10x larger than current
-    const originalSize = oreConfig ? oreConfig.size : 1.5;
+    const originalSize = collectibleConfig ? collectibleConfig.size : 1.5;
     const displaySize = originalSize; // Was originalSize * 0.1, now full size
     
     ironOreMesh = GeometryFactory.createCollectibleMesh('iron', 'ore', {

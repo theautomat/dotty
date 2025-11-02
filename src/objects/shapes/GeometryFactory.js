@@ -4,7 +4,7 @@
  * Handles ores, power-ups, asteroids, and enemies with a consistent API
  */
 import * as THREE from 'three';
-import OreConfig from '../ores/OreConfig.js';
+import CollectibleConfig from '../collectibles/CollectibleConfig.js';
 import PowerUpConfig from '../powers/PowerUpConfig.js';
 import EnemyConfig from '../enemies/EnemyConfig.js';
 
@@ -113,14 +113,14 @@ class GeometryFactory {
         return spikes;
     }
     /**
-     * Create geometry for any collectible item (ore or power-up)
+     * Create geometry for any collectible item (collectible or power-up)
      * @param {string} type - The item type
-     * @param {string} category - Either 'ore' or 'powerUp'
+     * @param {string} category - Either 'collectible' (or 'ore' for backward compatibility) or 'powerUp'
      * @param {Object} params - Additional parameters
      * @returns {THREE.Geometry} The created geometry
      */
     static createCollectibleGeometry(type, category, params = {}) {
-        if (category === 'ore') {
+        if (category === 'collectible' || category === 'ore') {
             return this.createOreGeometry(type, params);
         } else if (category === 'powerUp') {
             return this.createPowerGeometry(type, params);
@@ -130,16 +130,16 @@ class GeometryFactory {
             return new THREE.SphereGeometry(params.size || 1.5, 16, 16);
         }
     }
-    
+
     /**
      * Create a complete mesh for any collectible item
      * @param {string} type - The item type
-     * @param {string} category - Either 'ore' or 'powerUp'
+     * @param {string} category - Either 'collectible' (or 'ore' for backward compatibility) or 'powerUp'
      * @param {Object} params - Additional parameters
      * @returns {THREE.Mesh} The complete mesh
      */
     static createCollectibleMesh(type, category, params = {}) {
-        if (category === 'ore') {
+        if (category === 'collectible' || category === 'ore') {
             return this.createOreMesh(type, params);
         } else if (category === 'powerUp') {
             return this.createPowerMesh(type, params);
@@ -163,7 +163,7 @@ class GeometryFactory {
     static createOreGeometry(params, extraParams = {}) {
         // Check if params is just a type string
         if (typeof params === 'string') {
-            const oreConfig = OreConfig.getOreConfig(params);
+            const oreConfig = CollectibleConfig.getCollectibleConfig(params);
             if (oreConfig) {
                 // Use ore config as params
                 params = {
@@ -260,8 +260,8 @@ class GeometryFactory {
      * @returns {THREE.Mesh} The complete mesh
      */
     static createOreMesh(type, params = {}) {
-        // Get ore config for this type
-        const oreConfig = OreConfig.getOreConfig(type);
+        // Get collectible config for this type
+        const oreConfig = CollectibleConfig.getCollectibleConfig(type);
         
         if (!oreConfig) {
             console.warn(`No ore config found for type: ${type}, using defaults`);

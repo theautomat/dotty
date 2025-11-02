@@ -22,7 +22,7 @@ import { initGameOverOverlay } from '../components/GameOverOverlay.js';
 import { initEntryScreen, showEntryScreen, hideEntryScreen } from '../components/EntryScreen.js';
 import { initControlsBar, showControlsBar } from '../components/ControlsBar.js';
 import GeometryFactory from '../objects/shapes/GeometryFactory.js';
-import oreManager from '../managers/OreManager.js'; // Import oreManager singleton
+import collectibleManager from '../managers/CollectibleManager.js'; // Import collectibleManager singleton
 import GameConfig from './GameConfig.js'; // Import the GameConfig for global settings
 import BulletConfig from '../objects/BulletConfig.js'; // Import BulletConfig for bullet collision radius
 import asteroidManager from '../managers/AsteroidManager.js';
@@ -45,7 +45,7 @@ class Game {
         this.powerUpManager = null; // Reference to the powerUpManager singleton
         this.explosionManager = null; // Reference to explosionManager singleton
         this.bulletManager = null; // Reference to bulletManager singleton
-        this.oreManager = null; // Reference to oreManager singleton
+        this.collectibleManager = null; // Reference to collectibleManager singleton
         this.enemyManager = null; // Reference to enemyManager singleton
         
         // Score is now handled by GameStats
@@ -208,15 +208,15 @@ class Game {
         this.explosionManager.init({ scene: this.scene });
         
         // Initialize singleton managers using a consistent pattern
-        this.oreManager = oreManager;
+        this.collectibleManager = collectibleManager;
         this.powerUpManager = powerUpManager;
-        
+
         // Initialize power-up manager with the game instance
         this.powerUpManager.init(this);
         
-        // Initialize ore manager with the game instance and scene
-        this.oreManager.scene = this.scene;
-        this.oreManager.init(this);
+        // Initialize collectible manager with the game instance and scene
+        this.collectibleManager.scene = this.scene;
+        this.collectibleManager.init(this);
         
         // Create renderer
         this.renderer = new THREE.WebGLRenderer();//{ antialias: true });
@@ -238,7 +238,7 @@ class Game {
         // Create distant stars (simple dots)
         this.createStars();
         
-        // No need for ore factory - we'll use Ore directly with OreConfig
+        // No need for collectible factory - we'll use Collectible directly with CollectibleConfig
         
         // Initialize world boundary
         this.worldBoundary = new WorldBoundary(this.scene, this.WORLD_SIZE);
@@ -261,7 +261,7 @@ class Game {
         // Initialize asteroid manager with scene and configure its references to other managers
         this.asteroidManager.init({ scene: this.scene });
         this.asteroidManager.explosionManager = this.explosionManager;
-        this.asteroidManager.oreManager = this.oreManager;
+        this.asteroidManager.collectibleManager = this.collectibleManager;
         this.asteroidManager.powerUpManager = this.powerUpManager;
         
         // Initialize enemy manager with all the necessary references
@@ -269,7 +269,7 @@ class Game {
             scene: this.scene,
             camera: this.camera,
             explosionManager: this.explosionManager,
-            oreManager: this.oreManager,
+            collectibleManager: this.collectibleManager,
             powerUpManager: this.powerUpManager,
             gameStateMachine: gameStateMachine
         });
@@ -286,7 +286,7 @@ class Game {
             managers: {
                 asteroidManager: this.asteroidManager,
                 bulletManager: this.bulletManager,
-                oreManager: this.oreManager,
+                collectibleManager: this.collectibleManager,
                 explosionManager: this.explosionManager,
                 powerUpManager: this.powerUpManager,
                 enemyManager: this.enemyManager,
@@ -338,7 +338,7 @@ class Game {
         collisionManager.init({
             asteroidManager: this.asteroidManager,
             bulletManager: this.bulletManager,
-            oreManager: this.oreManager,
+            collectibleManager: this.collectibleManager,
             explosionManager: this.explosionManager,
             enemyManager: this.enemyManager,
             camera: this.camera,
@@ -404,8 +404,8 @@ class Game {
 
             // DOTTY: Spawn test treasures for collision testing
             // Position at Y=6 so the ore (size 11) sits on the grid at Y=0
-            this.oreManager.spawnOre(new THREE.Vector3(10, 6, 10), 'iron', 100, 300000);
-            this.oreManager.spawnOre(new THREE.Vector3(-15, 6, 5), 'copper', 150, 300000);
+            this.collectibleManager.spawnCollectible(new THREE.Vector3(10, 6, 10), 'iron', 100, 300000);
+            this.collectibleManager.spawnCollectible(new THREE.Vector3(-15, 6, 5), 'copper', 150, 300000);
 
             // Transition to PLAYING state
             gameStateMachine.transitionTo(GAME_STATES.PLAYING);
@@ -694,7 +694,7 @@ class Game {
         // Only update the ores (movement, lifespan, etc.)
         // DOTTY: Use playerDot position for 2D top-down collision detection
         if (this.playerDot && this.playerDot.position) {
-            this.oreManager.update(deltaTime, this.playerDot.position);
+            this.collectibleManager.update(deltaTime, this.playerDot.position);
         }
     }
     
@@ -900,7 +900,7 @@ class Game {
             objects: {
                 asteroids: this.asteroidManager?.count || 0,
                 bullets: this.bulletManager?.getTotalActiveBullets() || 0,
-                ores: this.oreManager?.activeCount || 0,
+                collectibles: this.collectibleManager?.activeCount || 0,
                 powerUps: powerUpManager?.initialized ? powerUpManager.getPowerUpCount() : 0
             },
             level: {

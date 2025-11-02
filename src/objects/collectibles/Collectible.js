@@ -1,32 +1,32 @@
 /**
- * Ore.js - Handles the behavior of ores in the game
+ * Collectible.js - Handles the behavior of collectibles in the game
  */
 import GameObject from '../GameObject.js';
 import GeometryFactory from '../shapes/GeometryFactory.js';
-import OreConfig from './OreConfig.js';
+import CollectibleConfig from './CollectibleConfig.js';
 import GameConfig from '../../game/GameConfig.js'; // Import GameConfig for global settings
 
-class Ore extends GameObject {
+class Collectible extends GameObject {
     /**
-     * Create a new ore
+     * Create a new collectible
      * @param {Object} scene - The THREE.js scene
-     * @param {THREE.Vector3} position - Position to spawn the ore
-     * @param {string} type - Type of ore (determines appearance and value)
-     * @param {number} value - Value of the ore
+     * @param {THREE.Vector3} position - Position to spawn the collectible
+     * @param {string} type - Type of collectible (determines appearance and value)
+     * @param {number} value - Value of the collectible
      * @param {Object} params - Additional parameters
      */
     constructor(scene, position, type = 'common', value = 1, params = {}) {
         super(scene);
-        
+
         // Store the type and value
         this.type = type;
         this.value = value;
-        
+
         // Store the position (clone to avoid reference issues)
         this.position = position.clone();
-        
-        // Get configuration for this ore type
-        const config = OreConfig.getOreConfig(type);
+
+        // Get configuration for this collectible type
+        const config = CollectibleConfig.getCollectibleConfig(type);
         
         // Default parameters with overrides from config and params
         this.params = {
@@ -53,18 +53,18 @@ class Ore extends GameObject {
         );
         
         // Create the visual representation
-        this.createOreMesh();
+        this.createCollectibleMesh();
     }
-    
+
     /**
-     * Create the ore's visual representation
+     * Create the collectible's visual representation
      */
-    createOreMesh() {
-        // Get ore options based on type
-        const options = OreConfig.getOreConfig(this.type);
+    createCollectibleMesh() {
+        // Get collectible options based on type
+        const options = CollectibleConfig.getCollectibleConfig(this.type);
 
         // Create the mesh using the factory
-        this.mesh = GeometryFactory.createCollectibleMesh(this.type, 'ore', {
+        this.mesh = GeometryFactory.createCollectibleMesh(this.type, 'collectible', {
             size: this.params.size,
             color: this.params.color
         });
@@ -73,46 +73,46 @@ class Ore extends GameObject {
         this.mesh.position.copy(this.position);
 
         // Reference back to this instance
-        this.mesh.userData.oreInstance = this;
+        this.mesh.userData.collectibleInstance = this;
 
         // Add to scene
         this.scene.add(this.mesh);
     }
-    
+
     /**
-     * Update the ore's state
+     * Update the collectible's state
      * @param {number} deltaTime - Delta time in milliseconds
-     * @returns {boolean} - Whether the ore is still active
+     * @returns {boolean} - Whether the collectible is still active
      */
     update(deltaTime) {
         if (this.collected || !this.mesh) return false;
-        
+
         // Update age and check if expired
         this.age += deltaTime;
         if (this.age > this.params.lifetime) {
             this.remove();
             return false;
         }
-        
-        // DOTTY: Disable ore movement for top-down 2D game
+
+        // DOTTY: Disable collectible movement for top-down 2D game
         // this.mesh.position.add(this.velocity);
 
         // Apply rotation for visual appeal
         this.mesh.rotation.x += this.params.rotationSpeed;
         this.mesh.rotation.y += this.params.rotationSpeed * 0.7;
-        
-        // Check if ore has gone beyond wrap distance
+
+        // Check if collectible has gone beyond wrap distance
         if (this.mesh.position.length() > this.params.wrapDistance) {
             // Wrap it back around
             const direction = this.mesh.position.clone().normalize();
             const newPosition = direction.multiplyScalar(-this.params.wrapDistance * 0.9);
             this.mesh.position.copy(newPosition);
         }
-        
-        // Make ore fade out as it ages
+
+        // Make collectible fade out as it ages
         if (this.age > this.params.lifetime * 0.7) {
             const opacity = 1 - ((this.age - (this.params.lifetime * 0.7)) / (this.params.lifetime * 0.3));
-            
+
             if (this.mesh.material) {
                 if (Array.isArray(this.mesh.material)) {
                     this.mesh.material.forEach(mat => {
@@ -125,63 +125,63 @@ class Ore extends GameObject {
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /**
-     * Check if the ore is collectible
-     * @returns {boolean} - Whether the ore can be collected
+     * Check if the collectible is collectible
+     * @returns {boolean} - Whether the collectible can be collected
      */
     checkCollection() {
         return !this.collected && this.mesh;
     }
-    
+
     /**
-     * Collect this ore
+     * Collect this collectible
      */
     collect() {
         if (this.collected) return;
-        
+
         this.collected = true;
         this.destroy();
     }
-    
+
     /**
-     * Destroy this ore and clean up resources
+     * Destroy this collectible and clean up resources
      */
     destroy() {
         // Call parent destroy for common cleanup
         super.destroy();
     }
-    
+
     /**
-     * Get the ore's value
-     * @returns {number} - Ore value
+     * Get the collectible's value
+     * @returns {number} - Collectible value
      */
     getValue() {
         return this.value;
     }
-    
+
     /**
-     * Get the ore's type
-     * @returns {string} - Ore type
+     * Get the collectible's type
+     * @returns {string} - Collectible type
      */
     getType() {
         return this.type;
     }
-    
+
     /**
-     * Create an ore at the given position
+     * Create a collectible at the given position
      * @param {Object} scene - THREE.js scene
-     * @param {THREE.Vector3} position - Position to create the ore
-     * @param {string} type - Ore type
-     * @param {number} value - Ore value
+     * @param {THREE.Vector3} position - Position to create the collectible
+     * @param {string} type - Collectible type
+     * @param {number} value - Collectible value
      * @param {Object} params - Additional parameters
-     * @returns {Ore} - Created ore instance
+     * @returns {Collectible} - Created collectible instance
      */
     static create(scene, position, type = 'common', value = 1, params = {}) {
-        return new Ore(scene, position, type, value, {
+        return new Collectible(scene, position, type, value, {
             ...params,
             wrapDistance: GameConfig.world.wrapDistance, // This should ideally come from game config
             size: params.size || 0.8,
@@ -190,4 +190,4 @@ class Ore extends GameObject {
     }
 }
 
-export default Ore;
+export default Collectible;

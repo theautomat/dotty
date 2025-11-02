@@ -4,7 +4,7 @@
  */
 // Using the global THREE object
 import { LevelConfig } from '../../game/index.js';
-import { OreConfig, Ore } from '../ores/index.js';
+import { CollectibleConfig, Collectible } from '../collectibles/index.js';
 import soundManager from '../../managers/SoundManager.js';
 import GeometryFactory from '../shapes/GeometryFactory.js';
 
@@ -286,7 +286,7 @@ class LevelTransitionDisplay {
         if (!this.oreScene) return;
         
         // Get the ore config for parameters
-        const oreConfig = OreConfig.getOreConfig(oreType);
+        const oreConfig = CollectibleConfig.getCollectibleConfig(oreType);
         
         // Create the ore mesh directly using GeometryFactory
         // Use a smaller size (1/10th) for the level transition display

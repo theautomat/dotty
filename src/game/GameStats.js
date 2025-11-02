@@ -7,7 +7,7 @@
  */
 import firebaseService from '../scripts/firebase-service.js';
 import { ENEMY_TYPES } from '../objects/enemies/index.js';
-import OreConfig from '../objects/ores/OreConfig.js';
+import CollectibleConfig from '../objects/collectibles/CollectibleConfig.js';
 import EnemyConfig from '../objects/enemies/EnemyConfig.js';
 import gameSessionManager from '../managers/GameSessionManager.js';
 
@@ -64,15 +64,15 @@ class GameStats {
         this.enemiesDestroyed = 0;
         this.shotsFired = 0;
         this.gameTime = 0;
-        this.totalOresMined = 0;
-        
+        this.totalCollectiblesMined = 0;
+
         // Reset timer-related state
         this.currentLevelTime = 0;
         this.levelTimerTotal = 0;
         this.levelTimerRemaining = 0;
-        
-        // Track ores by type
-        this.oresMined = { 
+
+        // Track collectibles by type
+        this.collectiblesMined = { 
             iron: 0, 
             copper: 0, 
             silver: 0, 
@@ -193,23 +193,23 @@ class GameStats {
     }
 
     /**
-     * Record an ore being mined
-     * @param {string} type - Type of ore (iron, copper, silver, gold, platinum)
-     * @param {number} value - Value of the ore mined
+     * Record a collectible being mined
+     * @param {string} type - Type of collectible (iron, copper, silver, gold, platinum)
+     * @param {number} value - Value of the collectible mined
      */
-    oreMined(type, value) {
-        // Ensure the ore type exists in our tracking
-        if (this.oresMined[type] === undefined) {
-            console.warn(`Unknown ore type: ${type}`);
+    collectibleMined(type, value) {
+        // Ensure the collectible type exists in our tracking
+        if (this.collectiblesMined[type] === undefined) {
+            console.warn(`Unknown collectible type: ${type}`);
             return 0;
         }
-        
-        // Increment ore counter
-        this.oresMined[type] += value;
-        this.totalOresMined += value;
-        
+
+        // Increment collectible counter
+        this.collectiblesMined[type] += value;
+        this.totalCollectiblesMined += value;
+
         // Just return the total count, don't calculate or add points
-        return this.totalOresMined;
+        return this.totalCollectiblesMined;
     }
 
     /**
@@ -246,38 +246,38 @@ class GameStats {
     }
 
     /**
-     * Get total ores mined of a specific type
-     * @param {string} type - Ore type (iron, copper, silver, gold, platinum)
-     * @returns {number} Total count of that ore type
+     * Get total collectibles mined of a specific type
+     * @param {string} type - Collectible type (iron, copper, silver, gold, platinum)
+     * @returns {number} Total count of that collectible type
      */
     getTotalMined(type) {
-        if (this.oresMined[type] === undefined) {
+        if (this.collectiblesMined[type] === undefined) {
             return 0;
         }
-        return this.oresMined[type];
+        return this.collectiblesMined[type];
     }
-    
+
     /**
-     * Get the raw count of all ores mined
-     * @returns {Object} Counts of each ore type
+     * Get the raw count of all collectibles mined
+     * @returns {Object} Counts of each collectible type
      */
-    getAllOresMined() {
-        return { ...this.oresMined };
+    getAllCollectiblesMined() {
+        return { ...this.collectiblesMined };
     }
-    
+
     /**
-     * Get score value of mined ores with level multipliers applied
+     * Get score value of mined collectibles with level multipliers applied
      * @param {number} levelMultiplier - The level's value multiplier
-     * @returns {number} Total score value of all mined ores
+     * @returns {number} Total score value of all mined collectibles
      */
-    getOresScoreWithMultiplier(levelMultiplier = 1) {
+    getCollectiblesScoreWithMultiplier(levelMultiplier = 1) {
         let totalScore = 0;
-        
-        // Calculate score by applying multiplier to each ore type
-        Object.entries(this.oresMined).forEach(([type, count]) => {
+
+        // Calculate score by applying multiplier to each collectible type
+        Object.entries(this.collectiblesMined).forEach(([type, count]) => {
             totalScore += count * levelMultiplier;
         });
-        
+
         return totalScore;
     }
     
@@ -291,15 +291,15 @@ class GameStats {
         // 1. Add asteroid count (each asteroid is worth 1 point)
         totalScore += this.asteroidsDestroyed || 0;
         
-        // 2. Add ore scores with their respective multipliers from OreConfig
-        if (this.oresMined) {
-            Object.entries(this.oresMined).forEach(([oreType, count]) => {
+        // 2. Add collectible scores with their respective multipliers from CollectibleConfig
+        if (this.collectiblesMined) {
+            Object.entries(this.collectiblesMined).forEach(([collectibleType, count]) => {
                 if (count && typeof count === 'number') {
-                    // Get multiplier from OreConfig
-                    const oreConfig = OreConfig.getOreConfig(oreType);
-                    const multiplier = oreConfig?.multiplier || 1;
-                    
-                    // Calculate ore score: count * multiplier
+                    // Get multiplier from CollectibleConfig
+                    const collectibleConfig = CollectibleConfig.getCollectibleConfig(collectibleType);
+                    const multiplier = collectibleConfig?.multiplier || 1;
+
+                    // Calculate collectible score: count * multiplier
                     totalScore += count * multiplier;
                 }
             });
@@ -360,8 +360,8 @@ class GameStats {
             enemiesDestroyed: this.enemiesDestroyed || 0,
             enemiesByType: this.enemiesByType ? { ...this.enemiesByType } : {}, // Include enemy kills by type
             shotsFired: this.shotsFired || 0,
-            oresMined: this.oresMined ? { ...this.oresMined } : {}, // Handle potential null
-            totalOresMined: this.totalOresMined || 0,
+            collectiblesMined: this.collectiblesMined ? { ...this.collectiblesMined } : {}, // Handle potential null
+            totalCollectiblesMined: this.totalCollectiblesMined || 0,
             level: this.currentLevel ? { ...this.currentLevel } : { id: 1, name: "Level 1" },
             gameTime: this.gameTime || 0,
             
@@ -405,7 +405,7 @@ class GameStats {
                     enemies_patroller: this.enemiesByType[ENEMY_TYPES.PATROLLER],
                     enemies_tetra: this.enemiesByType[ENEMY_TYPES.TETRA],
                     shots_fired: this.shotsFired,
-                    total_ores_mined: this.totalOresMined,
+                    total_collectibles_mined: this.totalCollectiblesMined,
                     game_time_seconds: this.gameTime
                 });
             } catch (analyticsError) {

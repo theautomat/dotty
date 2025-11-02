@@ -2,7 +2,7 @@
  * MiningDisplay.js - 3D display of mining resources for the HUD
  * Uses the unified GeometryFactory for consistent rendering
  */
-import OreConfig from '../ores/OreConfig.js';
+import CollectibleConfig from '../collectibles/CollectibleConfig.js';
 import GeometryFactory from '../shapes/GeometryFactory.js';
 
 class MiningDisplay {
@@ -44,14 +44,14 @@ class MiningDisplay {
         
         // Create ore mesh using the unified GeometryFactory
         // Get ore config to ensure we use the correct color
-        const oreConfig = OreConfig.getOreConfig(type);
+        const oreConfig = CollectibleConfig.getCollectibleConfig(type);
         
         // Always use the factory to create ore meshes with appropriate size
         const oreMesh = GeometryFactory.createCollectibleMesh(type, 'ore', {
             size: 0.025, // Reduced by 50% from 0.05
             transparent: true,
             opacity: 1.0, // Full opacity
-            // Use the correct color from OreConfig
+            // Use the correct color from CollectibleConfig
             color: oreConfig ? oreConfig.color : null
         });
         
@@ -338,7 +338,7 @@ class MiningDisplay {
         if (!oreDisplay) return;
 
         // Get ore config for color
-        const oreConfig = OreConfig.getOreConfig(type);
+        const oreConfig = CollectibleConfig.getCollectibleConfig(type);
         if (!oreConfig) return;
 
         // Store original color

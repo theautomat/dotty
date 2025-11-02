@@ -43,7 +43,7 @@ class EnemyManager {
         
         // Reference to other managers (set during init)
         this.explosionManager = null;
-        this.oreManager = null;
+        this.collectibleManager = null;
         this.powerUpManager = null;
         
         // Game state now managed by gameStateMachine
@@ -58,7 +58,7 @@ class EnemyManager {
      * @param {THREE.Scene} options.scene - The THREE.js scene
      * @param {THREE.Camera} options.camera - The player's camera
      * @param {Object} options.explosionManager - Reference to explosion manager
-     * @param {Object} options.oreManager - Reference to ore manager
+     * @param {Object} options.collectibleManager - Reference to collectible manager
      * @param {Object} options.powerUpManager - Reference to power-up manager
      */
     init(options = {}) {
@@ -66,7 +66,7 @@ class EnemyManager {
         this.scene = options.scene || null;
         this.camera = options.camera || null;
         this.explosionManager = options.explosionManager || null;
-        this.oreManager = options.oreManager || null;
+        this.collectibleManager = options.collectibleManager || null;
         this.powerUpManager = options.powerUpManager || null;
         this.gameStateMachine = options.gameStateMachine || null;
         
@@ -213,7 +213,7 @@ class EnemyManager {
             playerCamera: this.camera,
             enemyManager: this, // Pass enemyManager reference
             explosionManager: this.explosionManager, // Pass explosionManager for explosion effects
-            oreManager: this.oreManager, // Pass oreManager for ore drops
+            collectibleManager: this.collectibleManager, // Pass collectibleManager for collectible drops
             ...enemyType
         };
         

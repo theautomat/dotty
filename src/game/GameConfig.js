@@ -65,9 +65,9 @@ const GameConfig = {
         types: ['speedBoost', 'shield', 'doublePoints', 'magnet']
     },
     
-    // Ore configuration
-    ores: {
-        // Collection radius for ores
+    // Collectible configuration
+    collectibles: {
+        // Collection radius for collectibles
         // DOTTY: Reduced from 108.0 to 5.0 for 2D top-down gameplay
         collectionRadius: 5.0
     },

@@ -13,7 +13,7 @@ import Enemy from './Enemy.js';
 import soundManager from '../../managers/SoundManager.js';
 import ENEMY_TYPES from './EnemyTypes.js';
 import EnemyWeapon from './EnemyWeapon.js';
-import { Ore } from '../ores/index.js';
+import { Collectible } from '../collectibles/index.js';
 import * as THREE from 'three';
 import GameConfig from '../../game/GameConfig.js'; // Import GameConfig for global settings
 

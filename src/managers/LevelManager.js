@@ -26,7 +26,7 @@ class LevelManager {
         
         // Manager references (will be set during init)
         this.asteroidManager = null;
-        this.oreManager = null;
+        this.collectibleManager = null;
         this.bulletManager = null;
         this.explosionManager = null;
         this.enemyProjectiles = null;
@@ -65,7 +65,7 @@ class LevelManager {
         // Store manager references
         if (options.managers) {
             this.asteroidManager = options.managers.asteroidManager || null;
-            this.oreManager = options.managers.oreManager || null;
+            this.collectibleManager = options.managers.collectibleManager || null;
             this.bulletManager = options.managers.bulletManager || null;
             this.explosionManager = options.managers.explosionManager || null;
             this.powerUpManager = options.managers.powerUpManager || null;
@@ -142,7 +142,7 @@ class LevelManager {
         
         // Use only direct references to managers
         const asteroidManager = this.asteroidManager;
-        const oreManager = this.oreManager;
+        const collectibleManager = this.collectibleManager;
         
         // Remove all asteroids via AsteroidManager
         if (asteroidManager) {
@@ -159,7 +159,7 @@ class LevelManager {
             if (typeof oreManager.clearAll === 'function') {
                 oreManager.clearAll();
             } else {
-                // Fallback: manually remove each ore by index
+                // Fallback: manually remove each collectible by index
                 for (let i = oreManager.activeCount - 1; i >= 0; i--) {
                     oreManager.removeOreByIndex(i);
                 }
@@ -201,7 +201,7 @@ class LevelManager {
         
         console.assert(asteroidsLeft === 0, "Asteroid count should be 0 after cleanup");
         console.assert(bulletsLeft === 0, "Bullet count should be 0 after cleanup");
-        console.assert(oresLeft === 0, "Ore count should be 0 after cleanup");
+        console.assert(collectiblesLeft === 0, "Collectible count should be 0 after cleanup");
 
     }
     
@@ -477,9 +477,9 @@ class LevelManager {
             this.powerUpManager.clearActiveEffects(); // Clear applied effects
         }
         
-        // Clear ores
-        if (this.oreManager) {
-            this.oreManager.clearAllOres();
+        // Clear collectibles
+        if (this.collectibleManager) {
+            this.collectibleManager.clearAllCollectibles();
         }
         
         // Clear explosions using manager
@@ -643,28 +643,28 @@ class LevelManager {
         boss.setDestroyCallback(() => {
             console.log("[LEVEL-MANAGER] Boss destroyed, dropping rewards");
             
-            // If ore drops are configured for this boss
-            if (levelConfig.bossConfig.params && levelConfig.bossConfig.params.oreDropsOnDeath) {
+            // If collectible drops are configured for this boss
+            if (levelConfig.bossConfig.params && levelConfig.bossConfig.params.collectibleDropsOnDeath) {
                 const position = boss.getPosition();
-                const oreCount = levelConfig.bossConfig.params.oreDropCount || 5;
-                
-                // Spawn ores using oreManager
-                for (let i = 0; i < oreCount; i++) {
+                const collectibleCount = levelConfig.bossConfig.params.collectibleDropCount || 5;
+
+                // Spawn collectibles using collectibleManager
+                for (let i = 0; i < collectibleCount; i++) {
                     // Add some randomness to positions
                     const offset = new THREE.Vector3(
-                        (Math.random() - 0.5) * 10, 
+                        (Math.random() - 0.5) * 10,
                         (Math.random() - 0.5) * 10,
                         (Math.random() - 0.5) * 10
                     );
-                    
-                    const orePosition = position.clone().add(offset);
-                    
-                    // Use OreManager to spawn ores
-                    if (this.oreManager) {
-                        // Determine ore type based on level (could be improved with proper type selection)
-                        const oreType = 'gold'; // Default to valuable ore for boss drops
-                        const oreValue = 100;   // Higher value for boss-dropped ores
-                        this.oreManager.spawnOre(orePosition, oreType, oreValue);
+
+                    const collectiblePosition = position.clone().add(offset);
+
+                    // Use CollectibleManager to spawn collectibles
+                    if (this.collectibleManager) {
+                        // Determine collectible type based on level (could be improved with proper type selection)
+                        const collectibleType = 'gold'; // Default to valuable collectible for boss drops
+                        const collectibleValue = 100;   // Higher value for boss-dropped collectibles
+                        this.collectibleManager.spawnCollectible(collectiblePosition, collectibleType, collectibleValue);
                     }
                 }
             }

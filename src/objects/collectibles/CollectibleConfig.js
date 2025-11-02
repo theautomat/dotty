@@ -1,16 +1,16 @@
 /**
- * OreConfig.js - Configuration for ore types in the Asteroids game
- * 
- * This file defines the properties for different ore types, including:
+ * CollectibleConfig.js - Configuration for collectible types in the game
+ *
+ * This file defines the properties for different collectible types, including:
  * - Colors (in hex format)
  * - Geometry types (shape complexity increases with value)
- * - Escape velocity (how quickly ores move after creation)
+ * - Escape velocity (how quickly collectibles move after creation)
  * - Basic values and appearance details
  */
 
-const OreConfig = {
-    // Ore types in order of increasing value/complexity
-    oreTypes: [
+const CollectibleConfig = {
+    // Collectible types in order of increasing value/complexity
+    collectibleTypes: [
         {
             type: 'iron',
             name: 'Iron',
@@ -76,17 +76,17 @@ const OreConfig = {
         }
     ],
     
-    // Get config for a specific ore type
-    getOreConfig(type) {
-        return this.oreTypes.find(ore => ore.type === type);
+    // Get config for a specific collectible type
+    getCollectibleConfig(type) {
+        return this.collectibleTypes.find(collectible => collectible.type === type);
     },
-    
-    // Get ore config by index (for cycling through types)
-    getOreByIndex(index) {
+
+    // Get collectible config by index (for cycling through types)
+    getCollectibleByIndex(index) {
         // Ensure index is within bounds
-        const safeIndex = index % this.oreTypes.length;
-        return this.oreTypes[safeIndex];
+        const safeIndex = index % this.collectibleTypes.length;
+        return this.collectibleTypes[safeIndex];
     }
 };
 
-export default OreConfig;
+export default CollectibleConfig;

@@ -11,7 +11,7 @@ import GameOverStats from './GameOverStats.js';
 import GameCompletionDisplay from './GameCompletionDisplay.js';
 import PowerUpDisplay from './PowerUpDisplay.js';
 import ScreenFlash from './ScreenFlash.js';
-import OreConfig from '../../objects/ores/OreConfig.js';
+import CollectibleConfig from '../../objects/collectibles/CollectibleConfig.js';
 import PowerUpConfig from '../../objects/powers/PowerUpConfig.js';
 import gameStats from '../../game/GameStats.js';
 import gameStateMachine, { GAME_STATES } from '../../game/GameStateMachine.js';
@@ -559,8 +559,8 @@ class HUD {
      * @param {string} oreType - The type of ore collected
      */
     flashScreenForOre(oreType) {
-        // Get ore color from OreConfig
-        const oreConfig = OreConfig.getOreConfig(oreType);
+        // Get collectible color from CollectibleConfig
+        const oreConfig = CollectibleConfig.getCollectibleConfig(oreType);
         if (!oreConfig) return;
         
         // Use the general flash method
