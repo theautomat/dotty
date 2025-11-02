@@ -342,6 +342,7 @@ class Game {
             explosionManager: this.explosionManager,
             enemyManager: this.enemyManager,
             camera: this.camera,
+            playerDot: this.playerDot,  // DOTTY: Add player reference for 2D collision detection
             shipCollisionRadius: GameConfig.ship.collisionRadius,
             powerUpManager: this.powerUpManager,  // Add powerUpManager reference
             levelManager: this.levelManager  // Add levelManager reference
@@ -361,7 +362,8 @@ class Game {
         };
         
         // Initialize the gameStateMachine
-        gameStateMachine.init(soundManager, this.hud);
+        // DOTTY: Pass null for HUD since it's disabled
+        gameStateMachine.init(soundManager, this.hud || null);
 
         // Show the entry screen overlay
         showEntryScreen(() => {
@@ -394,11 +396,16 @@ class Game {
             } else {
                 console.warn("No renderer.domElement found to request pointer lock");
             }
-            
+
             // DOTTY: Temporarily disable level/asteroid/enemy spawning
             // Start the game using the LevelManager
             // LevelManager will handle loading the first level
             // this.levelManager.startGame();
+
+            // DOTTY: Spawn test treasures for collision testing
+            // Position at Y=6 so the ore (size 11) sits on the grid at Y=0
+            this.oreManager.spawnOre(new THREE.Vector3(10, 6, 10), 'iron', 100, 300000);
+            this.oreManager.spawnOre(new THREE.Vector3(-15, 6, 5), 'copper', 150, 300000);
 
             // Transition to PLAYING state
             gameStateMachine.transitionTo(GAME_STATES.PLAYING);
@@ -412,22 +419,22 @@ class Game {
      * Initialize the HUD system
      */
     initHUD() {
-        
-        // Create the HUD with just the data it needs
-        // The HUD will handle creating and managing its own components
-        this.hud = new HUD(
-            this.scene, 
-            this.camera,
-            this.renderer,
-            {
-                // No timer passed - LevelManager will update the HUD's timer display directly
-                bulletConfig: {
-                    maxCharges: 10,
-                    rechargeRate: 100 // Much faster recharge rate (was 500ms)
-                }
-            }
-        );
-        
+        // DOTTY: Temporarily disable HUD - will rebuild a simpler 2D HUD later
+        // The 3D HUD was designed for perspective camera and needs significant updates
+
+        // this.hud = new HUD(
+        //     this.scene,
+        //     this.camera,
+        //     this.renderer,
+        //     {
+        //         // No timer passed - LevelManager will update the HUD's timer display directly
+        //         bulletConfig: {
+        //             maxCharges: 10,
+        //             rechargeRate: 100 // Much faster recharge rate (was 500ms)
+        //         }
+        //     }
+        // );
+
     }
     
     /**
@@ -685,8 +692,9 @@ class Game {
      */
     updateOres(deltaTime) {
         // Only update the ores (movement, lifespan, etc.)
-        if (this.camera && this.camera.position) {
-            this.oreManager.update(deltaTime, this.camera.position);
+        // DOTTY: Use playerDot position for 2D top-down collision detection
+        if (this.playerDot && this.playerDot.position) {
+            this.oreManager.update(deltaTime, this.playerDot.position);
         }
     }
     

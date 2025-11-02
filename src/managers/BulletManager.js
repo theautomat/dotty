@@ -139,18 +139,21 @@ class BulletManager extends BaseInstanceManager {
         // Shooting bullet from camera
         // Don't fire if controls should be locked based on game state
         if (gameStateMachine.shouldLockControls()) return null;
-        
-        // Ensure the player has bullets available through HUD
-        if (!hud.canShoot()) {
-            // Play empty sound - uses phaser fail sound for now
-            soundManager.playPhaserFail();
-            // Flash the HUD bullets indicator to indicate empty
-            hud.flashBulletsIndicator();
-            return null;
-        }
-        
-        // Use up one charge
-        hud.useCharge();
+
+        // DOTTY: Disable shooting for top-down exploration game
+        return null;
+
+        // // Ensure the player has bullets available through HUD
+        // if (!hud.canShoot()) {
+        //     // Play empty sound - uses phaser fail sound for now
+        //     soundManager.playPhaserFail();
+        //     // Flash the HUD bullets indicator to indicate empty
+        //     hud.flashBulletsIndicator();
+        //     return null;
+        // }
+        //
+        // // Use up one charge
+        // hud.useCharge();
         
         // Calculate a position directly in front of the camera
         const bulletStartPosition = camera.position.clone();

@@ -74,10 +74,11 @@ class OreManager {
             }
 
             // Add random scatter to position
+            // DOTTY: Only randomize X and Z for 2D top-down, keep Y at provided height
             positionToUse.add(
                 new THREE.Vector3(
                     (Math.random() - 0.5) * 2,
-                    (Math.random() - 0.5) * 2,
+                    0, // Don't randomize Y - keep ores on the ground plane
                     (Math.random() - 0.5) * 2
                 )
             );

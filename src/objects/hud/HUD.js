@@ -55,13 +55,23 @@ class HUD {
         // Base distance from camera for HUD elements
         // Negative Z is in front of the camera in camera local space
         this.distance = -1.0;
-        
-        // Calculate visual dimensions at the HUD distance
-        const fovRadians = (this.camera.fov * Math.PI) / 180;
-        // Use absolute value of distance since we're using negative Z now
-        const height = 2 * Math.tan(fovRadians / 2) * Math.abs(this.distance);
-        const width = height * this.camera.aspect;
-        
+
+        let width, height;
+
+        // DOTTY: Handle both OrthographicCamera and PerspectiveCamera
+        if (this.camera.isOrthographicCamera) {
+            // For orthographic camera, use the frustum dimensions directly
+            // The HUD should match the visible area
+            width = (this.camera.right - this.camera.left);
+            height = (this.camera.top - this.camera.bottom);
+        } else {
+            // For perspective camera, calculate based on FOV
+            const fovRadians = (this.camera.fov * Math.PI) / 180;
+            // Use absolute value of distance since we're using negative Z now
+            height = 2 * Math.tan(fovRadians / 2) * Math.abs(this.distance);
+            width = height * this.camera.aspect;
+        }
+
         // Store edges for easy component placement
         this.edges = {
             left: -width / 2,
@@ -71,7 +81,7 @@ class HUD {
             width: width,
             height: height
         };
-        
+
         // Update existing components if any
         this.updateComponentPositions();
     }

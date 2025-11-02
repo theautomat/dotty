@@ -62,19 +62,19 @@ class Ore extends GameObject {
     createOreMesh() {
         // Get ore options based on type
         const options = OreConfig.getOreConfig(this.type);
-        
+
         // Create the mesh using the factory
         this.mesh = GeometryFactory.createCollectibleMesh(this.type, 'ore', {
             size: this.params.size,
             color: this.params.color
         });
-        
+
         // Apply position
         this.mesh.position.copy(this.position);
-        
+
         // Reference back to this instance
         this.mesh.userData.oreInstance = this;
-        
+
         // Add to scene
         this.scene.add(this.mesh);
     }
@@ -94,9 +94,9 @@ class Ore extends GameObject {
             return false;
         }
         
-        // Apply simple physics
-        this.mesh.position.add(this.velocity);
-        
+        // DOTTY: Disable ore movement for top-down 2D game
+        // this.mesh.position.add(this.velocity);
+
         // Apply rotation for visual appeal
         this.mesh.rotation.x += this.params.rotationSpeed;
         this.mesh.rotation.y += this.params.rotationSpeed * 0.7;

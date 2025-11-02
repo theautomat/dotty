@@ -52,28 +52,31 @@ yarn
 
 ### Running the Game
 
-For development:
+For development with Hot Module Replacement (HMR):
+
+```bash
+npm run vite
+```
+
+This launches Vite's dev server with instant hot reloading:
+- Changes appear immediately in the browser without manual refresh
+- Fast HMR updates as you edit files
+- Access the game at [http://localhost:5173](http://localhost:5173)
+
+For production build and serve:
 
 ```bash
 npm run dev
-# or with yarn
-yarn dev
 ```
 
-This launches the game with auto-reload capabilities:
-- The server automatically refreshes when code changes
-- LiveReload automatically refreshes your browser when files are modified
-- No manual reloading required - just save your files and see changes instantly
+This builds the project and serves it in production mode at [http://localhost:3000](http://localhost:3000).
 
-For production:
+To deploy to production:
 
 ```bash
+npm run build
 npm start
-# or with yarn
-yarn start
 ```
-
-Open your browser to [http://localhost:3000](http://localhost:3000) to play the game.
 
 ## Game Controls
 

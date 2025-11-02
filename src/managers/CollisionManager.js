@@ -19,9 +19,10 @@ class CollisionManager {
         this.explosionManager = null;
         this.enemyManager = null;
         this.camera = null;
+        this.playerDot = null;  // DOTTY: Player reference for 2D collision detection
         this.powerUpManager = null;
         this.levelManager = null;
-        
+
         // Configuration
         this.SHIP_COLLISION_RADIUS = 5.0; // Default, can be updated in init
     }
@@ -40,14 +41,15 @@ class CollisionManager {
         this.explosionManager = params.explosionManager || this.explosionManager;
         this.enemyManager = params.enemyManager || this.enemyManager; // Store enemyManager reference
         this.camera = params.camera || this.camera;
+        this.playerDot = params.playerDot || this.playerDot;  // DOTTY: Store player reference
         this.powerUpManager = params.powerUpManager || this.powerUpManager;
         this.levelManager = params.levelManager || this.levelManager;
-        
+
         // Update configuration if provided
         if (params.shipCollisionRadius) {
             this.SHIP_COLLISION_RADIUS = params.shipCollisionRadius;
         }
-        
+
         return this;
     }
     
@@ -57,26 +59,26 @@ class CollisionManager {
      * @param {THREE.Camera} params.camera - Player camera/ship if not using the stored reference
      */
     checkCollisions(params = {}) {
-        // Use provided camera or the stored reference
-        const camera = params.camera || this.camera;
-        
+        // DOTTY: Use playerDot for 2D collision detection
+        const playerPosition = this.playerDot ? this.playerDot.position : null;
+
         // Skip checks if essential objects are missing
-        if (!camera) return;
-        
+        if (!playerPosition) return;
+
         // Get all game entities directly from their managers
         const bullets = this.bulletManager ? this.bulletManager.getAllBullets() : [];
         const asteroids = this.asteroidManager ? this.asteroidManager.getAllAsteroids() : [];
         const enemies = this.enemyManager ? this.enemyManager.enemies : [];
         const enemyProjectiles = this.enemyManager ? this.enemyManager.enemyProjectiles : [];
-        
+
         // Check for ore collisions if oreManager exists
         if (this.oreManager) {
-            this.checkOreCollisions(camera.position);
+            this.checkOreCollisions(playerPosition);
         }
-        
+
         // Check player-asteroid collisions
         if (asteroids.length > 0) {
-            this.checkPlayerAsteroidCollisions(camera.position, asteroids);
+            this.checkPlayerAsteroidCollisions(playerPosition, asteroids);
         }
         
         // Check bullet-asteroid collisions

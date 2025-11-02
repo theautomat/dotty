@@ -68,7 +68,8 @@ const GameConfig = {
     // Ore configuration
     ores: {
         // Collection radius for ores
-        collectionRadius: 108.0
+        // DOTTY: Reduced from 108.0 to 5.0 for 2D top-down gameplay
+        collectionRadius: 5.0
     },
     
     // Debug settings

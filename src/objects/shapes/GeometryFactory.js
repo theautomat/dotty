@@ -3,6 +3,7 @@
  * Centralizes all shape creation logic to separate rendering from functionality
  * Handles ores, power-ups, asteroids, and enemies with a consistent API
  */
+import * as THREE from 'three';
 import OreConfig from '../ores/OreConfig.js';
 import PowerUpConfig from '../powers/PowerUpConfig.js';
 import EnemyConfig from '../enemies/EnemyConfig.js';
@@ -181,7 +182,7 @@ class GeometryFactory {
                 };
             }
         }
-        
+
         // Create geometry based on type
         let geometry;
         
@@ -276,11 +277,13 @@ class GeometryFactory {
             detail: oreConfig ? oreConfig.detail : 0,
             distortion: params.distortion || (oreConfig ? oreConfig.distortion : 0)
         });
-        
+
         // Create material
+        // DOTTY: Temporarily make ores solid instead of wireframe for visibility testing
         const material = new THREE.MeshBasicMaterial({
             color: color,
-            wireframe: true,
+            wireframe: false, // Changed from true to false for testing
+            side: THREE.DoubleSide, // DOTTY: Render both sides to test if it's a face culling issue
             transparent: params.transparent !== undefined ? params.transparent : false,
             opacity: params.opacity !== undefined ? params.opacity : 1.0
         });
