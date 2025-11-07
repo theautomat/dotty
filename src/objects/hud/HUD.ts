@@ -1,22 +1,53 @@
 /**
- * HUD.js - Heads-Up Display manager
+ * HUD.ts - Heads-Up Display manager
  * Container for all in-game HUD elements in 3D space
  */
-import TimerDisplay from './TimerDisplay.js';
-import MiningDisplay from './MiningDisplay.js';
-import BulletDisplay from './BulletDisplay.js';
-import LevelTransitionDisplay from './LevelTransitionDisplay.js';
-import DeathIndicator from './DeathIndicator.js';
-import GameOverStats from './GameOverStats.js';
-import GameCompletionDisplay from './GameCompletionDisplay.js';
-import PowerUpDisplay from './PowerUpDisplay.js';
-import ScreenFlash from './ScreenFlash.js';
+import * as THREE from 'three';
+import TimerDisplay from './TimerDisplay';
+import MiningDisplay from './MiningDisplay';
+import BulletDisplay from './BulletDisplay';
+import LevelTransitionDisplay from './LevelTransitionDisplay';
+import DeathIndicator from './DeathIndicator';
+import GameOverStats from './GameOverStats';
+import GameCompletionDisplay from './GameCompletionDisplay';
+import PowerUpDisplay from './PowerUpDisplay';
+import ScreenFlash from './ScreenFlash';
 import CollectibleConfig from '../../objects/collectibles/CollectibleConfig';
 import PowerUpConfig from '../../objects/powers/PowerUpConfig';
 import gameStats from '../../game/GameStats';
 import gameStateMachine, { GAME_STATES } from '../../game/GameStateMachine';
+
+interface HUDOptions {
+    bulletConfig?: {
+        maxCharges?: number;
+        rechargeRate?: number;
+    };
+}
+
+interface ComponentPosition {
+    anchor: string;
+    offsetX: number;
+    offsetY: number;
+}
+
+interface HUDComponent {
+    component: any;
+    position: ComponentPosition;
+}
+
 class HUD {
-    constructor(scene, camera, renderer, options = {}) {
+    private scene: THREE.Scene;
+    private camera: THREE.Camera;
+    private renderer: THREE.WebGLRenderer;
+    private bulletConfig: any;
+    private hudGroup: THREE.Group;
+    private components: Record<string, HUDComponent>;
+    private distance: number;
+    private edges: any;
+    private timer: any;
+    private visible: boolean;
+
+    constructor(scene: THREE.Scene, camera: THREE.Camera, renderer: THREE.WebGLRenderer, options: HUDOptions = {}) {
         this.scene = scene;
         this.camera = camera;
         this.renderer = renderer;

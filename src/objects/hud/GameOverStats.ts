@@ -1,16 +1,30 @@
 /**
- * GameOverStatsDisplay.js - Enhanced display of game over statistics
+ * GameOverStatsDisplay.ts - Enhanced display of game over statistics
  * Shows collected ores, asteroid count, enemies destroyed and total score using GeometryFactory
  */
+import * as THREE from 'three';
 import GeometryFactory from '../shapes/GeometryFactory';
 import { COLLECTIBLE_TYPES } from '../collectibles/index';
 import CollectibleConfig from '../collectibles/CollectibleConfig';
 import EnemyConfig from '../enemies/EnemyConfig';
 
+interface GameStats {
+    asteroidsDestroyed?: number;
+    enemiesByType?: Record<string, number>;
+    oresMined?: Record<string, number>;
+    score?: number;
+}
+
 class GameOverStatsDisplay {
-    /**
-     * Create a new enhanced game over stats display
-     */
+    private group: THREE.Group;
+    private background: THREE.Mesh;
+    private miningDisplay: any;
+    private statsDisplayGroup: THREE.Group | null;
+    private oreDisplayGroup: THREE.Group | null;
+    private asteroidDisplayGroup: THREE.Group | null;
+    private totalScoreGroup: THREE.Group | null;
+    private enemiesDisplayGroup: THREE.Group | null;
+
     constructor() {
         // Group containing all display elements
         this.group = new THREE.Group();
