@@ -16,21 +16,21 @@ Complete guide for the Solana smart contract and NFT integration in the Dotty ga
 
 ## Overview
 
-The Dotty game integrates with Solana through **multiple smart contracts** (programs):
+The game integrates with Solana through a **unified smart contract** (program):
 
-1. **dotty-nft** - Mint collectible NFTs for treasures found in-game
-2. **treasure-deposit** - Deposit memecoins to receive random monster NFTs
+**game** - A theme-agnostic, flexible program that supports:
+- **NFT Minting** - Mint collectible NFTs for treasures found in-game
+- **Token Deposit System** - Deposit tokens to earn premium NFT claims
+- **Vault Management** - Admin functions for token whitelisting and configuration
+- **Tiered Rewards** - Multi-tier system based on deposit amounts
 
 **Technology Stack:**
 - **Anchor Framework v0.30.1** - Modern Rust framework for Solana programs
 - **Metaplex Token Metadata v4.1.2** - Industry standard for Solana NFTs
-- **Multi-Program Workspace** - Scalable architecture for multiple contracts
-- **React Wallet Adapter** - Multi-wallet support (Phantom, Solflare, etc.)
+- **Unified Program Architecture** - Single contract with multiple instruction handlers
 - **@solana/web3.js v1.95.2** - JavaScript client for Solana interactions
 
-**New to Solana?** Start with [CONTRACTS-GUIDE.md](./CONTRACTS-GUIDE.md) for a beginner-friendly introduction!
-
-**Multiple Programs?** See [MULTI-CONTRACT-SETUP.md](./MULTI-CONTRACT-SETUP.md) for the complete guide.
+**New to Solana?** Check out the [Solana Cookbook](https://solanacookbook.com/) for guides and examples!
 
 ## Architecture
 
@@ -51,7 +51,7 @@ The Dotty game integrates with Solana through **multiple smart contracts** (prog
          ▼
 ┌─────────────────┐       ┌──────────────┐
 │ Solana Program  │◄──────┤   Metaplex   │
-│  (dotty-nft)    │       │   Metadata   │
+│     (game)      │       │   Metadata   │
 └────────┬────────┘       └──────────────┘
          │ 5. Mints NFT
          ▼
@@ -59,34 +59,52 @@ The Dotty game integrates with Solana through **multiple smart contracts** (prog
 │ Player's Wallet │
 │  (Phantom)      │
 └─────────────────┘
+
+Optional Token Deposit Flow:
+┌─────────────────┐
+│   Game Client   │  1. Deposits tokens
+└────────┬────────┘
+         ▼
+┌─────────────────┐
+│ Solana Program  │  2. Records deposit
+│     (game)      │  3. Calculates tier
+└────────┬────────┘
+         │ 4. Mints premium NFT
+         ▼
+┌─────────────────┐
+│ Player's Wallet │
+└─────────────────┘
 ```
 
 ## Current Status
 
 ### ✅ Implemented
-- **Two Solana programs** in multi-program workspace
-  - `dotty-nft`: NFT minting for collectibles
-  - `treasure-deposit`: Memecoin deposit → monster NFT mechanic
-- **Comprehensive test suites** for both programs (TypeScript + Mocha + Chai)
-- **React wallet adapter** components (WalletProvider, WalletButton, TreasureDeposit)
+- **Unified Solana program** (`game`) with multiple instruction handlers
+  - `mint_nft`: Universal NFT minting for any collectible type
+  - `initialize_vault`: Set up token deposit system
+  - `deposit_for_nft`: Deposit tokens to earn premium NFT claims
+  - `claim_deposit`: Claim deposit after token transfer
+  - `whitelist_token`: Admin function to whitelist accepted tokens
+  - `update_vault`: Admin function to update vault configuration
+- **Comprehensive test suite** (TypeScript + Mocha + Chai)
 - **Anchor v0.30.1** smart contract framework
 - **Metaplex metadata** integration
 - **Backend NFT service** foundation
-- **Metadata JSON** examples for collectibles
-- **Developer guides**: CONTRACTS-GUIDE.md (beginner intro) + MULTI-CONTRACT-SETUP.md
+- **Metadata JSON** examples for theme-agnostic collectibles
+- **Tiered reward system** (4 tiers based on deposit amount)
 
 ### ⚠️ In Progress / Next Steps
-- **Deploy to devnet** - Programs ready but not deployed
+- **Deploy to devnet** - Program ready but not deployed
 - **Backend minting integration** - Need to use deployed IDL
 - **Host metadata on IPFS/Arweave** - Currently placeholder URLs
-- **CPI between programs** - treasure-deposit → dotty-nft minting
-- **Token whitelisting** - Add PEPE, BONK, etc. to whitelist
+- **Token whitelisting** - Add specific tokens (USDC, etc.) to whitelist
+- **Web UI testing** - Test full flow through game interface
 
 ### 🔧 Technical Improvements Needed
-- React version fix (React 19.2.0 vs react-dom 16.14.0)
 - Rate limiting on backend
 - Signature verification for deposits
 - CI/CD for automated deployment
+- Monitoring and analytics for on-chain activity
 
 ## Setup & Installation
 
@@ -153,59 +171,50 @@ solana airdrop 2 $(solana address)
 
 ## Development Workflow
 
-### 1. Build the Program
+### Quick Start
 
 ```bash
-cd solana
-anchor build
+# 1. Build the program
+cd solana && anchor build
+
+# 2. Run tests locally
+anchor test
+
+# 3. Deploy to devnet (see detailed guide below)
+anchor deploy --provider.cluster devnet
 ```
 
 This generates:
-- Compiled program: `target/deploy/dotty_nft.so`
-- IDL file: `target/idl/dotty_nft.json`
-- TypeScript types: `target/types/dotty_nft.ts`
+- Compiled program: `target/deploy/game.so`
+- IDL file: `target/idl/game.json`
+- TypeScript types: `target/types/game.ts`
 
-### 2. Run Tests
+### Local Testing
 
 ```bash
-# From project root
-npm run test:solana
-
-# Or from solana directory
+# Run all tests with local validator
 cd solana && anchor test
+
+# Or start validator separately and run tests
+# Terminal 1:
+solana-test-validator
+
+# Terminal 2:
+anchor test --skip-local-validator
 ```
 
-Tests are located in `tests/dotty-nft.ts` using TypeScript + Mocha + Chai.
+Tests are located in `tests/game.ts` using TypeScript + Mocha + Chai.
 
-### 3. Deploy to Devnet
+### Program Instructions
 
-```bash
-# Deploy program
-anchor deploy --provider.cluster devnet
+The `game` program exposes these instructions:
 
-# This outputs: Program Id: <YOUR_PROGRAM_ID>
-```
-
-**IMPORTANT**: After deployment, update these files:
-1. `programs/dotty-nft/src/lib.rs` - Update `declare_id!("YOUR_PROGRAM_ID")`
-2. `Anchor.toml` - Update program IDs under `[programs.devnet]`
-3. Root `.env` - Update `SOLANA_PROGRAM_ID=YOUR_PROGRAM_ID`
-
-### 4. Rebuild After ID Update
-
-```bash
-anchor build
-anchor deploy --provider.cluster devnet
-```
-
-### 5. Integrate with Backend
-
-Copy the generated IDL to your backend:
-```bash
-cp target/idl/dotty_nft.json ../nft-idl.json
-```
-
-Update `nft-service.js` to use the IDL for actual program calls.
+1. **mint_nft** - Mint any type of NFT (collectibles, rewards, etc.)
+2. **initialize_vault** - One-time setup for token deposit system
+3. **deposit_for_nft** - Player deposits tokens to earn premium NFT claim
+4. **claim_deposit** - Mark deposit as claimed
+5. **whitelist_token** - Admin adds accepted token mints
+6. **update_vault** - Admin updates vault configuration
 
 ## Testing
 
@@ -256,45 +265,363 @@ describe("dotty-nft", () => {
 
 ## Deployment
 
-### Devnet Deployment
+### Complete Devnet Deployment Workflow
+
+This guide walks you through deploying to devnet, testing the program, and integrating with your web UI.
+
+#### Step 1: Pre-Deployment Checklist
 
 ```bash
-# 1. Set cluster to devnet
+# Verify installations
+rustc --version   # Should be 1.75+
+solana --version  # Should be 1.18+
+anchor --version  # Should be 0.30.1
+
+# Check your Solana configuration
+solana config get
+# Should show:
+# RPC URL: https://api.devnet.solana.com
+# WebSocket URL: wss://api.devnet.solana.com
+# Keypair Path: ~/.config/solana/id.json
+
+# If not on devnet, switch to it
 solana config set --url https://api.devnet.solana.com
 
-# 2. Ensure wallet has SOL
+# Check wallet balance
 solana balance
-# If needed: solana airdrop 2
+# If < 2 SOL, get airdrop
+solana airdrop 2
 
-# 3. Build and deploy
-anchor build
-anchor deploy --provider.cluster devnet
-
-# 4. Verify deployment
-solana program show <PROGRAM_ID>
+# Note your wallet address for later
+solana address
 ```
 
+#### Step 2: Build and Test Locally
+
+```bash
+# Navigate to solana directory
+cd solana
+
+# Clean previous builds (optional but recommended)
+anchor clean
+
+# Build the program
+anchor build
+
+# Run tests locally to ensure everything works
+anchor test
+
+# ✅ All tests should pass before deploying
+```
+
+**Expected output:**
+```
+game
+  NFT Minting
+    mint_nft
+      ✓ Successfully mints an NFT to a player (XXXXms)
+  Deposit System
+    initialize_vault
+      ✓ Successfully initializes the deposit vault (XXXXms)
+    deposit_for_nft
+      ✓ Successfully deposits tokens and creates record (XXXXms)
+    ...
+```
+
+#### Step 3: Initial Deployment
+
+```bash
+# Deploy to devnet
+anchor deploy --provider.cluster devnet
+
+# ⚠️ SAVE THE PROGRAM ID FROM THE OUTPUT!
+# Example output:
+# Program Id: 7vYN8KqmHZqvGHGvLjUjQ2vJZJhF8Pt1KqGm8kX9XYZ1
+```
+
+**Important**: The first deployment will fail or warn about program ID mismatch. This is expected!
+
+#### Step 4: Update Program ID
+
+Now update the program ID in your code to match the deployed address.
+
+**File 1:** `programs/game/src/lib.rs`
+```rust
+declare_id!("YOUR_ACTUAL_PROGRAM_ID_HERE");
+```
+
+**File 2:** `Anchor.toml`
+```toml
+[programs.devnet]
+game = "YOUR_ACTUAL_PROGRAM_ID_HERE"
+```
+
+**File 3:** `../.env` (project root)
+```bash
+SOLANA_PROGRAM_ID=YOUR_ACTUAL_PROGRAM_ID_HERE
+```
+
+#### Step 5: Rebuild and Redeploy
+
+```bash
+# Rebuild with updated program ID
+anchor build
+
+# Deploy again (this time it will upgrade the existing program)
+anchor deploy --provider.cluster devnet
+
+# Verify deployment
+solana program show YOUR_PROGRAM_ID
+
+# Expected output shows program data account, upgrade authority, etc.
+```
+
+#### Step 6: Test on Devnet
+
+```bash
+# Run tests against devnet
+anchor test --provider.cluster devnet --skip-local-validator
+
+# ✅ All tests should pass
+```
+
+#### Step 7: Initialize the Vault (One-Time Setup)
+
+If you're using the token deposit feature, initialize the vault:
+
+```bash
+# Option A: Use Anchor test to call initialize_vault
+# (Modify tests/game.ts to include initialization call)
+
+# Option B: Use Solana Playground or custom script
+# Example using anchor CLI (create a script):
+```
+
+**Create `scripts/initialize-vault.ts`:**
+```typescript
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
+import { Game } from "../target/types/game";
+
+async function main() {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+  const program = anchor.workspace.Game as Program<Game>;
+
+  const [vaultPda] = anchor.web3.PublicKey.findProgramAddressSync(
+    [Buffer.from("vault")],
+    program.programId
+  );
+
+  const tx = await program.methods
+    .initializeVault()
+    .accounts({
+      vault: vaultPda,
+      authority: provider.wallet.publicKey,
+      systemProgram: anchor.web3.SystemProgram.programId,
+    })
+    .rpc();
+
+  console.log("✅ Vault initialized!");
+  console.log("Transaction:", tx);
+  console.log("Vault PDA:", vaultPda.toString());
+}
+
+main();
+```
+
+**Run it:**
+```bash
+ts-node scripts/initialize-vault.ts
+```
+
+#### Step 8: Copy IDL for Backend Integration
+
+```bash
+# Copy the generated IDL to your backend
+cp target/idl/game.json ../game-idl.json
+
+# Verify the file was copied
+ls -lh ../game-idl.json
+```
+
+#### Step 9: Update Backend to Use Deployed Program
+
+Update your backend NFT service to use the real program:
+
+**File: `nft-service.js` or `nft-service.ts`**
+```javascript
+const { Program, AnchorProvider, web3 } = require('@coral-xyz/anchor');
+const idl = require('./game-idl.json');
+
+// Load from environment
+const PROGRAM_ID = new web3.PublicKey(process.env.SOLANA_PROGRAM_ID);
+const DEVNET_URL = 'https://api.devnet.solana.com';
+
+// Initialize connection
+const connection = new web3.Connection(DEVNET_URL, 'confirmed');
+
+// Load backend wallet (secure this!)
+const wallet = loadWalletFromEnv(); // Implement this
+
+const provider = new AnchorProvider(connection, wallet, {
+  commitment: 'confirmed'
+});
+
+const program = new Program(idl, PROGRAM_ID, provider);
+
+// Mint NFT function
+async function mintNFT(playerWallet, metadata) {
+  const mintKeypair = web3.Keypair.generate();
+  const playerPublicKey = new web3.PublicKey(playerWallet);
+
+  // ... (rest of minting logic)
+}
+```
+
+#### Step 10: Test Through Web UI
+
+Start your game and test the full flow:
+
+**Terminal 1: Start backend**
+```bash
+npm start
+# or
+npm run dev
+```
+
+**Terminal 2: Start frontend (if separate)**
+```bash
+npm run vite
+```
+
+**Testing checklist:**
+
+1. **Connect Wallet**
+   - Open game in browser (http://localhost:5173 or configured port)
+   - Click "Connect Wallet" button
+   - Approve connection in Phantom wallet
+   - ✅ Verify wallet address appears in UI
+
+2. **Switch Phantom to Devnet**
+   - Open Phantom wallet
+   - Settings → Developer Settings → Testnet Mode: ON
+   - Switch network to "Devnet"
+   - If needed, airdrop devnet SOL to player wallet:
+     ```bash
+     solana airdrop 1 PLAYER_WALLET_ADDRESS --url devnet
+     ```
+
+3. **Test NFT Minting**
+   - Play the game and find a collectible
+   - Trigger mint action
+   - Check browser console for transaction logs
+   - Expected: Transaction signature in console
+   - ✅ Verify NFT appears in Phantom wallet (may take 10-30 seconds)
+
+4. **Verify On-Chain**
+   - Copy transaction signature from console
+   - Visit Solana Explorer: https://explorer.solana.com/?cluster=devnet
+   - Paste transaction signature
+   - ✅ Verify transaction succeeded
+   - ✅ Verify NFT metadata is correct
+
+5. **Test Token Deposit (Optional)**
+   - If implementing deposit feature:
+   - Player deposits tokens via UI
+   - Check vault balance increased
+   - Player claims deposit
+   - ✅ Verify deposit record on-chain
+
+#### Step 11: Monitor and Debug
+
+```bash
+# View program logs
+solana logs YOUR_PROGRAM_ID --url devnet
+
+# This will show real-time logs as transactions happen
+# Keep this running in a terminal while testing
+
+# View specific transaction
+solana confirm -v TRANSACTION_SIGNATURE --url devnet
+
+# Check program account info
+solana program show YOUR_PROGRAM_ID --url devnet
+```
+
+#### Troubleshooting Deployment
+
+**Issue: "Insufficient funds for deploy"**
+```bash
+# Get more SOL
+solana airdrop 2
+# You may need 2-5 SOL for deployment
+```
+
+**Issue: "Program ID mismatch"**
+```bash
+# You forgot to update the program ID in lib.rs or Anchor.toml
+# Go back to Step 4 and update both files
+```
+
+**Issue: "Unable to get RPC response"**
+```bash
+# Devnet may be congested, try again or use a different RPC
+solana config set --url https://rpc.ankr.com/solana_devnet
+```
+
+**Issue: "Airdrop limit reached"**
+```bash
+# Devnet airdrops are rate-limited
+# Try again in 24 hours or use a devnet faucet:
+# https://solfaucet.com
+```
+
+**Issue: "NFT not showing in wallet"**
+- Refresh Phantom wallet
+- Ensure wallet is on devnet
+- Check transaction on Solana Explorer
+- Check if metadata URI is accessible
+- NFTs may take 10-30 seconds to appear
+
+**Issue: "Transaction simulation failed"**
+- Check program logs: `solana logs YOUR_PROGRAM_ID --url devnet`
+- Common causes:
+  - Incorrect account addresses
+  - Missing signers
+  - Account not initialized (run initialize_vault first)
+  - Insufficient SOL for rent
+
 ### Mainnet Deployment
+
+⚠️ **Only deploy to mainnet when thoroughly tested on devnet!**
 
 ```bash
 # 1. Switch to mainnet
 solana config set --url https://api.mainnet-beta.solana.com
 
 # 2. Fund wallet with real SOL (deployment costs ~2-5 SOL)
-# Send SOL to your wallet address
+# Send SOL to: $(solana address)
 
-# 3. Deploy
+# 3. Build and deploy
 anchor build
 anchor deploy --provider.cluster mainnet
 
-# 4. IMPORTANT: Update program IDs everywhere
-# - src/lib.rs: declare_id!()
+# 4. Update program IDs everywhere
+# - programs/game/src/lib.rs: declare_id!()
 # - Anchor.toml: [programs.mainnet]
-# - Backend .env: SOLANA_PROGRAM_ID
+# - .env: SOLANA_PROGRAM_ID
 
 # 5. Rebuild and upgrade
 anchor build
 anchor upgrade <PROGRAM_ID> --provider.cluster mainnet --program-id <PROGRAM_ID>
+
+# 6. Initialize vault on mainnet
+# Run initialization script on mainnet
+
+# 7. Update backend .env to use mainnet RPC
+SOLANA_NETWORK=mainnet
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 ```
 
 ## Frontend Integration
