@@ -1,90 +1,495 @@
 # Dotty NFT Solana Program
 
-This folder contains the Solana smart contract (program) for minting collectible NFTs in the Dotty game.
+Complete guide for the Solana smart contract and NFT integration in the Dotty game.
+
+## Table of Contents
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Current Status](#current-status)
+- [Setup & Installation](#setup--installation)
+- [Development Workflow](#development-workflow)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Frontend Integration](#frontend-integration)
+- [Security Considerations](#security-considerations)
+- [Troubleshooting](#troubleshooting)
 
 ## Overview
 
-When players discover treasures in the Dotty game, they can claim NFTs that are minted directly to their Phantom wallet. This uses:
+When players discover treasures in the Dotty game, they can claim NFTs that are minted directly to their Phantom wallet. This implementation uses:
 
-- **Anchor Framework** - Rust framework for building Solana programs
-- **Metaplex Token Metadata** - Industry standard for Solana NFTs
+- **Anchor Framework v0.30.1** - Modern Rust framework for Solana programs
+- **Metaplex Token Metadata v4.1.2** - Industry standard for Solana NFTs
 - **Backend-Signed Minting** - Game server validates claims and signs transactions
+- **@solana/web3.js v1.95.2** - JavaScript client for Solana interactions
 
-## How It Works
-
-1. Player finds a collectible in the game
-2. Game backend receives claim request with player's wallet address
-3. Backend validates the claim (rate limiting, anti-cheat, etc.)
-4. Backend calls the Solana program to mint an NFT to player's wallet
-5. NFT appears in player's Phantom wallet with metadata and image
-
-## Project Structure
+## Architecture
 
 ```
-solana/
-├── Anchor.toml              # Anchor configuration
-├── programs/
-│   └── dotty-nft/
-│       ├── Cargo.toml       # Rust dependencies
-│       ├── Xargo.toml       # Cross-compilation config
-│       └── src/
-│           └── lib.rs       # Main smart contract code
-├── metadata/                # NFT metadata JSON files
-│   └── examples/            # Example metadata for different collectibles
-└── tests/                   # Test files (TODO)
+┌─────────────────┐
+│   Game Client   │
+│   (Browser)     │
+└────────┬────────┘
+         │ 1. Discovers collectible
+         │ 2. Requests mint
+         ▼
+┌─────────────────┐
+│  Express Server │
+│  (NFT Service)  │
+└────────┬────────┘
+         │ 3. Validates claim
+         │ 4. Calls program
+         ▼
+┌─────────────────┐       ┌──────────────┐
+│ Solana Program  │◄──────┤   Metaplex   │
+│  (dotty-nft)    │       │   Metadata   │
+└────────┬────────┘       └──────────────┘
+         │ 5. Mints NFT
+         ▼
+┌─────────────────┐
+│ Player's Wallet │
+│  (Phantom)      │
+└─────────────────┘
 ```
+
+## Current Status
+
+### ✅ Implemented
+- Smart contract structure with Anchor
+- Metaplex metadata integration
+- Backend NFT service foundation
+- Phantom wallet connection (vanilla JS)
+- Metadata JSON examples for 3 collectible types
+
+### ⚠️ In Progress / Missing
+- **No test suite** - Need to add Anchor tests
+- **No actual minting** - Backend currently simulates minting
+- **No IDL integration** - Need to build and integrate program IDL
+- **Program not deployed** - Need to deploy to devnet/mainnet
+- **Placeholder metadata** - Need actual image hosting (IPFS/Arweave)
+- **React integration** - Wallet adapter libraries installed but not used
+
+### 🔧 Technical Debt
+- React version mismatch (React 19.2.0 vs react-dom 16.14.0)
+- Wallet adapter installed but using vanilla JS instead
+- Missing TypeScript test configuration
+- No CI/CD for contract deployment
+- No rate limiting on backend
 
 ## Setup & Installation
 
 ### Prerequisites
 
-1. **Install Rust**:
+1. **Install Rust**
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
 ```
 
-2. **Install Solana CLI**:
+2. **Install Solana CLI** (v1.18+)
 ```bash
 sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
 ```
 
-3. **Install Anchor**:
+3. **Install Anchor** (v0.30.1)
 ```bash
 cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-avm install latest
-avm use latest
+avm install 0.30.1
+avm use 0.30.1
 ```
 
-4. **Configure Solana CLI for Devnet**:
+4. **Verify installations**
+```bash
+rustc --version    # Should be 1.75+
+solana --version   # Should be 1.18+
+anchor --version   # Should be 0.30.1
+```
+
+### Project Setup
+
+1. **Navigate to solana directory**
+```bash
+cd solana
+```
+
+2. **Install test dependencies** (COMING SOON - see tasks.md)
+```bash
+npm install  # Once package.json is created
+```
+
+3. **Configure Solana for devnet**
 ```bash
 solana config set --url https://api.devnet.solana.com
 ```
 
-5. **Create a wallet** (if you don't have one):
+4. **Create/Load wallet**
 ```bash
+# Create new wallet (save the seed phrase!)
 solana-keygen new
+
+# Or specify a custom path
+solana-keygen new -o ~/.config/solana/dotty-deployer.json
 ```
 
-### Building the Program
+5. **Get devnet SOL**
+```bash
+solana airdrop 2
+# Or specify wallet
+solana airdrop 2 $(solana address)
+```
+
+## Development Workflow
+
+### 1. Build the Program
 
 ```bash
 cd solana
 anchor build
 ```
 
-### Testing Locally
+This generates:
+- Compiled program: `target/deploy/dotty_nft.so`
+- IDL file: `target/idl/dotty_nft.json`
+- TypeScript types: `target/types/dotty_nft.ts`
+
+### 2. Run Tests (COMING SOON)
 
 ```bash
 anchor test
 ```
 
-### Deploying to Devnet
+Tests will be created in `tests/` directory using TypeScript + Mocha.
+
+### 3. Deploy to Devnet
 
 ```bash
+# Deploy program
+anchor deploy --provider.cluster devnet
+
+# This outputs: Program Id: <YOUR_PROGRAM_ID>
+```
+
+**IMPORTANT**: After deployment, update these files:
+1. `programs/dotty-nft/src/lib.rs` - Update `declare_id!("YOUR_PROGRAM_ID")`
+2. `Anchor.toml` - Update program IDs under `[programs.devnet]`
+3. Root `.env` - Update `SOLANA_PROGRAM_ID=YOUR_PROGRAM_ID`
+
+### 4. Rebuild After ID Update
+
+```bash
+anchor build
+anchor deploy --provider.cluster devnet
+```
+
+### 5. Integrate with Backend
+
+Copy the generated IDL to your backend:
+```bash
+cp target/idl/dotty_nft.json ../nft-idl.json
+```
+
+Update `nft-service.js` to use the IDL for actual program calls.
+
+## Testing
+
+### Local Testing (Localnet)
+
+```bash
+# Terminal 1: Start local validator
+solana-test-validator
+
+# Terminal 2: Run tests
+anchor test --skip-local-validator
+```
+
+### Devnet Testing
+
+```bash
+# Deploy to devnet first
+anchor deploy --provider.cluster devnet
+
+# Run tests against devnet
+anchor test --provider.cluster devnet
+```
+
+### Test Structure (To Be Implemented)
+
+```typescript
+// tests/dotty-nft.ts
+describe("dotty-nft", () => {
+  it("Mints a collectible NFT", async () => {
+    // Test mint_collectible instruction
+  });
+
+  it("Validates metadata is created correctly", async () => {
+    // Test Metaplex metadata
+  });
+
+  it("Prevents unauthorized minting", async () => {
+    // Test access control
+  });
+});
+```
+
+## Deployment
+
+### Devnet Deployment
+
+```bash
+# 1. Set cluster to devnet
+solana config set --url https://api.devnet.solana.com
+
+# 2. Ensure wallet has SOL
+solana balance
+# If needed: solana airdrop 2
+
+# 3. Build and deploy
+anchor build
+anchor deploy --provider.cluster devnet
+
+# 4. Verify deployment
+solana program show <PROGRAM_ID>
+```
+
+### Mainnet Deployment
+
+```bash
+# 1. Switch to mainnet
+solana config set --url https://api.mainnet-beta.solana.com
+
+# 2. Fund wallet with real SOL (deployment costs ~2-5 SOL)
+# Send SOL to your wallet address
+
+# 3. Deploy
+anchor build
+anchor deploy --provider.cluster mainnet
+
+# 4. IMPORTANT: Update program IDs everywhere
+# - src/lib.rs: declare_id!()
+# - Anchor.toml: [programs.mainnet]
+# - Backend .env: SOLANA_PROGRAM_ID
+
+# 5. Rebuild and upgrade
+anchor build
+anchor upgrade <PROGRAM_ID> --provider.cluster mainnet --program-id <PROGRAM_ID>
+```
+
+## Frontend Integration
+
+### Current Implementation (Vanilla JS)
+
+**Location**: `../src/utils/wallet-connection.js`, `../src/components/WalletUI.js`
+
+Uses Phantom's `window.solana` API directly:
+```javascript
+await window.solana.connect()
+```
+
+### Recommended: Wallet Adapter (Multi-Wallet Support)
+
+The project has wallet adapter libraries installed but not used. To support multiple wallets (Phantom, Solflare, Ledger, etc.), refactor to use:
+
+**Libraries already installed**:
+- `@solana/wallet-adapter-react` v0.15.35
+- `@solana/wallet-adapter-react-ui` v0.9.35
+- `@solana/wallet-adapter-wallets` v0.19.32
+- `@solana/wallet-adapter-base` v0.9.23
+
+**Implementation** (see `tasks.md` for full migration plan):
+```typescript
+// Wrap app with WalletProvider
+import { WalletProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+
+const wallets = [new PhantomWalletAdapter()];
+
+<WalletProvider wallets={wallets}>
+  <WalletModalProvider>
+    <App />
+  </WalletModalProvider>
+</WalletProvider>
+```
+
+### Backend Minting Flow
+
+**Current** (simulated):
+```javascript
+// nft-service.js - Currently returns simulated response
+async mintCollectible(playerWallet, collectibleType) {
+  // TODO: Call actual Anchor program
+  return { success: true, signature: 'SIMULATED_...' };
+}
+```
+
+**After deployment** (actual minting):
+```javascript
+const { Program, AnchorProvider, web3 } = require('@coral-xyz/anchor');
+const idl = require('./nft-idl.json');
+
+// Initialize program
+const program = new Program(idl, programId, provider);
+
+// Call mint_collectible instruction
+const tx = await program.methods
+  .mintCollectible(metadata.name, metadata.symbol, metadata.uri)
+  .accounts({
+    player: playerPublicKey,
+    payer: backendWallet.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenAccount: tokenAccountAddress,
+    metadata: metadataAddress,
+    tokenProgram: TOKEN_PROGRAM_ID,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+    tokenMetadataProgram: METAPLEX_PROGRAM_ID,
+    systemProgram: SystemProgram.programId,
+    rent: web3.SYSVAR_RENT_PUBKEY,
+  })
+  .signers([backendWallet, mintKeypair])
+  .rpc();
+```
+
+## Security Considerations
+
+### Current Security Posture
+
+⚠️ **Backend-Controlled Minting**
+- Backend wallet pays gas fees
+- Backend authorizes all mints
+- **Risk**: Backend compromise = unlimited minting
+
+🔒 **Recommended Improvements**
+
+1. **Rate Limiting** - Prevent spam minting
+   ```javascript
+   // Limit: 1 mint per collectible type per player per day
+   const mintKey = `${playerWallet}:${collectibleType}:${today}`;
+   if (await redis.exists(mintKey)) {
+     throw new Error('Already minted today');
+   }
+   await redis.setex(mintKey, 86400, '1');
+   ```
+
+2. **Session Verification** - Validate game session
+   ```rust
+   #[account]
+   pub struct PlayerSession {
+       pub player: Pubkey,
+       pub timestamp: i64,
+       pub verified: bool,
+   }
+   ```
+
+3. **On-Chain Tracking** - Prevent duplicate mints
+   ```rust
+   #[account]
+   pub struct CollectibleRecord {
+       pub player: Pubkey,
+       pub collectible_type: String,
+       pub mint: Pubkey,
+       pub minted_at: i64,
+   }
+   ```
+
+4. **Signature Verification** - Cryptographic proof
+   ```javascript
+   // Game client signs claim
+   const message = `mint:${collectibleType}:${timestamp}`;
+   const signature = await wallet.signMessage(message);
+
+   // Backend verifies signature
+   const verified = nacl.sign.detached.verify(
+     Buffer.from(message),
+     signature,
+     playerPublicKey.toBuffer()
+   );
+   ```
+
+### Wallet Security
+
+- Backend wallet private key should be stored in secure environment variables or AWS Secrets Manager
+- Use separate wallets for devnet and mainnet
+- Implement wallet rotation strategy
+- Monitor wallet balance and transaction patterns
+
+## Troubleshooting
+
+### Common Issues
+
+**1. "Program ID mismatch"**
+```
+Error: Program ID mismatch after deploy
+```
+**Solution**: Update `declare_id!()` in `lib.rs` and rebuild:
+```bash
+anchor build
 anchor deploy
 ```
 
-This will output a Program ID. Update the `declare_id!()` in `src/lib.rs` and the program ID in `Anchor.toml` with this value.
+**2. "Insufficient funds"**
+```
+Error: Account <WALLET> has insufficient funds
+```
+**Solution**: Airdrop more SOL (devnet) or fund wallet (mainnet):
+```bash
+solana airdrop 2
+```
+
+**3. "Anchor version mismatch"**
+```
+Error: Anchor CLI version mismatch
+```
+**Solution**: Install correct version:
+```bash
+avm install 0.30.1
+avm use 0.30.1
+```
+
+**4. "Failed to parse IDL"**
+```
+Error: Failed to parse IDL
+```
+**Solution**: Rebuild program to regenerate IDL:
+```bash
+anchor build
+```
+
+**5. "Wallet not found"**
+```
+⚠️  Solana wallet not found
+```
+**Solution**: Create wallet or set correct path:
+```bash
+solana-keygen new
+# Or set in .env: SOLANA_WALLET_PATH=/path/to/wallet.json
+```
+
+## Project Structure
+
+```
+solana/
+├── Anchor.toml              # Anchor configuration
+├── Cargo.toml               # Workspace config (auto-generated)
+├── programs/
+│   └── dotty-nft/
+│       ├── Cargo.toml       # Program dependencies
+│       ├── Xargo.toml       # Cross-compilation config
+│       └── src/
+│           └── lib.rs       # Main smart contract (155 lines)
+├── metadata/
+│   └── examples/            # NFT metadata examples
+│       ├── golden-fragment.json
+│       ├── crystal-shard.json
+│       └── alien-artifact.json
+├── tests/                   # ⚠️ TO BE CREATED
+│   └── dotty-nft.ts         # Test suite
+├── package.json             # ⚠️ TO BE CREATED
+├── tsconfig.json            # ⚠️ TO BE CREATED
+├── .gitignore               # ⚠️ TO BE CREATED
+├── README.md                # This file
+└── tasks.md                 # Development tasks
+```
 
 ## Program Functions
 
@@ -92,28 +497,63 @@ This will output a Program ID. Update the `declare_id!()` in `src/lib.rs` and th
 
 Mints a new collectible NFT to a player's wallet.
 
-**Parameters:**
-- `metadata_title: String` - Name of the NFT (e.g., "Golden Asteroid Fragment")
-- `metadata_symbol: String` - Symbol (e.g., "DOTTY")
-- `metadata_uri: String` - URL to JSON metadata (image, attributes, etc.)
+**Signature**:
+```rust
+pub fn mint_collectible(
+    ctx: Context<MintCollectible>,
+    metadata_title: String,
+    metadata_symbol: String,
+    metadata_uri: String,
+) -> Result<()>
+```
 
-**Accounts Required:**
-- `player` - The player's wallet that receives the NFT
-- `payer` - Game backend wallet that pays gas and authorizes mint
-- `mint` - New mint account (created by this transaction)
-- `token_account` - Player's token account (created if needed)
+**Parameters**:
+- `metadata_title` - NFT name (e.g., "Golden Asteroid Fragment")
+- `metadata_symbol` - Token symbol (e.g., "DOTTY")
+- `metadata_uri` - URL to JSON metadata file
+
+**Accounts**:
+- `player` - Player's wallet (receives NFT)
+- `payer` - Backend wallet (pays gas, signs transaction)
+- `mint` - New mint account (NFT mint address)
+- `token_account` - Player's associated token account
 - `metadata` - Metaplex metadata account
+- `token_program` - SPL Token program
+- `associated_token_program` - Associated Token program
+- `token_metadata_program` - Metaplex metadata program
+- `system_program` - System program
+- `rent` - Rent sysvar
+
+**Example Call** (TypeScript):
+```typescript
+await program.methods
+  .mintCollectible(
+    "Golden Asteroid Fragment",
+    "DOTTY",
+    "https://example.com/metadata/golden-fragment.json"
+  )
+  .accounts({
+    player: playerPublicKey,
+    payer: backendWallet.publicKey,
+    mint: mintKeypair.publicKey,
+    tokenAccount: tokenAccountAddress,
+    metadata: metadataAddress,
+    // ... other accounts
+  })
+  .signers([backendWallet, mintKeypair])
+  .rpc();
+```
 
 ## NFT Metadata Format
 
-Each NFT needs a JSON file hosted somewhere (IPFS, Arweave, or regular web hosting):
+Metadata JSON follows Metaplex standard:
 
 ```json
 {
   "name": "Golden Asteroid Fragment",
   "symbol": "DOTTY",
-  "description": "A rare golden fragment discovered in the depths of space.",
-  "image": "https://example.com/images/golden-fragment.png",
+  "description": "A rare golden fragment discovered in space.",
+  "image": "https://arweave.net/...",
   "attributes": [
     {
       "trait_type": "Rarity",
@@ -123,35 +563,59 @@ Each NFT needs a JSON file hosted somewhere (IPFS, Arweave, or regular web hosti
       "trait_type": "Type",
       "value": "Asteroid Fragment"
     }
-  ]
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://arweave.net/...",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
 }
 ```
 
-## Security Considerations
-
-⚠️ **Current Implementation:**
-- Backend wallet controls all minting
-- Basic rate limiting should be added
-- No on-chain validation of gameplay
-
-🔒 **Future Improvements:**
-- Add session verification
-- Implement cooldowns in smart contract
-- Add signature verification for claims
-- Track minted collectibles on-chain to prevent duplicates
-
-## Development Workflow
-
-1. Make changes to `src/lib.rs`
-2. Build: `anchor build`
-3. Test: `anchor test`
-4. Deploy to devnet: `anchor deploy`
-5. Update backend with new Program ID
-6. Test in game
+**Hosting Options**:
+- **IPFS** - Free, decentralized (ipfs.io, Pinata, NFT.Storage)
+- **Arweave** - Permanent storage (recommended for mainnet)
+- **AWS S3** - Centralized, easy (ok for devnet testing)
 
 ## Resources
 
-- [Anchor Documentation](https://www.anchor-lang.com/)
-- [Solana Cookbook](https://solanacookbook.com/)
-- [Metaplex Docs](https://docs.metaplex.com/)
-- [Phantom Wallet](https://phantom.com/)
+### Official Documentation
+- [Anchor Book](https://www.anchor-lang.com/) - Anchor framework guide
+- [Solana Cookbook](https://solanacookbook.com/) - Code examples and guides
+- [Metaplex Docs](https://docs.metaplex.com/) - NFT standards and tools
+- [Solana Web3.js](https://solana-labs.github.io/solana-web3.js/) - JavaScript SDK
+
+### Tools
+- [Solana Explorer](https://explorer.solana.com/) - View transactions (devnet/mainnet)
+- [Solana Playground](https://beta.solpg.io/) - Online IDE for Solana
+- [Phantom](https://phantom.com/) - Popular Solana wallet
+
+### Community
+- [Solana Discord](https://discord.gg/solana)
+- [Anchor Discord](https://discord.gg/anchor)
+- [Solana Stack Exchange](https://solana.stackexchange.com/)
+
+## Next Steps
+
+See [`tasks.md`](./tasks.md) for detailed implementation tasks.
+
+**Priority Order**:
+1. Set up test infrastructure (package.json, tsconfig.json)
+2. Write comprehensive test suite
+3. Deploy program to devnet
+4. Integrate IDL with backend
+5. Implement actual minting in backend
+6. Host metadata on IPFS/Arweave
+7. Add rate limiting and security features
+8. Consider migrating to React wallet adapter
+
+---
+
+**Last Updated**: 2025-11-07
+**Program Version**: 0.1.0
+**Anchor Version**: 0.30.1
+**Status**: Pre-deployment (testing phase)
