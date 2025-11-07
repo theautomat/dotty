@@ -108,17 +108,17 @@ anchor --version   # Should be 0.30.1
 
 ### Project Setup
 
-1. **Navigate to solana directory**
+1. **Install dependencies from root**
 ```bash
-cd solana
+# From project root
+npm install
+# or
+pnpm install
 ```
 
-2. **Install test dependencies** (COMING SOON - see tasks.md)
-```bash
-npm install  # Once package.json is created
-```
+This installs all dependencies including Solana test dependencies (Mocha, Chai, etc.)
 
-3. **Configure Solana for devnet**
+2. **Configure Solana for devnet**
 ```bash
 solana config set --url https://api.devnet.solana.com
 ```
@@ -153,13 +153,17 @@ This generates:
 - IDL file: `target/idl/dotty_nft.json`
 - TypeScript types: `target/types/dotty_nft.ts`
 
-### 2. Run Tests (COMING SOON)
+### 2. Run Tests
 
 ```bash
-anchor test
+# From project root
+npm run test:solana
+
+# Or from solana directory
+cd solana && anchor test
 ```
 
-Tests will be created in `tests/` directory using TypeScript + Mocha.
+Tests are located in `tests/dotty-nft.ts` using TypeScript + Mocha + Chai.
 
 ### 3. Deploy to Devnet
 
@@ -199,18 +203,24 @@ Update `nft-service.js` to use the IDL for actual program calls.
 # Terminal 1: Start local validator
 solana-test-validator
 
-# Terminal 2: Run tests
-anchor test --skip-local-validator
+# Terminal 2: Run tests (from root)
+npm run test:solana:local
+
+# Or from solana directory
+cd solana && anchor test --skip-local-validator
 ```
 
 ### Devnet Testing
 
 ```bash
 # Deploy to devnet first
-anchor deploy --provider.cluster devnet
+cd solana && anchor deploy --provider.cluster devnet
 
-# Run tests against devnet
-anchor test --provider.cluster devnet
+# Run tests against devnet (from root)
+npm run test:solana:devnet
+
+# Or from solana directory
+cd solana && anchor test --provider.cluster devnet
 ```
 
 ### Test Structure (To Be Implemented)
@@ -476,19 +486,20 @@ solana/
 │       ├── Cargo.toml       # Program dependencies
 │       ├── Xargo.toml       # Cross-compilation config
 │       └── src/
-│           └── lib.rs       # Main smart contract (155 lines)
+│           └── lib.rs       # Main smart contract (120 lines)
 ├── metadata/
 │   └── examples/            # NFT metadata examples
 │       ├── golden-fragment.json
 │       ├── crystal-shard.json
 │       └── alien-artifact.json
-├── tests/                   # ⚠️ TO BE CREATED
-│   └── dotty-nft.ts         # Test suite
-├── package.json             # ⚠️ TO BE CREATED
-├── tsconfig.json            # ⚠️ TO BE CREATED
-├── .gitignore               # ⚠️ TO BE CREATED
+├── tests/                   # Test suite
+│   └── dotty-nft.ts         # Comprehensive Anchor tests
+├── tsconfig.json            # TypeScript config for tests
+├── .gitignore               # Ignores build artifacts
 ├── README.md                # This file
 └── tasks.md                 # Development tasks
+
+Note: Test dependencies are in root package.json (unified project structure)
 ```
 
 ## Program Functions
