@@ -1,6 +1,6 @@
 // main.js - Entry point for Vite
 import * as THREE from 'three';
-import { Game } from './src/game/index.js';
+import { Game } from './src/game/index';
 import { io } from 'socket.io-client';
 
 // Make THREE globally available for legacy code
