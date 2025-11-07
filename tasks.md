@@ -17,14 +17,14 @@ This is a major architectural refactoring to modernize the codebase with React a
 - ✅ Cleanup: Remove 18 duplicate JavaScript files + WebRTC files (909 lines)
 
 **Current Status:**
-- **38 TypeScript files** converted (Game.ts added!)
-- **46 JavaScript files** remaining (down from 50)
+- **43 TypeScript files** converted (+5 in this session: ExplosionManager, StartScreen, game/index, ASCIIEffect, SoundTypes)
+- **41 JavaScript files** remaining (down from 46)
 - **WebRTC cleanup:** 909 lines of unused multiplayer code removed
 - **Build status:** ✅ PASSING (1.15 MB / 296 KB gzipped)
 
 **Next Priorities:**
-1. `ExplosionManager.js` → TypeScript (high priority - used by 11+ files)
-2. Remaining 46 JS files (UI, Firebase, HUD components, effects)
+1. HUD components → TypeScript (12 files in src/objects/hud/)
+2. Remaining 41 JS files (UI, Firebase, other components)
 
 ---
 
@@ -208,20 +208,25 @@ This is a major architectural refactoring to modernize the codebase with React a
   - [x] **Total removed: 909 lines of unused multiplayer code**
 - [x] **Cleanup: Deleted duplicate files**
   - [x] Deleted `src/styles/GameTheme.js` (duplicate of `src/game/GameTheme.ts`)
-- [ ] Convert remaining core files
-  - [ ] `src/managers/ExplosionManager.js` → `ExplosionManager.ts` (400-500 lines, used by 11+ files)
-  - [ ] `src/game/StartScreen.js` → `StartScreen.ts`
-  - [ ] `src/game/index.js` → `index.ts`
-- [ ] Convert effects
-  - [ ] `src/effects/ASCIIEffect.js` → `ASCIIEffect.ts`
-- [ ] Convert audio
-  - [ ] `src/audio/SoundTypes.js` → `SoundTypes.ts`
+- [x] **Convert remaining core files**
+  - [x] `src/managers/ExplosionManager.js` → `ExplosionManager.ts` ✅ (318 lines)
+  - [x] `src/game/StartScreen.js` → `StartScreen.ts` ✅ (159 lines)
+  - [x] `src/game/index.js` → `index.ts` ✅
+- [x] **Convert effects**
+  - [x] `src/effects/ASCIIEffect.js` → `ASCIIEffect.ts` ✅ (274 lines)
+- [x] **Convert audio**
+  - [x] `src/audio/SoundTypes.js` → `SoundTypes.ts` ✅ (56 lines)
+- [x] **Fixed imports in main.js** (removed .js extension from game/index import)
 
 **Notes:**
 - Game.ts is the main game controller that orchestrates the entire game loop
 - All WebRTC properties maintained for compatibility but disabled
+- ExplosionManager.ts properly extends BaseInstanceManager with generic type
+- StartScreen.ts includes proper THREE.js types for all 3D elements
+- ASCIIEffect.ts with comprehensive DOM element types (HTMLCanvasElement, etc.)
+- SoundTypes.ts with proper type exports using "as const" pattern
 - Build passing: 1.15 MB bundle (296 KB gzipped)
-- Next priority: ExplosionManager.js conversion (high usage)
+- **Phase 7 fully completed!** All core game files now in TypeScript
 
 ### Phase 8: Convert HUD Components to TypeScript (Still vanilla)
 Note: These will remain vanilla Three.js objects for now, just with TypeScript
