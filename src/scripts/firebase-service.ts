@@ -4,7 +4,7 @@
  * This service handles saving game statistics to Cloud Firestore
  * and tracking analytics events.
  */
-import { initializeFirebase } from './firebase-module.js';
+import { initializeFirebase } from './firebase-module';
 import { collection, addDoc, doc, setDoc } from 'firebase/firestore';
 import { logEvent } from 'firebase/analytics';
 
@@ -36,7 +36,7 @@ class FirebaseService {
       this.initialized = true;
       
       // Just log the database instance for debugging
-      console.log('Cloud Firestore initialized successfully');
+      // console.log('Cloud Firestore initialized successfully');
       
       return true;
     } catch (error) {
@@ -88,6 +88,8 @@ class FirebaseService {
         // Core stats
         score: stats.score,
         asteroidsDestroyed: stats.asteroidsDestroyed,
+        enemiesDestroyed: stats.enemiesDestroyed,
+        shotsFired: stats.shotsFired,
         totalOresMined: stats.totalOresMined,
         gameTime: stats.gameTime,
         
@@ -154,7 +156,7 @@ class FirebaseService {
       
       // Log the event
       logEvent(this.analytics, eventName, eventParams);
-      console.debug(`Analytics event tracked: ${eventName}`);
+      // console.debug(`Analytics event tracked: ${eventName}`);
       return true;
     } catch (error) {
       // Just log the error - don't fail the game

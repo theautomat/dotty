@@ -1,9 +1,20 @@
-// main.js - Entry point for Vite
+// main.ts - Entry point for Vite
 import * as THREE from 'three';
 import { Game } from './src/game/index';
 import { io } from 'socket.io-client';
 
 // Make THREE globally available for legacy code
+declare global {
+  interface Window {
+    THREE: typeof THREE;
+    ENABLE_MULTIPLAYER: boolean;
+    io: typeof io;
+    LEADERBOARD_PAGE?: boolean;
+    GAME_INITIALIZING?: boolean;
+    game?: Game;
+  }
+}
+
 window.THREE = THREE;
 
 // Enable WebRTC multiplayer
@@ -16,37 +27,37 @@ window.io = io;
 document.addEventListener('DOMContentLoaded', async () => {
   // Check if we're on the leaderboard page
   // Keep both detection methods for backward compatibility
-  const isLeaderboard = 
-    window.location.pathname.includes('/leaderboard') || 
+  const isLeaderboard =
+    window.location.pathname.includes('/leaderboard') ||
     window.location.search.includes('leaderboard=true');
-  
+
   if (isLeaderboard) {
     console.log('On leaderboard page - loading leaderboard instead of game');
     window.LEADERBOARD_PAGE = true;
-    
+
     // Clean up the game container
     const gameContainer = document.getElementById('game-container');
     if (gameContainer) {
       // Hide game UI elements
       gameContainer.style.display = 'none';
     }
-    
+
     try {
       // Load the leaderboard Preact application
       await loadLeaderboard();
     } catch (error) {
       console.error('Failed to load leaderboard:', error);
     }
-    
+
     return;
   }
-  
+
   // Set a flag to indicate initialization is in progress
   window.GAME_INITIALIZING = true;
-  
+
   const game = new Game();
   window.game = game;
-  
+
   // Initialize the game
   game.init();
 });
@@ -55,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Dynamically load and render the leaderboard
  * TODO: Migrate to React component (Phase 9)
  */
-async function loadLeaderboard() {
+async function loadLeaderboard(): Promise<void> {
   // TEMPORARY STUB: Leaderboard disabled during React/TypeScript migration
   console.log('⚠️ Leaderboard temporarily disabled during React migration');
 
