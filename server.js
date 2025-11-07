@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
-const { initWebRTC } = require('./webrtc-signaling');
+// WebRTC signaling implementation is inline below (removed unused import)
 const { nftService } = require('./nft-service');
 
 // Create Express app

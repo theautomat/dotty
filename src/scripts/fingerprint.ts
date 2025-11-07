@@ -2,8 +2,16 @@
 // Using the FingerprintJS library via CDN
 // API key loaded from environment variables
 
+interface FingerprintResult {
+    visitorId: string;
+    confidence?: {
+        score: number;
+    };
+    timestamp?: number;
+}
+
 // Initialize visitor identification
-async function initFingerprint() {
+async function initFingerprint(): Promise<string> {
     try {
         // Get API key from environment variables
         const apiKey = import.meta.env.VITE_FINGERPRINT_API_KEY;

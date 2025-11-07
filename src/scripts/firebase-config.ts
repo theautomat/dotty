@@ -3,7 +3,17 @@
 // NOTE: Using Vite's import.meta.env to access environment variables
 // All client-side env vars must be prefixed with VITE_
 
-const firebaseConfig = {
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId?: string;
+}
+
+const firebaseConfig: FirebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -15,7 +25,7 @@ const firebaseConfig = {
 };
 
 // Validate that all required environment variables are present
-const requiredEnvVars = [
+const requiredEnvVars: string[] = [
   'VITE_FIREBASE_API_KEY',
   'VITE_FIREBASE_AUTH_DOMAIN',
   'VITE_FIREBASE_PROJECT_ID',

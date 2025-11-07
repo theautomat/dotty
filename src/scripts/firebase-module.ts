@@ -11,7 +11,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
 // Import Firebase configuration
-import firebaseConfig from './firebase-config.js';
+import firebaseConfig from './firebase-config';
 
 // Firebase instances
 let firebaseApp = null;
@@ -33,24 +33,15 @@ const initializeFirebase = () => {
   }
 
   try {
-    // Log Firebase config for debugging (without exposing API key)
-    console.log('Firebase config:', { 
-      ...firebaseConfig, 
-      apiKey: '[REDACTED]'
-    });
-    
     // Initialize the Firebase app
     firebaseApp = initializeApp(firebaseConfig);
-    console.log('Firebase app initialized');
     
     // Initialize Cloud Firestore
     firestore = getFirestore(firebaseApp);
-    console.log('Cloud Firestore initialized');
     
     // Initialize Analytics (non-critical)
     try {
       firebaseAnalytics = getAnalytics(firebaseApp);
-      console.log('Firebase Analytics initialized');
     } catch (analyticsError) {
       console.warn('Analytics initialization failed (non-critical):', analyticsError);
     }
