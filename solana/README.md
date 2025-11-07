@@ -16,12 +16,21 @@ Complete guide for the Solana smart contract and NFT integration in the Dotty ga
 
 ## Overview
 
-When players discover treasures in the Dotty game, they can claim NFTs that are minted directly to their Phantom wallet. This implementation uses:
+The Dotty game integrates with Solana through **multiple smart contracts** (programs):
 
+1. **dotty-nft** - Mint collectible NFTs for treasures found in-game
+2. **treasure-deposit** - Deposit memecoins to receive random monster NFTs
+
+**Technology Stack:**
 - **Anchor Framework v0.30.1** - Modern Rust framework for Solana programs
 - **Metaplex Token Metadata v4.1.2** - Industry standard for Solana NFTs
-- **Backend-Signed Minting** - Game server validates claims and signs transactions
+- **Multi-Program Workspace** - Scalable architecture for multiple contracts
+- **React Wallet Adapter** - Multi-wallet support (Phantom, Solflare, etc.)
 - **@solana/web3.js v1.95.2** - JavaScript client for Solana interactions
+
+**New to Solana?** Start with [CONTRACTS-GUIDE.md](./CONTRACTS-GUIDE.md) for a beginner-friendly introduction!
+
+**Multiple Programs?** See [MULTI-CONTRACT-SETUP.md](./MULTI-CONTRACT-SETUP.md) for the complete guide.
 
 ## Architecture
 
@@ -55,26 +64,29 @@ When players discover treasures in the Dotty game, they can claim NFTs that are 
 ## Current Status
 
 ### ✅ Implemented
-- Smart contract structure with Anchor
-- Metaplex metadata integration
-- Backend NFT service foundation
-- Phantom wallet connection (vanilla JS)
-- Metadata JSON examples for 3 collectible types
+- **Two Solana programs** in multi-program workspace
+  - `dotty-nft`: NFT minting for collectibles
+  - `treasure-deposit`: Memecoin deposit → monster NFT mechanic
+- **Comprehensive test suites** for both programs (TypeScript + Mocha + Chai)
+- **React wallet adapter** components (WalletProvider, WalletButton, TreasureDeposit)
+- **Anchor v0.30.1** smart contract framework
+- **Metaplex metadata** integration
+- **Backend NFT service** foundation
+- **Metadata JSON** examples for collectibles
+- **Developer guides**: CONTRACTS-GUIDE.md (beginner intro) + MULTI-CONTRACT-SETUP.md
 
-### ⚠️ In Progress / Missing
-- **No test suite** - Need to add Anchor tests
-- **No actual minting** - Backend currently simulates minting
-- **No IDL integration** - Need to build and integrate program IDL
-- **Program not deployed** - Need to deploy to devnet/mainnet
-- **Placeholder metadata** - Need actual image hosting (IPFS/Arweave)
-- **React integration** - Wallet adapter libraries installed but not used
+### ⚠️ In Progress / Next Steps
+- **Deploy to devnet** - Programs ready but not deployed
+- **Backend minting integration** - Need to use deployed IDL
+- **Host metadata on IPFS/Arweave** - Currently placeholder URLs
+- **CPI between programs** - treasure-deposit → dotty-nft minting
+- **Token whitelisting** - Add PEPE, BONK, etc. to whitelist
 
-### 🔧 Technical Debt
-- React version mismatch (React 19.2.0 vs react-dom 16.14.0)
-- Wallet adapter installed but using vanilla JS instead
-- Missing TypeScript test configuration
-- No CI/CD for contract deployment
-- No rate limiting on backend
+### 🔧 Technical Improvements Needed
+- React version fix (React 19.2.0 vs react-dom 16.14.0)
+- Rate limiting on backend
+- Signature verification for deposits
+- CI/CD for automated deployment
 
 ## Setup & Installation
 
