@@ -3,7 +3,7 @@
  * Shows collected ores, asteroid count, enemies destroyed and total score using GeometryFactory
  */
 import GeometryFactory from '../shapes/GeometryFactory';
-import { COLLECTIBLE_TYPES } from '../collectibles/index.js';
+import { COLLECTIBLE_TYPES } from '../collectibles/index';
 import CollectibleConfig from '../collectibles/CollectibleConfig';
 import EnemyConfig from '../enemies/EnemyConfig';
 

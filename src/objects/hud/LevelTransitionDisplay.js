@@ -4,7 +4,7 @@
  */
 // Using the global THREE object
 import { LevelConfig } from '../../game/index.js';
-import { CollectibleConfig, Collectible } from '../collectibles/index.js';
+import { CollectibleConfig, Collectible } from '../collectibles/index';
 import soundManager from '../../managers/SoundManager';
 import GeometryFactory from '../shapes/GeometryFactory';
 

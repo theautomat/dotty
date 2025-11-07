@@ -9,13 +9,8 @@
  */
 
 import * as THREE from 'three';
-import UFO from '../objects/enemies/UFO.js';
-import Hunter from '../objects/enemies/Hunter.js';
-import Patroller from '../objects/enemies/Patroller.js';
-import Tetra from '../objects/enemies/Tetra.js';
-import SphereBoss from '../objects/enemies/SphereBoss.js';
-import EnemyWeapon from '../objects/enemies/EnemyWeapon.js';
-import HeatSeekingMine from '../objects/enemies/HeatSeekingMine.js';
+import UFO from '../objects/enemies/UFO';
+import EnemyWeapon from '../objects/enemies/EnemyWeapon';
 import EnemyConfig from '../objects/enemies/EnemyConfig';
 import soundManager from './SoundManager';
 import LevelConfig from '../game/LevelConfig';
@@ -262,19 +257,6 @@ class EnemyManager {
         enemy = new UFO(this.scene, spawnPosition, commonParams);
         break;
 
-      case 'hunter':
-        enemy = new Hunter(this.scene, spawnPosition, commonParams);
-        break;
-
-      case 'patroller':
-        enemy = new Patroller(this.scene, spawnPosition, commonParams);
-        break;
-
-      case 'tetra':
-        console.log("Creating Tetra enemy");
-        enemy = new Tetra(this.scene, spawnPosition, commonParams);
-        break;
-
       default:
         console.warn(`[ENEMY_MANAGER] Unknown enemy type: ${enemyType.type}`);
         return null;
@@ -318,50 +300,21 @@ class EnemyManager {
     try {
       let projectile: any;
 
-      // Create the appropriate projectile based on type
-      if (type === 'heatSeekingMine') {
-        // Create HeatSeekingMine instance
-        console.log("[ENEMY_MANAGER] Creating heat-seeking mine!");
-        projectile = new HeatSeekingMine(
-          this.scene,
-          position,
-          direction,
-          projectileConfig.targetPosition!, // Player position for tracking
-          {
-            speed: speed || 0.8,
-            damage: damage || 15,
-            color: color || 0xff1100,
-            size: size || 15.0, // Use the size from config (defaulting to 15.0)
-            type: 'heatSeekingMine', // Explicitly pass type
-            // Pass all heat-seeking specific parameters
-            gravityFactor: projectileConfig.gravityFactor,
-            orbitTangentialFactor: projectileConfig.orbitTangentialFactor,
-            spiralFactor: projectileConfig.spiralFactor,
-            // Pass collision radius multiplier if specified
-            collisionRadiusMultiplier: projectileConfig.collisionRadiusMultiplier || 5.0
-          }
-        );
-
-        // Set explosion manager reference for creating explosions
-        if (projectile && this.explosionManager) {
-          projectile.setExplosionManager(this.explosionManager);
+      // Create EnemyWeapon projectile
+      projectile = new EnemyWeapon(
+        this.scene,
+        position,
+        direction,
+        {
+          speed: speed || 1.2,
+          damage: damage || 10,
+          color: color || 0xff0000,
+          size: size || 2.0, // Larger size for better visibility
+          lifetime: 5000,
+          spin: !!spin,
+          type: type || 'basic'
         }
-      } else {
-        // Create default EnemyWeapon for other types
-        projectile = new EnemyWeapon(
-          this.scene,
-          position,
-          direction,
-          {
-            speed: speed || 1.2,
-            damage: damage || 10,
-            color: color || 0xff0000,
-            size: size || 2.0, // Larger size for better visibility
-            lifetime: 5000,
-            spin: !!spin
-          }
-        );
-      }
+      );
 
       // Add the projectile to the scene
       if (projectile && projectile.mesh) {
