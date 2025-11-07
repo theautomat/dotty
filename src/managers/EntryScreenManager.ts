@@ -5,8 +5,8 @@
  * Later, it will be integrated directly into the game flow.
  */
 
-import { initEntryScreen, updateEntryScreen, toggleEntryScreen } from '../entry-screen/components/EntryScreen.js';
-import gameSessionManager from './GameSessionManager.js';
+import { initEntryScreen, updateEntryScreen, toggleEntryScreen } from '../entry-screen/components/EntryScreen';
+import gameSessionManager from './GameSessionManager';
 import gameStateMachine, { GAME_STATES } from '../game/GameStateMachine';
 
 class EntryScreenManager {

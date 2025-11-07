@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import CollectibleConfig, { CollectibleType } from '../objects/collectibles/CollectibleConfig';
 import LevelConfig from '../game/LevelConfig';
 import soundManager from './SoundManager';
-import Collectible from '../objects/collectibles/Collectible.js';
+import Collectible from '../objects/collectibles/Collectible';
 import GameConfig from '../game/GameConfig';
 import GameStats from '../game/GameStats';
 import powerUpManager from './PowerUpManager';

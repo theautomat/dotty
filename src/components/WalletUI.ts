@@ -3,7 +3,7 @@
  * Displays wallet connection button and status
  */
 
-import { walletConnection } from '../utils/wallet-connection.js';
+import { walletConnection } from '../utils/wallet-connection';
 
 export class WalletUI {
   constructor() {

@@ -4,8 +4,8 @@
  */
 import * as THREE from 'three';
 import BaseInstanceManager from './BaseInstanceManager';
-import GeometryFactory from '../objects/shapes/GeometryFactory.js';
-import Asteroid from '../objects/Asteroid.js';
+import GeometryFactory from '../objects/shapes/GeometryFactory';
+import Asteroid from '../objects/Asteroid';
 import GameTheme from '../game/GameTheme';
 import GameConfig from '../game/GameConfig'; // Import GameConfig for global settings
 import { isOutsideWorldBoundary } from '../utils/WorldUtils'; // Import boundary check for proper spawning
