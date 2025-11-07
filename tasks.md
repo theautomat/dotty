@@ -13,18 +13,20 @@ This is a major architectural refactoring to modernize the codebase with React a
 - ✅ Phase 4: Convert Core Infrastructure (13 files)
 - ✅ Phase 5: Convert Game Objects (7 major files)
 - ✅ Phase 6: Convert Managers (8 core managers)
-- ✅ Cleanup: Remove 18 duplicate JavaScript files
+- ✅ Phase 7: Convert Core Game Files (Game.ts + WebRTC cleanup)
+- ✅ Phase 8: Convert HUD Components (13 files, 4,083 lines)
+- ✅ Cleanup: Remove 18 duplicate JavaScript files + WebRTC files (909 lines)
 
 **Current Status:**
-- **37 TypeScript files** converted (up from 17)
-- **50 JavaScript files** remaining (down from 69)
-- **20+ files** converted in latest session
-- **Build status:** ✅ PASSING
+- **67 TypeScript files** converted (up from 43)
+- **3 JavaScript files** remaining (backend only: server.js, nft-service.js, wallet-connection.js)
+- **WebRTC cleanup:** 909 lines of unused multiplayer code removed
+- **Additional cleanup:** 6 duplicate/unused files removed (406 lines)
+- **Latest conversions:** Main entry point, Firebase/services, game managers, UI components (11 files)
+- **Build status:** ✅ PASSING (1.15 MB / 296 KB gzipped)
 
-**Next Priorities:**
-1. `ExplosionManager.js` → TypeScript (high priority - used by 11+ files)
-2. `Game.js` → TypeScript (main game orchestrator, 985 lines)
-3. Optional: Remaining 50 JS files (UI, Firebase, WebRTC, enemies)
+**Frontend TypeScript Migration: ESSENTIALLY COMPLETE ✅**
+All frontend JavaScript files have been converted to TypeScript. Only backend Node.js files remain as JavaScript.
 
 ---
 
@@ -124,36 +126,34 @@ This is a major architectural refactoring to modernize the codebase with React a
   - [x] `src/objects/GameObject.js` → `GameObject.ts` ✅
   - [x] `src/objects/shapes/GeometryFactory.js` → `GeometryFactory.ts` ✅ (1,522 lines!)
 - [x] Convert player and world objects
-  - [ ] `src/objects/WorldBoundary.js` → `WorldBoundary.ts`
+  - [x] `src/objects/WorldBoundary.js` → `WorldBoundary.ts` ✅
   - [x] `src/objects/Bullet.js` → `Bullet.ts` ✅
   - [x] `src/objects/Asteroid.js` → `Asteroid.ts` ✅
-  - [ ] `src/objects/FlyByAsteroid.js` → `FlyByAsteroid.ts`
+  - [x] `src/objects/FlyByAsteroid.js` → `FlyByAsteroid.ts` ✅
   - [x] `src/objects/ExplosionFragment.js` → `ExplosionFragment.ts` ✅
 - [x] Convert collectibles
   - [x] `src/objects/collectibles/Collectible.js` → `Collectible.ts` ✅
-  - [ ] `src/objects/collectibles/CollectibleTypes.js` → `CollectibleTypes.ts`
-  - [ ] `src/objects/collectibles/index.js` → `index.ts`
-- [ ] Convert enemies (remaining)
-  - [ ] `src/objects/enemies/Enemy.js` → `Enemy.ts`
-  - [ ] `src/objects/enemies/EnemyWeapon.js` → `EnemyWeapon.ts`
-  - [ ] `src/objects/enemies/Boss.js` → `Boss.ts`
-  - [ ] `src/objects/enemies/SphereBoss.js` → `SphereBoss.ts`
-  - [ ] `src/objects/enemies/Hunter.js` → `Hunter.ts`
-  - [ ] `src/objects/enemies/Patroller.js` → `Patroller.ts`
-  - [ ] `src/objects/enemies/Tetra.js` → `Tetra.ts`
-  - [ ] `src/objects/enemies/UFO.js` → `UFO.ts`
-  - [ ] `src/objects/enemies/HeatSeekingMine.js` → `HeatSeekingMine.ts`
-  - [ ] `src/objects/enemies/EnemyTypes.js` → `EnemyTypes.ts`
-  - [ ] `src/objects/enemies/index.js` → `index.ts`
+  - [x] `src/objects/collectibles/CollectibleTypes.js` → `CollectibleTypes.ts` ✅
+  - [x] `src/objects/collectibles/index.js` → `index.ts` ✅
+- [x] Convert enemies (simplified - UFO only)
+  - [x] `src/objects/enemies/Enemy.js` → `Enemy.ts` ✅
+  - [x] `src/objects/enemies/EnemyWeapon.js` → `EnemyWeapon.ts` ✅
+  - [x] `src/objects/enemies/UFO.js` → `UFO.ts` ✅ (631 lines!)
+  - [x] `src/objects/enemies/EnemyTypes.js` → `EnemyTypes.ts` ✅ (simplified to UFO only)
+  - [x] `src/objects/enemies/index.js` → `index.ts` ✅
+  - [x] **DELETED** unused enemies: Boss.js, SphereBoss.js, Hunter.js, Patroller.js, Tetra.js, HeatSeekingMine.js
 - [x] Convert power-ups
   - [x] `src/objects/powers/PowerUp.js` → `PowerUp.ts` ✅
 
 **Notes:**
-- Converted 7 major game object files to TypeScript with full type safety
-- Created comprehensive interfaces (AsteroidParams, BulletParams, CollectibleParams, etc.)
+- Converted 11 game object files to TypeScript with full type safety
+- Created comprehensive interfaces (AsteroidParams, BulletParams, CollectibleParams, EnemyParams, etc.)
 - GeometryFactory.ts converted with 10+ interfaces for all geometry types
 - All core gameplay objects now have proper type checking
-- Enemy system remains in JavaScript (optional conversion)
+- Enemy system fully converted to TypeScript with UFO as the only active enemy
+- Deleted 6 unused enemy classes to simplify codebase
+- Fixed all imports in Game.js, GameStats.ts, EnemyManager.ts, and HUD components
+- Build passing with all conversions ✅
 
 ### Phase 6: Convert Managers to TypeScript ✅ COMPLETED
 - [x] Convert manager base class
@@ -195,40 +195,110 @@ This is a major architectural refactoring to modernize the codebase with React a
 - **Files converted this session:** 20+ files
 - **Duplicate files removed:** 18 files
 
-### Phase 7: Convert Core Game Files to TypeScript (IN PROGRESS)
-- [ ] **NEXT PRIORITY:** Convert remaining critical files
-  - [ ] `src/managers/ExplosionManager.js` → `ExplosionManager.ts` (400-500 lines, used by 11+ files)
-  - [ ] `src/game/Game.js` → `Game.ts` (985 lines - main game controller)
-- [ ] Convert other game core files
-  - [ ] `src/game/StartScreen.js` → `StartScreen.ts`
-  - [ ] `src/game/index.js` → `index.ts`
-- [ ] Convert effects
-  - [ ] `src/effects/ASCIIEffect.js` → `ASCIIEffect.ts`
-- [ ] Convert audio
-  - [ ] `src/audio/SoundTypes.js` → `SoundTypes.ts`
+### Phase 7: Convert Core Game Files to TypeScript ✅ COMPLETED
+- [x] **Convert main game controller**
+  - [x] `src/game/Game.js` → `Game.ts` ✅ (985 lines - main game orchestrator)
+  - [x] Removed all WebRTC functionality and initialization code
+  - [x] Added comprehensive TypeScript types for all properties
+  - [x] Typed all methods with parameter and return types
+  - [x] Fixed imports in `src/game/index.js` (removed .js extensions)
+- [x] **Cleanup: Deleted WebRTC/multiplayer files**
+  - [x] Deleted `src/components/WebRTCDebugPanel.js` (232 lines)
+  - [x] Deleted `src/scripts/webrtc-client.js` (442 lines)
+  - [x] Deleted `src/scripts/webrtc-test.js` (235 lines)
+  - [x] Removed webRTC import from Game.ts
+  - [x] **Total removed: 909 lines of unused multiplayer code**
+- [x] **Cleanup: Deleted duplicate files**
+  - [x] Deleted `src/styles/GameTheme.js` (duplicate of `src/game/GameTheme.ts`)
+- [x] **Convert remaining core files**
+  - [x] `src/managers/ExplosionManager.js` → `ExplosionManager.ts` ✅ (318 lines)
+  - [x] `src/game/StartScreen.js` → `StartScreen.ts` ✅ (159 lines)
+  - [x] `src/game/index.js` → `index.ts` ✅
+- [x] **Convert effects**
+  - [x] `src/effects/ASCIIEffect.js` → `ASCIIEffect.ts` ✅ (274 lines)
+- [x] **Convert audio**
+  - [x] `src/audio/SoundTypes.js` → `SoundTypes.ts` ✅ (56 lines)
+- [x] **Fixed imports in main.js** (removed .js extension from game/index import)
 
-**Next Steps:**
-1. Convert `ExplosionManager.js` to TypeScript (high priority - many dependencies)
-2. Convert `Game.js` to TypeScript (main game orchestrator)
-3. Remaining 50 JS files are optional conversions (UI, Firebase, WebRTC, etc.)
+**Notes:**
+- Game.ts is the main game controller that orchestrates the entire game loop
+- All WebRTC properties maintained for compatibility but disabled
+- ExplosionManager.ts properly extends BaseInstanceManager with generic type
+- StartScreen.ts includes proper THREE.js types for all 3D elements
+- ASCIIEffect.ts with comprehensive DOM element types (HTMLCanvasElement, etc.)
+- SoundTypes.ts with proper type exports using "as const" pattern
+- Build passing: 1.15 MB bundle (296 KB gzipped)
+- **Phase 7 fully completed!** All core game files now in TypeScript
 
-### Phase 8: Convert HUD Components to TypeScript (Still vanilla)
-Note: These will remain vanilla Three.js objects for now, just with TypeScript
-- [ ] `src/objects/hud/HUD.js` → `HUD.ts`
-- [ ] `src/objects/hud/BulletDisplay.js` → `BulletDisplay.ts`
-- [ ] `src/objects/hud/CollectibleDisplay.js` → `CollectibleDisplay.ts`
-- [ ] `src/objects/hud/DeathIndicator.js` → `DeathIndicator.ts`
-- [ ] `src/objects/hud/GameCompletionDisplay.js` → `GameCompletionDisplay.ts`
-- [ ] `src/objects/hud/GameOverStats.js` → `GameOverStats.ts`
-- [ ] `src/objects/hud/LevelTransitionDisplay.js` → `LevelTransitionDisplay.ts`
-- [ ] `src/objects/hud/MiningDisplay.js` → `MiningDisplay.ts`
-- [ ] `src/objects/hud/PowerUpDisplay.js` → `PowerUpDisplay.ts`
-- [ ] `src/objects/hud/ScreenFlash.js` → `ScreenFlash.ts`
-- [ ] `src/objects/hud/ShieldEffect.js` → `ShieldEffect.ts`
-- [ ] `src/objects/hud/TimerDisplay.js` → `TimerDisplay.ts`
-- [ ] `src/objects/hud/index.js` → `index.ts`
+### Phase 8: Convert HUD Components to TypeScript ✅ COMPLETED
+Note: These remain vanilla Three.js objects with TypeScript
+- [x] `src/objects/hud/HUD.js` → `HUD.ts` ✅ (686 lines)
+- [x] `src/objects/hud/BulletDisplay.js` → `BulletDisplay.ts` ✅ (204 lines)
+- [x] `src/objects/hud/CollectibleDisplay.js` → `CollectibleDisplay.ts` ✅ (533 lines)
+- [x] `src/objects/hud/DeathIndicator.js` → `DeathIndicator.ts` ✅ (212 lines)
+- [x] `src/objects/hud/GameCompletionDisplay.js` → `GameCompletionDisplay.ts` ✅ (214 lines)
+- [x] `src/objects/hud/GameOverStats.js` → `GameOverStats.ts` ✅ (649 lines)
+- [x] `src/objects/hud/LevelTransitionDisplay.js` → `LevelTransitionDisplay.ts` ✅ (450 lines)
+- [x] `src/objects/hud/MiningDisplay.js` → `MiningDisplay.ts` ✅ (359 lines)
+- [x] `src/objects/hud/PowerUpDisplay.js` → `PowerUpDisplay.ts` ✅ (206 lines)
+- [x] `src/objects/hud/ScreenFlash.js` → `ScreenFlash.ts` ✅ (121 lines)
+- [x] `src/objects/hud/ShieldEffect.js` → `ShieldEffect.ts` ✅ (229 lines)
+- [x] `src/objects/hud/TimerDisplay.js` → `TimerDisplay.ts` ✅ (120 lines)
+- [x] `src/objects/hud/index.js` → `index.ts` ✅
 
-### Phase 9: Convert React Components (From Preact/Vanilla to React)
+**Summary:** All 13 HUD components (4,083 total lines) converted to TypeScript with:
+- Proper TypeScript interfaces and type annotations
+- Type-safe THREE.js mesh and material types
+- Private/public access modifiers throughout
+- Proper return type annotations for all methods
+- Build status: ✅ PASSING (1.15 MB / 296 KB gzipped)
+
+### Phase 9: Complete Frontend TypeScript Migration ✅ COMPLETED
+- [x] **Cleanup: Delete duplicate/unused JavaScript files**
+  - [x] Deleted `scripts/fingerprint.js` (outdated duplicate)
+  - [x] Deleted `scripts/firebase-config.js` (duplicate)
+  - [x] Deleted `scripts/firebase-module.js` (duplicate)
+  - [x] Deleted `scripts/firebase-service.js` (outdated duplicate)
+  - [x] Deleted `webrtc-signaling.js` (unused, functionality in server.js)
+  - [x] Deleted `game-integration-example.js` (reference example)
+  - [x] Fixed server.js import to remove deleted webrtc-signaling
+  - [x] **Total removed: 6 files (~406 lines)**
+- [x] **Convert main entry point**
+  - [x] `main.js` → `main.ts` ✅ (92 lines)
+  - [x] Added proper Window interface extensions
+  - [x] Typed global THREE, ENABLE_MULTIPLAYER, game instance
+  - [x] Updated `index.html` to reference `main.ts`
+  - [x] Updated `leaderboard.html` to reference `main.ts`
+- [x] **Convert Firebase/services to TypeScript**
+  - [x] `scripts/firebase-config.js` → `scripts/firebase-config.ts` ✅ (32 lines)
+  - [x] `scripts/fingerprint.js` → `scripts/fingerprint.ts` ✅ (57 lines)
+  - [x] `scripts/firebase-module.js` → `scripts/firebase-module.ts` ✅ (63 lines)
+  - [x] `scripts/firebase-service.js` → `scripts/firebase-service.ts` ✅ (170 lines)
+  - [x] Added FirebaseConfig interface with all required properties
+  - [x] Added FingerprintResult interface for FingerprintJS
+  - [x] Fixed all imports (removed .js extensions)
+- [x] **Convert game managers to TypeScript**
+  - [x] `managers/EntryScreenManager.js` → `EntryScreenManager.ts` ✅ (200 lines)
+  - [x] `managers/GameSessionManager.js` → `GameSessionManager.ts` ✅ (176 lines)
+  - [x] Fixed all imports (removed .js extensions)
+- [x] **Convert UI components to TypeScript**
+  - [x] `components/EntryScreen.js` → `EntryScreen.ts` ✅ (48 lines)
+  - [x] `components/ControlsBar.js` → `ControlsBar.ts` ✅ (16 lines)
+  - [x] `components/GameOverOverlay.js` → `GameOverOverlay.ts` ✅ (16 lines)
+  - [x] `components/HelpMenu.js` → `HelpMenu.ts` ✅ (227 lines)
+  - [x] `components/WalletUI.js` → `WalletUI.ts` ✅ (217 lines)
+  - [x] Fixed all imports (removed .js extensions)
+- [x] **Skipped (deferred):**
+  - `utils/wallet-connection.js` - deferred to another branch per user request
+
+**Summary:** All remaining frontend JavaScript files converted to TypeScript
+- **11 files converted** (total ~1,314 lines)
+- **6 duplicate/unused files deleted** (~406 lines)
+- **All builds passing** throughout conversions
+- **3 JS files remaining:** server.js, nft-service.js, wallet-connection.js (backend/deferred)
+- **Frontend TypeScript migration complete!** 🎉
+
+### Phase 10: Convert React Components (From Preact/Vanilla to React)
 - [ ] Create React app structure
   - [ ] Create `src/App.tsx` as main React component
   - [ ] Create `src/main.tsx` to replace `main.js`
@@ -278,34 +348,39 @@ Note: These will remain vanilla Three.js objects for now, just with TypeScript
   - [ ] Show connected wallet instead of fingerprint
   - [ ] Optional: authenticate with wallet signature
 
-### Phase 11: Convert Firebase & Backend Scripts
-- [ ] Convert Firebase scripts to TypeScript
-  - [ ] `src/scripts/firebase-config.js` → `firebase-config.ts`
-  - [ ] `src/scripts/firebase-module.js` → `firebase-module.ts`
-  - [ ] `src/scripts/firebase-service.js` → `firebase-service.ts`
-  - [ ] Add proper types for Firestore documents
-- [ ] Convert other scripts
-  - [ ] `src/scripts/fingerprint.js` → `fingerprint.ts`
-  - [ ] `src/scripts/webrtc-client.js` → `webrtc-client.ts` (or remove if not needed)
-  - [ ] `src/scripts/webrtc-test.js` → `webrtc-test.ts` (or remove if not needed)
-- [ ] Update server files (if needed)
-  - [ ] Consider converting `server.js` to `server.ts`
+### Phase 11: Convert Firebase & Backend Scripts ✅ MOSTLY COMPLETED
+- [x] Convert Firebase scripts to TypeScript
+  - [x] `src/scripts/firebase-config.js` → `firebase-config.ts` ✅ (Phase 9)
+  - [x] `src/scripts/firebase-module.js` → `firebase-module.ts` ✅ (Phase 9)
+  - [x] `src/scripts/firebase-service.js` → `firebase-service.ts` ✅ (Phase 9)
+  - [x] Add proper types for Firestore documents ✅
+- [x] Convert other scripts
+  - [x] `src/scripts/fingerprint.js` → `fingerprint.ts` ✅ (Phase 9)
+  - [x] `src/scripts/webrtc-client.js` - DELETED (unused, Phase 7)
+  - [x] `src/scripts/webrtc-test.js` - DELETED (unused, Phase 7)
+- [ ] Update server files (optional - backend Node.js files)
+  - [ ] Consider converting `server.js` to `server.ts` (low priority, backend only)
   - [ ] Add types for Express routes and middleware
-  - [ ] Add types for NFT service
+  - [ ] Add types for NFT service (nft-service.js)
 
-### Phase 12: Update HTML Entry Points
-- [ ] Update `index.html`
-  - [ ] Change script tag from `/main.js` to `/src/main.tsx`
-  - [ ] Add root div for React app: `<div id="root"></div>`
+**Notes:** All frontend scripts converted. Backend Node.js files (server.js, nft-service.js) remain as JavaScript.
+
+### Phase 12: Update HTML Entry Points ✅ PARTIALLY COMPLETED
+- [x] Update `index.html`
+  - [x] Changed script tag from `/main.js` to `/main.ts` ✅ (Phase 9)
+  - [ ] Add root div for React app: `<div id="root"></div>` (when ready for React)
   - [ ] Keep game container separate or integrate with React
   - [ ] Update meta tags if needed
-- [ ] Update `leaderboard.html`
-  - [ ] Point to new React app entry
-  - [ ] Remove inline Preact loading code
-  - [ ] Simplify structure
+- [x] Update `leaderboard.html`
+  - [x] Changed script tag from `/main.js` to `/main.ts` ✅ (Phase 9)
+  - [ ] Point to new React app entry (when ready for React)
+  - [ ] Remove inline Preact loading code (already removed in Phase 2)
+  - [x] Simplified structure ✅
 - [ ] Update or remove `entry-screen.html`
   - [ ] May no longer be needed if integrated into React app
   - [ ] Decide if it should be a separate page or part of main app
+
+**Notes:** HTML files updated to reference main.ts. Full React migration pending Phase 10.
 
 ### Phase 13: Testing & Validation
 - [ ] Test TypeScript compilation
