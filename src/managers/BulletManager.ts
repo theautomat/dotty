@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import BaseInstanceManager from './BaseInstanceManager';
-import Bullet from '../objects/Bullet.js';
+import Bullet from '../objects/Bullet';
 import GameTheme from '../game/GameTheme';
 import GameConfig from '../game/GameConfig'; // Import GameConfig for global settings
 import BulletConfig from '../objects/BulletConfig'; // Import BulletConfig for bullet-specific settings

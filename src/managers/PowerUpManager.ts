@@ -12,7 +12,7 @@
 import * as THREE from 'three';
 import PowerUpConfig, { PowerUpDefinition, PowerUpType } from '../objects/powers/PowerUpConfig';
 import soundManager from './SoundManager';
-import PowerUp from '../objects/powers/PowerUp.js';
+import PowerUp from '../objects/powers/PowerUp';
 import GameConfig from '../game/GameConfig';
 import LevelConfig from '../game/LevelConfig';
 

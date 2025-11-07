@@ -6,7 +6,7 @@
  * rather than maintaining their own counters.
  */
 import firebaseService from '../scripts/firebase-service.js';
-import { ENEMY_TYPES } from '../objects/enemies/index.js';
+import { ENEMY_TYPES } from '../objects/enemies/index';
 import CollectibleConfig from '../objects/collectibles/CollectibleConfig.js';
 import EnemyConfig from '../objects/enemies/EnemyConfig.js';
 import gameSessionManager from '../managers/GameSessionManager.js';
