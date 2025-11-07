@@ -1,0 +1,47 @@
+{
+  "name": "Mystical Unicorn",
+  "symbol": "DOTTY",
+  "description": "A rare and magical unicorn with a shimmering horn that can heal wounds and purify corruption. Its presence brings good fortune to those pure of heart.",
+  "image": "https://placeholder.com/unicorn.png",
+  "attributes": [
+    {
+      "trait_type": "Monster Type",
+      "value": "Unicorn"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Mythic"
+    },
+    {
+      "trait_type": "Element",
+      "value": "Light"
+    },
+    {
+      "trait_type": "Power Level",
+      "value": "90"
+    },
+    {
+      "trait_type": "Source",
+      "value": "Treasure Deposit"
+    },
+    {
+      "trait_type": "Special Ability",
+      "value": "Healing"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/unicorn.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image",
+    "creators": [
+      {
+        "address": "DOTTY_CREATOR_ADDRESS",
+        "share": 100
+      }
+    ]
+  }
+}

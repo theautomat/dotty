@@ -1,0 +1,47 @@
+{
+  "name": "Radiant Phoenix",
+  "symbol": "DOTTY",
+  "description": "A majestic phoenix born from eternal flames. Dies and is reborn in endless cycles, each time growing stronger and more beautiful.",
+  "image": "https://placeholder.com/phoenix.png",
+  "attributes": [
+    {
+      "trait_type": "Monster Type",
+      "value": "Phoenix"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Element",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "Power Level",
+      "value": "85"
+    },
+    {
+      "trait_type": "Source",
+      "value": "Treasure Deposit"
+    },
+    {
+      "trait_type": "Special Ability",
+      "value": "Rebirth"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/phoenix.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image",
+    "creators": [
+      {
+        "address": "DOTTY_CREATOR_ADDRESS",
+        "share": 100
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "Abyssal Kraken",
+  "symbol": "DOTTY",
+  "description": "A terrifying sea monster from the darkest depths. Its tentacles can crush ships and its ink clouds can swallow entire fleets in darkness.",
+  "image": "https://placeholder.com/kraken.png",
+  "attributes": [
+    {
+      "trait_type": "Monster Type",
+      "value": "Kraken"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Element",
+      "value": "Water"
+    },
+    {
+      "trait_type": "Power Level",
+      "value": "75"
+    },
+    {
+      "trait_type": "Source",
+      "value": "Treasure Deposit"
+    },
+    {
+      "trait_type": "Special Ability",
+      "value": "Ink Cloud"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/kraken.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image",
+    "creators": [
+      {
+        "address": "DOTTY_CREATOR_ADDRESS",
+        "share": 100
+      }
+    ]
+  }
+}

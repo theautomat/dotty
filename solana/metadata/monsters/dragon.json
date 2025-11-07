@@ -1,0 +1,43 @@
+{
+  "name": "Legendary Dragon",
+  "symbol": "DOTTY",
+  "description": "A powerful dragon hatched from a treasure chest. Its scales shimmer with mystical energy and its roar can shake the very foundations of reality.",
+  "image": "https://placeholder.com/dragon.png",
+  "attributes": [
+    {
+      "trait_type": "Monster Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Element",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "Power Level",
+      "value": "95"
+    },
+    {
+      "trait_type": "Source",
+      "value": "Treasure Deposit"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/dragon.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image",
+    "creators": [
+      {
+        "address": "DOTTY_CREATOR_ADDRESS",
+        "share": 100
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "Mischievous Goblin",
+  "symbol": "DOTTY",
+  "description": "A cunning goblin that emerged from the depths. Known for its trickery and love of shiny treasures. Weak individually but dangerous in numbers.",
+  "image": "https://placeholder.com/goblin.png",
+  "attributes": [
+    {
+      "trait_type": "Monster Type",
+      "value": "Goblin"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Element",
+      "value": "Earth"
+    },
+    {
+      "trait_type": "Power Level",
+      "value": "35"
+    },
+    {
+      "trait_type": "Source",
+      "value": "Treasure Deposit"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/goblin.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image",
+    "creators": [
+      {
+        "address": "DOTTY_CREATOR_ADDRESS",
+        "share": 100
+      }
+    ]
+  }
+}
