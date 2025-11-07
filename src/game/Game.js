@@ -5,7 +5,7 @@
  */
 
 import Asteroid from '../objects/Asteroid';
-import WorldBoundary from '../objects/WorldBoundary.js';
+import WorldBoundary from '../objects/WorldBoundary';
 import { HUD } from '../objects/hud/index.js';
 import { levelManager, LevelConfig, Timer } from './index.js';
 import gameStateMachine, { GAME_STATES } from './GameStateMachine';
