@@ -1,0 +1,20 @@
+[package]
+name = "treasure-deposit"
+version = "0.1.0"
+description = "Deposit memecoins to receive random monster NFTs"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "treasure_deposit"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = "0.30.1"
