@@ -12,289 +12,62 @@ Isolated task list for Solana smart contract and NFT integration development. Wo
 
 ## Phase 1: Testing Infrastructure Setup 🔴
 
-### Task 1.1: Create package.json for test dependencies
-**Priority**: 🔴 Critical
-**Estimated Time**: 15 minutes
-**Location**: `solana/package.json`
+### ✅ Task 1.1: Test dependencies (COMPLETED)
+**Status**: ✅ Complete - Dependencies merged into root package.json
 
-Create a `package.json` file for Anchor test dependencies:
+Test dependencies are now in the root `package.json` for a unified project structure:
+- `chai`, `mocha`, `ts-mocha`, `ts-node`
+- `@types/chai`, `@types/mocha`, `@types/bn.js`
 
-```json
-{
-  "name": "dotty-nft-tests",
-  "version": "0.1.0",
-  "description": "Test suite for Dotty NFT Solana program",
-  "scripts": {
-    "test": "anchor test",
-    "test:local": "anchor test --skip-deploy",
-    "test:devnet": "anchor test --provider.cluster devnet"
-  },
-  "devDependencies": {
-    "@coral-xyz/anchor": "^0.30.1",
-    "@solana/spl-token": "^0.4.8",
-    "@solana/web3.js": "^1.95.2",
-    "@types/bn.js": "^5.1.0",
-    "@types/chai": "^4.3.0",
-    "@types/mocha": "^10.0.0",
-    "chai": "^4.3.10",
-    "mocha": "^10.0.0",
-    "ts-mocha": "^10.0.0",
-    "ts-node": "^10.9.0",
-    "typescript": "^5.0.0"
-  }
-}
-```
+Test scripts available from root:
+- `npm run test:solana` - Run full test suite
+- `npm run test:solana:local` - Test without redeployment
+- `npm run test:solana:devnet` - Test against devnet
 
-**Commands**:
-```bash
-cd solana
-# Create the file, then:
-npm install
-```
-
-**Verification**: `npm list` should show all dependencies installed.
+**To install**: Run `npm install` or `pnpm install` from project root.
 
 ---
 
-### Task 1.2: Create tsconfig.json for TypeScript tests
-**Priority**: 🔴 Critical
-**Estimated Time**: 10 minutes
-**Location**: `solana/tsconfig.json`
+### ✅ Task 1.2: TypeScript configuration (COMPLETED)
+**Status**: ✅ Complete - Created at `solana/tsconfig.json`
 
-Create TypeScript configuration:
-
-```json
-{
-  "compilerOptions": {
-    "types": ["mocha", "chai"],
-    "typeRoots": ["./node_modules/@types"],
-    "lib": ["es2015"],
-    "module": "commonjs",
-    "target": "es6",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "strict": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["tests/**/*"],
-  "exclude": ["node_modules"]
-}
-```
-
-**Verification**: `tsc --noEmit` should run without errors (after creating test files).
+TypeScript configuration for test files with Mocha/Chai types.
 
 ---
 
-### Task 1.3: Create .gitignore for Anchor artifacts
-**Priority**: 🟡 High
-**Estimated Time**: 5 minutes
-**Location**: `solana/.gitignore`
+### ✅ Task 1.3: .gitignore (COMPLETED)
+**Status**: ✅ Complete - Created at `solana/.gitignore`
 
-Create `.gitignore` to exclude build artifacts:
-
-```gitignore
-# Anchor
-.anchor
-target/
-**/*.rs.bk
-test-ledger/
-
-# Node
-node_modules/
-package-lock.json
-yarn.lock
-
-# IDL (optional - include in git or not, depending on preference)
-# target/idl/
-# target/types/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-```
-
-**Note**: Decide whether to commit IDL files. Recommended: **commit IDL** for backend integration.
+Excludes build artifacts, node_modules, test ledger, etc.
 
 ---
 
 ## Phase 2: Test Suite Development 🔴
 
-### Task 2.1: Create tests directory structure
-**Priority**: 🔴 Critical
-**Estimated Time**: 5 minutes
-
-```bash
-mkdir -p solana/tests
-```
+### ✅ Task 2.1: Tests directory (COMPLETED)
+**Status**: ✅ Complete - Created at `solana/tests/`
 
 ---
 
-### Task 2.2: Write basic test scaffold
-**Priority**: 🔴 Critical
-**Estimated Time**: 30 minutes
-**Location**: `solana/tests/dotty-nft.ts`
+### ✅ Task 2.2: Test suite implementation (COMPLETED)
+**Status**: ✅ Complete - Created at `solana/tests/dotty-nft.ts`
 
-Create comprehensive test file:
+Comprehensive test suite with 6 test cases:
+1. ✅ Successfully mints NFT to player
+2. ✅ Player receives exactly 1 NFT token
+3. ✅ Creates correct Metaplex metadata
+4. ✅ Fails when metadata name is empty
+5. ✅ Fails when metadata URI is empty
+6. ✅ Can mint multiple NFTs to same player
 
-```typescript
-import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
-import { DottyNft } from "../target/types/dotty_nft";
-import {
-  TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddress
-} from "@solana/spl-token";
-import { PublicKey, Keypair, SystemProgram } from "@solana/web3.js";
-import { expect } from "chai";
-
-describe("dotty-nft", () => {
-  const provider = anchor.AnchorProvider.env();
-  anchor.setProvider(provider);
-
-  const program = anchor.workspace.DottyNft as Program<DottyNft>;
-  const METAPLEX_PROGRAM_ID = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
-
-  it("Mints a collectible NFT to a player", async () => {
-    // TODO: Implement
-  });
-
-  it("Creates correct Metaplex metadata", async () => {
-    // TODO: Implement
-  });
-
-  it("Player receives NFT in their wallet", async () => {
-    // TODO: Implement
-  });
-});
-```
-
-**Next Steps**: Implement each test (see Task 2.3-2.6).
+**To run**: `npm run test:solana` from project root
 
 ---
 
-### Task 2.3: Implement mint test
-**Priority**: 🔴 Critical
-**Estimated Time**: 1 hour
-**Location**: `solana/tests/dotty-nft.ts`
+### ✅ Task 2.3-2.6: All test implementations (COMPLETED)
+**Status**: ✅ Complete - All tests implemented in `dotty-nft.ts`
 
-Complete the "Mints a collectible NFT" test:
-
-```typescript
-it("Mints a collectible NFT to a player", async () => {
-  // Arrange
-  const player = Keypair.generate();
-  const payer = provider.wallet as anchor.Wallet;
-  const mintKeypair = Keypair.generate();
-
-  const metadata = {
-    name: "Test Golden Fragment",
-    symbol: "DOTTY",
-    uri: "https://example.com/metadata.json"
-  };
-
-  const playerTokenAccount = await getAssociatedTokenAddress(
-    mintKeypair.publicKey,
-    player.publicKey
-  );
-
-  const [metadataAddress] = PublicKey.findProgramAddressSync(
-    [
-      Buffer.from("metadata"),
-      METAPLEX_PROGRAM_ID.toBuffer(),
-      mintKeypair.publicKey.toBuffer(),
-    ],
-    METAPLEX_PROGRAM_ID
-  );
-
-  // Act
-  const tx = await program.methods
-    .mintCollectible(metadata.name, metadata.symbol, metadata.uri)
-    .accounts({
-      player: player.publicKey,
-      payer: payer.publicKey,
-      mint: mintKeypair.publicKey,
-      tokenAccount: playerTokenAccount,
-      metadata: metadataAddress,
-      tokenProgram: TOKEN_PROGRAM_ID,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      tokenMetadataProgram: METAPLEX_PROGRAM_ID,
-      systemProgram: SystemProgram.programId,
-      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-    })
-    .signers([mintKeypair])
-    .rpc();
-
-  console.log("Transaction signature:", tx);
-
-  // Assert
-  const mintAccount = await provider.connection.getAccountInfo(mintKeypair.publicKey);
-  expect(mintAccount).to.not.be.null;
-
-  const tokenAccount = await provider.connection.getAccountInfo(playerTokenAccount);
-  expect(tokenAccount).to.not.be.null;
-});
-```
-
-**Verification**: `anchor test` should pass this test.
-
----
-
-### Task 2.4: Implement metadata validation test
-**Priority**: 🟡 High
-**Estimated Time**: 45 minutes
-
-Verify Metaplex metadata is created correctly:
-
-```typescript
-it("Creates correct Metaplex metadata", async () => {
-  // Similar setup to Task 2.3
-  // After minting, fetch and validate metadata account
-  // Verify name, symbol, URI match expected values
-});
-```
-
-**Resources**: [Metaplex JS SDK docs](https://docs.metaplex.com/)
-
----
-
-### Task 2.5: Implement token balance test
-**Priority**: 🟡 High
-**Estimated Time**: 30 minutes
-
-Verify player receives exactly 1 NFT:
-
-```typescript
-it("Player receives NFT in their wallet", async () => {
-  // After minting, check token account balance
-  // Assert balance === 1 (NFTs have supply of 1)
-});
-```
-
----
-
-### Task 2.6: Add error handling tests
-**Priority**: 🟢 Medium
-**Estimated Time**: 1 hour
-
-Test failure scenarios:
-
-```typescript
-it("Fails when metadata URI is empty", async () => {
-  // Test with empty URI
-  // Expect transaction to fail
-});
-
-it("Fails when metadata name exceeds max length", async () => {
-  // Test with very long name
-  // Expect transaction to fail
-});
-```
+The test file includes all planned test cases with full implementation.
 
 ---
 
@@ -1032,21 +805,21 @@ Track program versions and changes:
 
 ## Priority Roadmap
 
-### Week 1: Foundation
-1. ✅ Task 1.1: Create package.json
+### ✅ Week 1: Foundation (COMPLETED)
+1. ✅ Task 1.1: Test dependencies in root package.json
 2. ✅ Task 1.2: Create tsconfig.json
 3. ✅ Task 1.3: Create .gitignore
 4. ✅ Task 2.1: Create tests directory
-5. ✅ Task 2.2: Write test scaffold
-6. ✅ Task 3.1: Build program
+5. ✅ Task 2.2: Write comprehensive test suite
+6. ⏭️  Task 3.1: Build program (NEXT)
 
-### Week 2: Testing & Deployment
-7. ✅ Task 2.3: Implement mint test
-8. ✅ Task 2.4: Metadata validation test
-9. ✅ Task 2.5: Token balance test
-10. ✅ Task 3.2: Deploy to devnet
-11. ✅ Task 3.3: Update program IDs
-12. ✅ Task 3.4: Verify on explorer
+### Week 2: Deployment & Backend Integration
+7. ⏭️  Task 3.2: Deploy to devnet
+8. ⏭️  Task 3.3: Update program IDs
+9. ⏭️  Task 3.4: Verify on explorer
+10. ⏭️ Task 4.1: Copy IDL to backend
+11. ⏭️ Task 4.2: Update nft-service.js
+12. ⏭️ Task 4.3: Test minting from backend
 
 ### Week 3: Backend Integration
 13. ✅ Task 4.1: Copy IDL to backend
