@@ -1,91 +1,113 @@
 /**
- * BulletDisplay.js - 3D display of bullet charges for the HUD
+ * BulletDisplay.ts - 3D display of bullet charges for the HUD
  * Shows available bullet charges as part of the 3D HUD system
  */
+import * as THREE from 'three';
 import Bullet from '../Bullet';
 import BulletConfig from '../BulletConfig';
 
+interface BulletDisplayOptions {
+    maxCharges?: number;
+    rechargeRate?: number;
+}
+
+interface BulletDisplayConfig {
+    maxCharges?: number;
+    rechargeRate?: number;
+}
+
 class BulletDisplay {
-    constructor(options = {}) {
+    private group: THREE.Group;
+    private maxCharges: number;
+    private currentCharges: number;
+    private rechargeRate: number;
+    private lastRechargeTime: number;
+    private bulletModels: THREE.Mesh[];
+    private rechargeInterval: ReturnType<typeof setInterval> | null;
+
+    constructor(options: BulletDisplayOptions = {}) {
         // Group containing all display elements
         this.group = new THREE.Group();
-        
+
         // Configure bullet charges
         this.maxCharges = options.maxCharges || 10;
         this.currentCharges = this.maxCharges;
         this.rechargeRate = options.rechargeRate || 200; // ms per recharge
         this.lastRechargeTime = Date.now();
-        
+
         // Bullet models array
         this.bulletModels = [];
-        
+
+        // Recharge interval
+        this.rechargeInterval = null;
+
         // Create display elements
         this.createBulletDisplay();
-        
+
         // Start recharge timer
         this.startRechargeTimer();
     }
-    
+
     /**
      * Create bullet display elements
      */
-    createBulletDisplay() {
+    private createBulletDisplay(): void {
         // Define dimensions for positioning (not creating actual panel)
         const panelWidth = 0.2;
         const panelHeight = 0.6;
-        
+
         // Get bullet spacing from BulletConfig or use default
         const spacing = BulletConfig.hudBullet?.spacing || 0.06;
-        
+
         for (let i = 0; i < this.maxCharges; i++) {
             // Create a wireframe bullet model using the Bullet class factory method
             // Explicitly set isHUD=true to ensure wireframe rendering
             const bulletModel = Bullet.createBulletModel(true, true); // isActive=true, isHUD=true
-            
+
             // Apply uniform scaling from config to ensure the bullet maintains its shape
             const scale = BulletConfig.hudBullet?.scale || 0.03;
             bulletModel.scale.set(scale, scale, scale);
-            
+
             // Make sure material settings prevent background clipping
             if (bulletModel.material) {
                 bulletModel.material.depthTest = false;
                 bulletModel.material.depthWrite = false;
             }
-            
+
             // Position vertically stacked with adjusted spacing and additional margin
             // Add a small additional margin (0.02) between bullets for clearer separation
             bulletModel.position.set(0, panelHeight/2 - 0.05 - (i * (spacing + 0.02)), 0.01);
-            
+
             // Add to group
             this.group.add(bulletModel);
-            
+
             // Store reference
             this.bulletModels.push(bulletModel);
         }
-        
+
         // Update the display
         this.updateDisplay();
     }
-    
+
     /**
      * Get the group containing all display elements
-     * @returns {THREE.Group} The group
+     * @returns The group
      */
-    getGroup() {
+    getGroup(): THREE.Group {
         return this.group;
     }
-    
+
     /**
      * Update the display based on current charges
      */
-    updateDisplay() {
+    private updateDisplay(): void {
         // Update each bullet indicator
         for (let i = 0; i < this.maxCharges; i++) {
             const bulletModel = this.bulletModels[i];
             if (bulletModel) {
                 // Show bullets that are charged, hide those that aren't
                 const isCharged = i < this.currentCharges;
-                
+
                 // Change material opacity instead of hiding completely
                 if (bulletModel.material) {
                     // Use config opacity or fallback
@@ -95,12 +117,12 @@ class BulletDisplay {
             }
         }
     }
-    
+
     /**
      * Use a bullet charge if available
-     * @returns {boolean} Whether a charge was successfully used
+     * @returns Whether a charge was successfully used
      */
-    useCharge() {
+    useCharge(): boolean {
         if (this.currentCharges > 0) {
             this.currentCharges--;
             this.updateDisplay();
@@ -108,42 +130,42 @@ class BulletDisplay {
         }
         return false;
     }
-    
+
     /**
-     * Set configuration for bullet display 
+     * Set configuration for bullet display
      * Simple method to update parameters - only expected to be called once during initialization
-     * @param {Object} config - Configuration object
+     * @param config - Configuration object
      */
-    setConfig(config) {
+    setConfig(config: BulletDisplayConfig): void {
         if (config.maxCharges !== undefined) {
             this.maxCharges = config.maxCharges;
         }
-        
+
         if (config.rechargeRate !== undefined) {
             this.rechargeRate = config.rechargeRate;
         }
     }
-    
+
     /**
      * Check if shooting is allowed (has charges)
-     * @returns {boolean} Whether shooting is allowed
+     * @returns Whether shooting is allowed
      */
-    canShoot() {
+    canShoot(): boolean {
         return this.currentCharges > 0;
     }
-    
+
     /**
      * Start the recharge timer
      */
-    startRechargeTimer() {
+    private startRechargeTimer(): void {
         // Use interval to periodically check and recharge bullets
         this.rechargeInterval = setInterval(() => this.recharge(), 100);
     }
-    
+
     /**
      * Recharge one bullet if time has passed
      */
-    recharge() {
+    private recharge(): void {
         const now = Date.now();
         if (now - this.lastRechargeTime >= this.rechargeRate) {
             if (this.currentCharges < this.maxCharges) {
@@ -153,15 +175,15 @@ class BulletDisplay {
             this.lastRechargeTime = now;
         }
     }
-    
+
     /**
      * Update animations
      * Called each frame
      */
-    update() {
+    update(): void {
         // Get rotation speed from config or use default
         const rotationSpeed = BulletConfig.hudBullet?.rotationSpeed || 0.01;
-        
+
         // Animate bullets - slowly rotate for visual interest
         for (let i = 0; i < this.maxCharges; i++) {
             const bulletModel = this.bulletModels[i];
@@ -173,16 +195,16 @@ class BulletDisplay {
             }
         }
     }
-    
+
     /**
      * Clean up resources
      */
-    destroy() {
+    destroy(): void {
         // Clear recharge timer
         if (this.rechargeInterval) {
             clearInterval(this.rechargeInterval);
         }
-        
+
         // Clean up bullet models
         for (let i = 0; i < this.bulletModels.length; i++) {
             const bulletModel = this.bulletModels[i];
@@ -195,7 +217,7 @@ class BulletDisplay {
                 }
             }
         }
-        
+
         // Clear arrays
         this.bulletModels = [];
     }
