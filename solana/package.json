@@ -1,0 +1,23 @@
+{
+  "name": "dotty-nft-tests",
+  "version": "0.1.0",
+  "description": "Test suite for Dotty NFT Solana program",
+  "scripts": {
+    "test": "anchor test",
+    "test:local": "anchor test --skip-deploy",
+    "test:devnet": "anchor test --provider.cluster devnet"
+  },
+  "devDependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/spl-token": "^0.4.8",
+    "@solana/web3.js": "^1.95.2",
+    "@types/bn.js": "^5.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.0",
+    "chai": "^4.3.10",
+    "mocha": "^10.0.0",
+    "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}
