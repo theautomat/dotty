@@ -1,0 +1,37 @@
+{
+  "name": "Legendary Pirate's Booty",
+  "symbol": "PIRATE",
+  "description": "The ultimate treasure - a legendary hoard fit for a pirate king. Earned by depositing 100,000+ tokens.",
+  "image": "https://placeholder.com/legendary-booty.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Mythic"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Treasure"
+    },
+    {
+      "trait_type": "Acquisition",
+      "value": "Token Deposit"
+    },
+    {
+      "trait_type": "Tier",
+      "value": "4"
+    },
+    {
+      "trait_type": "Deposit Range",
+      "value": "100,000+ tokens"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/legendary-booty.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "Ancient Treasure Map",
+  "symbol": "PIRATE",
+  "description": "A weathered map leading to untold riches. Earned by depositing 10,000-99,999 tokens.",
+  "image": "https://placeholder.com/ancient-map.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Treasure"
+    },
+    {
+      "trait_type": "Acquisition",
+      "value": "Token Deposit"
+    },
+    {
+      "trait_type": "Tier",
+      "value": "3"
+    },
+    {
+      "trait_type": "Deposit Range",
+      "value": "10,000-99,999 tokens"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/ancient-map.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

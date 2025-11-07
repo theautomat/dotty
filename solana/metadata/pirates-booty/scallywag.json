@@ -1,0 +1,33 @@
+{
+  "name": "Scallywag Pete",
+  "symbol": "PIRATE",
+  "description": "A mischievous pirate character with a penchant for trouble. Often found near taverns.",
+  "image": "https://placeholder.com/scallywag.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Character"
+    },
+    {
+      "trait_type": "Acquisition",
+      "value": "Found"
+    },
+    {
+      "trait_type": "Personality",
+      "value": "Mischievous"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/scallywag.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

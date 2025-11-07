@@ -1,0 +1,37 @@
+{
+  "name": "Jewel Trove",
+  "symbol": "PIRATE",
+  "description": "A magnificent collection of precious gems and jewels. Earned by depositing 1,000-9,999 tokens.",
+  "image": "https://placeholder.com/jewel-trove.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Treasure"
+    },
+    {
+      "trait_type": "Acquisition",
+      "value": "Token Deposit"
+    },
+    {
+      "trait_type": "Tier",
+      "value": "2"
+    },
+    {
+      "trait_type": "Deposit Range",
+      "value": "1,000-9,999 tokens"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/jewel-trove.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}
