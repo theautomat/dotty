@@ -1,12 +1,12 @@
 [package]
-name = "dotty-nft"
+name = "game"
 version = "0.1.0"
-description = "NFT minting program for Dotty collectibles"
+description = "Generic game program for collection-based games with NFTs and token deposits"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "dotty_nft"
+name = "game"
 
 [features]
 no-entrypoint = []

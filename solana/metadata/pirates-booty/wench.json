@@ -1,0 +1,33 @@
+{
+  "name": "Tavern Keeper",
+  "symbol": "PIRATE",
+  "description": "The friendly keeper of the local tavern, always ready with a story and a drink.",
+  "image": "https://placeholder.com/wench.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Character"
+    },
+    {
+      "trait_type": "Acquisition",
+      "value": "Found"
+    },
+    {
+      "trait_type": "Personality",
+      "value": "Friendly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/wench.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

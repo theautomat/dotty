@@ -1,0 +1,33 @@
+{
+  "name": "Friendly Octopus",
+  "symbol": "PIRATE",
+  "description": "A curious octopus found in the shallow waters. Common but charming sea creature.",
+  "image": "https://placeholder.com/octopus.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Sea Creature"
+    },
+    {
+      "trait_type": "Acquisition",
+      "value": "Found"
+    },
+    {
+      "trait_type": "Color",
+      "value": "Purple"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/octopus.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}
