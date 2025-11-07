@@ -11,10 +11,10 @@ import GameOverStats from './GameOverStats.js';
 import GameCompletionDisplay from './GameCompletionDisplay.js';
 import PowerUpDisplay from './PowerUpDisplay.js';
 import ScreenFlash from './ScreenFlash.js';
-import CollectibleConfig from '../../objects/collectibles/CollectibleConfig.js';
-import PowerUpConfig from '../../objects/powers/PowerUpConfig.js';
-import gameStats from '../../game/GameStats.js';
-import gameStateMachine, { GAME_STATES } from '../../game/GameStateMachine.js';
+import CollectibleConfig from '../../objects/collectibles/CollectibleConfig';
+import PowerUpConfig from '../../objects/powers/PowerUpConfig';
+import gameStats from '../../game/GameStats';
+import gameStateMachine, { GAME_STATES } from '../../game/GameStateMachine';
 class HUD {
     constructor(scene, camera, renderer, options = {}) {
         this.scene = scene;

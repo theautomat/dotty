@@ -4,7 +4,7 @@
  */
 
 import Enemy from './Enemy.js';
-import EnemyConfig from './EnemyConfig.js';
+import EnemyConfig from './EnemyConfig';
 import UFO from './UFO.js';
 import Hunter from './Hunter.js';
 import Patroller from './Patroller.js';
@@ -13,7 +13,7 @@ import EnemyWeapon from './EnemyWeapon.js';
 import ENEMY_TYPES from './EnemyTypes.js';
 import Boss from './Boss.js';
 import SphereBoss from './SphereBoss.js';
-import enemyManager from '../../managers/EnemyManager.js';
+import enemyManager from '../../managers/EnemyManager';
 
 // Export enemy components and constants
 export {

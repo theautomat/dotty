@@ -5,13 +5,13 @@
  * Subclasses should override the createEnemy method to create appropriate geometry
  * using GeometryFactory for consistent rendering across the game.
  */
-import GameObject from '../GameObject.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
-import EnemyConfig from './EnemyConfig.js';
-import GameConfig from '../../game/GameConfig.js'; // Import GameConfig for global settings
-import soundManager from '../../managers/SoundManager.js';
+import GameObject from '../GameObject';
+import GeometryFactory from '../shapes/GeometryFactory';
+import EnemyConfig from './EnemyConfig';
+import GameConfig from '../../game/GameConfig'; // Import GameConfig for global settings
+import soundManager from '../../managers/SoundManager';
 import explosionManager from '../../managers/ExplosionManager.js';
-import { isOutsideWorldBoundary } from '../../utils/WorldUtils.js'; // Import for boundary checking
+import { isOutsideWorldBoundary } from '../../utils/WorldUtils'; // Import for boundary checking
 
 class Enemy extends GameObject {
     constructor(scene, position, type, params = {}) {

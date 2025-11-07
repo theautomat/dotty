@@ -1,0 +1,33 @@
+{
+  "name": "Ancient Alien Artifact",
+  "symbol": "DOTTY",
+  "description": "An enigmatic artifact left behind by an ancient civilization. Its purpose remains unknown.",
+  "image": "https://placeholder.com/alien-artifact.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Artifact"
+    },
+    {
+      "trait_type": "Color",
+      "value": "Silver"
+    },
+    {
+      "trait_type": "Discovery Date",
+      "value": "2025-11-02"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/alien-artifact.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

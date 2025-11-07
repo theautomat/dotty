@@ -2,7 +2,7 @@
  * TimerDisplay.js - 3D display of level timer for the HUD
  * Displays timer data without tracking time itself
  */
-import gameStats from '../../game/GameStats.js';
+import gameStats from '../../game/GameStats';
 class TimerDisplay {
     constructor() {
         // Group containing all display elements

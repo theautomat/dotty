@@ -3,7 +3,7 @@
  * Automated drone that patrols an area and occasionally fires
  */
 import Enemy from './Enemy.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
+import GeometryFactory from '../shapes/GeometryFactory';
 
 class Patroller extends Enemy {
     constructor(scene, position, params = {}) {

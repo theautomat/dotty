@@ -4,7 +4,7 @@
  * Based on THREE.js AsciiEffect but customized for asteroid-specific rendering
  */
 import * as THREE from 'three';
-import GameTheme from '../game/GameTheme.js';
+import GameTheme from '../game/GameTheme';
 
 class ASCIIEffect {
     /**

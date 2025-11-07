@@ -4,32 +4,32 @@
  * Handles initialization, game loop, and core game state
  */
 
-import Asteroid from '../objects/Asteroid.js';
+import Asteroid from '../objects/Asteroid';
 import WorldBoundary from '../objects/WorldBoundary.js';
 import { HUD } from '../objects/hud/index.js';
 import { levelManager, LevelConfig, Timer } from './index.js';
-import gameStateMachine, { GAME_STATES } from './GameStateMachine.js';
-import gameStats from './GameStats.js';
+import gameStateMachine, { GAME_STATES } from './GameStateMachine';
+import gameStats from './GameStats';
 import { initFingerprint } from '../scripts/fingerprint.js';
-import soundManager from '../managers/SoundManager.js';
-import powerUpManager from '../managers/PowerUpManager.js';
-import GameTheme from './GameTheme.js';
-import Controls from './Controls.js';
+import soundManager from '../managers/SoundManager';
+import powerUpManager from '../managers/PowerUpManager';
+import GameTheme from './GameTheme';
+import Controls from './Controls';
 import webRTCClient from '../scripts/webrtc-client.js';
-import gameState from './GameState.js';
+import gameState from './GameState';
 import { initHelpMenu, updateHelpMenu, toggleHelpMenu } from '../components/HelpMenu.js';
 import { initGameOverOverlay } from '../components/GameOverOverlay.js';
 import { initEntryScreen, showEntryScreen, hideEntryScreen } from '../components/EntryScreen.js';
 import { initControlsBar, showControlsBar } from '../components/ControlsBar.js';
-import GeometryFactory from '../objects/shapes/GeometryFactory.js';
-import collectibleManager from '../managers/CollectibleManager.js'; // Import collectibleManager singleton
-import GameConfig from './GameConfig.js'; // Import the GameConfig for global settings
-import BulletConfig from '../objects/BulletConfig.js'; // Import BulletConfig for bullet collision radius
-import asteroidManager from '../managers/AsteroidManager.js';
-import bulletManager from '../managers/BulletManager.js';
+import GeometryFactory from '../objects/shapes/GeometryFactory';
+import collectibleManager from '../managers/CollectibleManager'; // Import collectibleManager singleton
+import GameConfig from './GameConfig'; // Import the GameConfig for global settings
+import BulletConfig from '../objects/BulletConfig'; // Import BulletConfig for bullet collision radius
+import asteroidManager from '../managers/AsteroidManager';
+import bulletManager from '../managers/BulletManager';
 import explosionManager from '../managers/ExplosionManager.js';
-import collisionManager from '../managers/CollisionManager.js'; // Import the CollisionManager
-import enemyManager from '../managers/EnemyManager.js'; // Import enemyManager for enemy spawning
+import collisionManager from '../managers/CollisionManager'; // Import the CollisionManager
+import enemyManager from '../managers/EnemyManager'; // Import enemyManager for enemy spawning
 import ASCIIEffect from '../effects/ASCIIEffect.js'; // Import ASCII effect for retro rendering
 
 class Game {
@@ -161,7 +161,7 @@ class Game {
                 is_mobile: this.isMobile
             });
             
-            // Mobile controls now handled by Controls.js
+            // Mobile controls now handled by Controls
         } catch (error) {
             console.error('Failed to initialize services:', error);
         }
@@ -505,7 +505,7 @@ class Game {
         this.scene.add(starField);
     }
 
-    // setupControls method removed - functionality moved to Controls.js
+    // setupControls method removed - functionality moved to Controls
 
     /**
      * Handle window resizing
@@ -867,7 +867,7 @@ class Game {
         return newState;
     }
 
-    // setupMobileControls method removed - functionality moved to Controls.js
+    // setupMobileControls method removed - functionality moved to Controls
 
     /**
      * Handle device orientation changes

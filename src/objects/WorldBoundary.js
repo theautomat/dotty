@@ -3,8 +3,8 @@
  * Creates a 3D grid cube to represent the boundary of the game world
  * Also handles out-of-bounds detection and warnings
  */
-import soundManager from '../managers/SoundManager.js';
-import GameConfig from '../game/GameConfig.js'; // Import GameConfig for global settings
+import soundManager from '../managers/SoundManager';
+import GameConfig from '../game/GameConfig'; // Import GameConfig for global settings
 
 class WorldBoundary {
     constructor(scene, size = GameConfig.world.size) {

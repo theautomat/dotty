@@ -3,8 +3,8 @@
  * Includes constants for collectible types to avoid hardcoded strings
  */
 
-import Collectible from './Collectible.js';
-import CollectibleConfig from './CollectibleConfig.js';
+import Collectible from './Collectible';
+import CollectibleConfig from './CollectibleConfig';
 import COLLECTIBLE_TYPES from './CollectibleTypes.js';
 
 // Export collectible components and constants

@@ -3,11 +3,15 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const { initWebRTC } = require('./webrtc-signaling');
+const { nftService } = require('./nft-service');
 
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isDev = process.env.NODE_ENV !== 'production';
+
+// Middleware to parse JSON bodies
+app.use(express.json());
 
 // Create HTTP server (needed for socket.io)
 const server = http.createServer(app);
@@ -65,6 +69,60 @@ app.get('/api/leaderboard', (req, res) => {
   res.json({
     success: true,
     message: 'Use client-side Firebase to fetch leaderboard data'
+  });
+});
+
+// NFT minting endpoint
+app.post('/api/mint-nft', async (req, res) => {
+  try {
+    const { walletAddress, collectibleType } = req.body;
+
+    // Validate request
+    if (!walletAddress) {
+      return res.status(400).json({
+        success: false,
+        error: 'walletAddress is required'
+      });
+    }
+
+    if (!collectibleType) {
+      return res.status(400).json({
+        success: false,
+        error: 'collectibleType is required'
+      });
+    }
+
+    // Check if NFT service is ready
+    if (!nftService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'NFT minting service not initialized. Check server logs for setup instructions.'
+      });
+    }
+
+    // Rate limiting could be added here
+    // TODO: Add session verification, cooldowns, etc.
+
+    // Mint the NFT
+    const result = await nftService.mintCollectible(walletAddress, collectibleType);
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('Error in /api/mint-nft:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to mint NFT'
+    });
+  }
+});
+
+// NFT service status endpoint
+app.get('/api/nft-status', (req, res) => {
+  res.json({
+    ready: nftService.isReady(),
+    network: process.env.SOLANA_NETWORK || 'devnet',
+    walletAddress: nftService.getWalletAddress()
   });
 });
 
@@ -248,21 +306,30 @@ if (ENABLE_MULTIPLAYER) {
   console.log('Multiplayer mode disabled');
 }
 
+// Initialize NFT service
+nftService.initialize().then(initialized => {
+  if (initialized) {
+    console.log('✅ NFT minting is ready');
+  } else {
+    console.log('❌ NFT minting is disabled (wallet not configured)');
+  }
+});
+
 // Start the server using the HTTP server, not Express app
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
-  
+
   if (isDev) {
     console.log(`DEVELOPMENT MODE: LiveReload is active - game will refresh when files change`);
     console.log(`Open your browser to http://localhost:${PORT}/index.html to play the game`);
   } else {
     console.log(`PRODUCTION MODE: LiveReload is disabled`);
   }
-  
+
   if (ENABLE_MULTIPLAYER) {
     console.log(`WebRTC signaling server running (multiplayer enabled)`);
     console.log(`To test multiplayer: open one browser normally, then open another with "?join=true" added to URL`);
   }
-  
+
   console.log(`Press Ctrl+C to stop the server`);
 });

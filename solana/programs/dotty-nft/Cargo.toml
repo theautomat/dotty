@@ -1,0 +1,21 @@
+[package]
+name = "dotty-nft"
+version = "0.1.0"
+description = "NFT minting program for Dotty collectibles"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "dotty_nft"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = "0.30.1"
+mpl-token-metadata = "4.1.2"

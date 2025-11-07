@@ -1,11 +1,11 @@
 /**
- * FlyByAsteroid.js - Special type of asteroid that doesn't wrap around boundary
+ * FlyByAsteroid - Special type of asteroid that doesn't wrap around boundary
  * Extends the Asteroid class but gets removed once it leaves the play area
  */
-import Asteroid from './Asteroid.js';
-import GameTheme from '../game/GameTheme.js';
-import GeometryFactory from './shapes/GeometryFactory.js';
-import GameConfig from '../game/GameConfig.js'; // Import GameConfig for global settings
+import Asteroid from './Asteroid';
+import GameTheme from '../game/GameTheme';
+import GeometryFactory from './shapes/GeometryFactory';
+import GameConfig from '../game/GameConfig'; // Import GameConfig for global settings
 
 class FlyByAsteroid extends Asteroid {
     constructor(params = {}) {

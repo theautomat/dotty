@@ -7,7 +7,7 @@
 import { html, render } from 'https://esm.sh/htm/preact/standalone';
 
 // Import the SoundManager singleton
-import soundManager from '../managers/SoundManager.js';
+import soundManager from '../managers/SoundManager';
 
 /**
  * Help Menu Preact component

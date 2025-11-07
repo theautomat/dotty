@@ -5,8 +5,8 @@
 // Using the global THREE object
 import { LevelConfig } from '../../game/index.js';
 import { CollectibleConfig, Collectible } from '../collectibles/index.js';
-import soundManager from '../../managers/SoundManager.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
+import soundManager from '../../managers/SoundManager';
+import GeometryFactory from '../shapes/GeometryFactory';
 
 class LevelTransitionDisplay {
     /**

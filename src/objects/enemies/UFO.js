@@ -4,11 +4,11 @@
  * hovers at a distance, and fires charged energy orbs
  */
 import Enemy from './Enemy.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
-import EnemyConfig from './EnemyConfig.js';
+import GeometryFactory from '../shapes/GeometryFactory';
+import EnemyConfig from './EnemyConfig';
 import EnemyWeapon from './EnemyWeapon.js';
-import GameConfig from '../../game/GameConfig.js';
-import soundManager from '../../managers/SoundManager.js';
+import GameConfig from '../../game/GameConfig';
+import soundManager from '../../managers/SoundManager';
 
 class UFO extends Enemy {
     constructor(scene, position, params = {}) {

@@ -2,7 +2,7 @@
  * CollectibleDisplay.js - Base class for displaying collectible items in the HUD
  * Provides consistent API for both ore and power-up displays
  */
-import GeometryFactory from '../shapes/GeometryFactory.js';
+import GeometryFactory from '../shapes/GeometryFactory';
 
 class CollectibleDisplay {
     constructor(options = {}) {

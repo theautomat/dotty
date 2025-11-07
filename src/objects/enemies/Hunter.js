@@ -4,8 +4,8 @@
  */
 import Enemy from './Enemy.js';
 import * as THREE from 'three';
-import GeometryFactory from '../shapes/GeometryFactory.js';
-import soundManager from '../../managers/SoundManager.js';
+import GeometryFactory from '../shapes/GeometryFactory';
+import soundManager from '../../managers/SoundManager';
 import explosionManager from '../../managers/ExplosionManager.js';
 
 class Hunter extends Enemy {

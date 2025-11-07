@@ -2,7 +2,7 @@
  * GameCompletionDisplay.js - 3D component for game completion visual
  * Displays when the player completes all levels
  */
-import GeometryFactory from '../shapes/GeometryFactory.js';
+import GeometryFactory from '../shapes/GeometryFactory';
 
 class GameCompletionDisplay {
     /**

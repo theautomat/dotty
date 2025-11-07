@@ -11,8 +11,8 @@
  */
 
 import Boss from './Boss.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
-//import { playSound } from '../../managers/SoundManager.js';
+import GeometryFactory from '../shapes/GeometryFactory';
+//import { playSound } from '../../managers/SoundManager';
 
 class SphereBoss extends Boss {
     constructor(scene, position = new THREE.Vector3(), params = {}) {

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import BaseInstanceManager from './BaseInstanceManager.js';
-import GameTheme from '../game/GameTheme.js';
-import ExplosionFragment from '../objects/ExplosionFragment.js';
+import BaseInstanceManager from './BaseInstanceManager';
+import GameTheme from '../game/GameTheme';
+import ExplosionFragment from '../objects/ExplosionFragment';
 
 // Maximum number of particles to support 
 const MAX_PARTICLES = 3000;

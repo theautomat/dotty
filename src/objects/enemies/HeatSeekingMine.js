@@ -3,11 +3,11 @@
  * Follows the player at a slow pace and explodes when it gets close enough
  */
 import EnemyWeapon from './EnemyWeapon.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
-import GameObject from '../GameObject.js';
+import GeometryFactory from '../shapes/GeometryFactory';
+import GameObject from '../GameObject';
 import * as THREE from 'three';
-import soundManager from '../../managers/SoundManager.js';
-import GameConfig from '../../game/GameConfig.js'; // Import GameConfig for global settings
+import soundManager from '../../managers/SoundManager';
+import GameConfig from '../../game/GameConfig'; // Import GameConfig for global settings
 
 class HeatSeekingMine extends EnemyWeapon {
     constructor(scene, position, direction, playerPosition, params = {}) {

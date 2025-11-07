@@ -7,7 +7,7 @@
 
 import { initEntryScreen, updateEntryScreen, toggleEntryScreen } from '../entry-screen/components/EntryScreen.js';
 import gameSessionManager from './GameSessionManager.js';
-import gameStateMachine, { GAME_STATES } from '../game/GameStateMachine.js';
+import gameStateMachine, { GAME_STATES } from '../game/GameStateMachine';
 
 class EntryScreenManager {
   constructor(game) {

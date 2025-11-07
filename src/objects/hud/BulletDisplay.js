@@ -2,8 +2,8 @@
  * BulletDisplay.js - 3D display of bullet charges for the HUD
  * Shows available bullet charges as part of the 3D HUD system
  */
-import Bullet from '../Bullet.js';
-import BulletConfig from '../BulletConfig.js';
+import Bullet from '../Bullet';
+import BulletConfig from '../BulletConfig';
 
 class BulletDisplay {
     constructor(options = {}) {

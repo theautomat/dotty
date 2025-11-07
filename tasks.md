@@ -1,5 +1,334 @@
 # Dotty Game Development Tasks
 
+## 🚀 ACTIVE: React + TypeScript Migration
+
+This is a major architectural refactoring to modernize the codebase with React and TypeScript.
+
+### Phase 1: Initial Setup & Configuration ✅ COMPLETED
+- [x] Install React dependencies
+  - [x] Add `react` and `react-dom` to package.json (React 19)
+  - [x] Add `@types/react` and `@types/react-dom`
+  - [x] Add `@types/three` for Three.js types
+  - [x] Add `@types/node` for Node.js types
+- [x] Install TypeScript
+  - [x] Add `typescript` as dev dependency (v5.9.3)
+  - [x] Add `@typescript-eslint/parser` and `@typescript-eslint/eslint-plugin`
+- [x] Update Vite configuration
+  - [x] Install `@vitejs/plugin-react`
+  - [x] Update `vite.config.js` → `vite.config.mts` (ESM TypeScript)
+  - [x] Configure React plugin
+  - [x] Configure TypeScript settings in Vite
+- [x] Create TypeScript configuration
+  - [x] Create `tsconfig.json` with appropriate compiler options
+  - [x] Create `tsconfig.node.json` for Node.js scripts
+  - [x] Configure paths, module resolution, JSX settings
+- [x] **TESTED**: Build successful, server runs, game loads correctly
+
+**Notes:**
+- Using React 19 (bleeding edge!) with `--legacy-peer-deps` flag
+- Vite config renamed to `.mts` to handle ESM modules while keeping server as CommonJS
+- All dependencies installed and build passes successfully
+
+### Phase 2: Dependency Cleanup ✅ COMPLETED
+- [x] Remove Preact
+  - [x] Remove all CDN imports of Preact (`https://esm.sh/htm/preact/standalone`)
+  - [x] Stubbed out Preact components for now
+- [x] Update Solana wallet dependencies
+  - [x] Verify `@solana/wallet-adapter-react` is installed (already in package.json)
+  - [x] Verify `@solana/wallet-adapter-react-ui` is installed (already in package.json)
+  - [x] `@solana/wallet-adapter-wallets` confirmed installed
+  - [x] These are now USABLE since we have React!
+- [x] **TESTED**: Build successful, game loads and runs without Preact
+
+**Notes:**
+- Replaced `main.js` leaderboard (540+ lines of Preact) with simple stub
+- Replaced `EntryScreen.js` with bypass stub - game starts immediately
+- Stubbed `GameOverOverlay.js`, `ControlsBar.js`
+- Bundle size reduced: 1.26MB → 1.18MB
+- Game runs without errors, entry screen bypassed for testing
+- Components marked for React migration in Phase 9
+
+### Phase 3: Create Type Definitions ✅ COMPLETED
+- [x] Create global type definitions
+  - [x] Create `src/types/global.d.ts` for window extensions
+  - [x] Define types for `window.THREE`, `window.game`, etc.
+  - [x] Create `src/types/solana.d.ts` for Solana Phantom types
+- [x] Create game-specific type definitions
+  - [x] Create `src/types/game.ts` for game state types
+  - [x] Create `src/types/objects.ts` for game object types
+  - [x] Create `src/types/managers.ts` for manager interfaces
+  - [x] Create `src/types/firebase.ts` for Firebase data structures
+  - [x] Create `src/types/index.ts` to export all types
+- [x] **TESTED**: TypeScript compilation successful, build works
+
+**Notes:**
+- Created comprehensive type system covering all game aspects
+- Enums for GameState, EnemyType, PowerUpType, CollectibleType, SoundType
+- Interfaces for game objects, managers, Firebase data, Solana wallet
+- Global window extensions for THREE, game instance, Socket.IO, Phantom
+- All types are now available for import throughout the codebase
+
+### Phase 4: Convert Core Infrastructure (No React Yet) ✅ COMPLETED
+- [x] Convert utility files to TypeScript
+  - [x] `src/utils/WorldUtils.js` → `WorldUtils.ts`
+  - [ ] `src/utils/wallet-connection.js` → (will be replaced with React wallet adapter in Phase 10)
+- [x] Convert configuration files to TypeScript
+  - [x] `src/game/GameConfig.js` → `GameConfig.ts`
+  - [x] `src/game/GameTheme.js` → `GameTheme.ts`
+  - [x] `src/game/LevelConfig.js` → `LevelConfig.ts` (simplified to 2 levels)
+  - [ ] `src/objects/BulletConfig.js` → `BulletConfig.ts` (deferred to Phase 5)
+  - [ ] `src/objects/collectibles/CollectibleConfig.js` → `CollectibleConfig.ts` (deferred to Phase 5)
+  - [ ] `src/objects/enemies/EnemyConfig.js` → `EnemyConfig.ts` (deferred to Phase 5)
+  - [ ] `src/objects/powers/PowerUpConfig.js` → `PowerUpConfig.ts` (deferred to Phase 5)
+- [ ] Convert game state management to TypeScript (deferred to next session)
+  - [ ] `src/game/GameState.js` → `GameState.ts`
+  - [ ] `src/game/GameStateMachine.js` → `GameStateMachine.ts`
+  - [ ] `src/game/GameStats.js` → `GameStats.ts`
+  - [ ] `src/game/Timer.js` → `Timer.ts`
+- [x] **TESTED**: Build successful, game compiles correctly
+
+**Notes:**
+- Converted 4 core files to TypeScript with proper type definitions
+- Simplified LevelConfig from 5 levels to 2 levels (removed unused levels 3-5)
+- Updated all imports throughout codebase (removed `.js` extensions)
+- Bundle size stable: ~1.18MB
+- Remaining config files (Bullet, Collectible, Enemy, PowerUp) will be done with Phase 5 game objects
+
+### Phase 5: Convert Game Objects to TypeScript (IN PROGRESS)
+- [x] Convert base classes
+  - [x] `src/objects/GameObject.js` → `GameObject.ts` ✅
+  - [ ] `src/objects/shapes/GeometryFactory.js` → `GeometryFactory.ts`
+- [ ] Remaining: 74 JavaScript files to convert
+- [ ] Convert player and world objects
+  - [ ] `src/objects/WorldBoundary.js` → `WorldBoundary.ts`
+  - [ ] `src/objects/Bullet.js` → `Bullet.ts`
+  - [ ] `src/objects/Asteroid.js` → `Asteroid.ts`
+  - [ ] `src/objects/FlyByAsteroid.js` → `FlyByAsteroid.ts`
+  - [ ] `src/objects/ExplosionFragment.js` → `ExplosionFragment.ts`
+- [ ] Convert collectibles
+  - [ ] `src/objects/collectibles/Collectible.js` → `Collectible.ts`
+  - [ ] `src/objects/collectibles/CollectibleTypes.js` → `CollectibleTypes.ts`
+  - [ ] `src/objects/collectibles/index.js` → `index.ts`
+- [ ] Convert enemies
+  - [ ] `src/objects/enemies/Enemy.js` → `Enemy.ts`
+  - [ ] `src/objects/enemies/EnemyWeapon.js` → `EnemyWeapon.ts`
+  - [ ] `src/objects/enemies/Boss.js` → `Boss.ts`
+  - [ ] `src/objects/enemies/SphereBoss.js` → `SphereBoss.ts`
+  - [ ] `src/objects/enemies/Hunter.js` → `Hunter.ts`
+  - [ ] `src/objects/enemies/Patroller.js` → `Patroller.ts`
+  - [ ] `src/objects/enemies/Tetra.js` → `Tetra.ts`
+  - [ ] `src/objects/enemies/UFO.js` → `UFO.ts`
+  - [ ] `src/objects/enemies/HeatSeekingMine.js` → `HeatSeekingMine.ts`
+  - [ ] `src/objects/enemies/EnemyTypes.js` → `EnemyTypes.ts`
+  - [ ] `src/objects/enemies/index.js` → `index.ts`
+- [ ] Convert power-ups
+  - [ ] `src/objects/powers/PowerUp.js` → `PowerUp.ts`
+
+### Phase 6: Convert Managers to TypeScript
+- [ ] Convert manager base class
+  - [ ] `src/managers/BaseInstanceManager.js` → `BaseInstanceManager.ts`
+- [ ] Convert game managers
+  - [ ] `src/managers/AsteroidManager.js` → `AsteroidManager.ts`
+  - [ ] `src/managers/BulletManager.js` → `BulletManager.ts`
+  - [ ] `src/managers/CollectibleManager.js` → `CollectibleManager.ts`
+  - [ ] `src/managers/CollisionManager.js` → `CollisionManager.ts`
+  - [ ] `src/managers/EnemyManager.js` → `EnemyManager.ts`
+  - [ ] `src/managers/ExplosionManager.js` → `ExplosionManager.ts`
+  - [ ] `src/managers/LevelManager.js` → `LevelManager.ts`
+  - [ ] `src/managers/PowerUpManager.js` → `PowerUpManager.ts`
+  - [ ] `src/managers/SoundManager.js` → `SoundManager.ts`
+  - [ ] `src/managers/GameSessionManager.js` → `GameSessionManager.ts`
+  - [ ] `src/managers/EntryScreenManager.js` → `EntryScreenManager.ts`
+
+### Phase 7: Convert Core Game Files to TypeScript
+- [ ] Convert game core
+  - [ ] `src/game/Controls.js` → `Controls.ts`
+  - [ ] `src/game/StartScreen.js` → `StartScreen.ts`
+  - [ ] `src/game/Game.js` → `Game.ts` (main game controller)
+  - [ ] `src/game/index.js` → `index.ts`
+- [ ] Convert effects
+  - [ ] `src/effects/ASCIIEffect.js` → `ASCIIEffect.ts`
+- [ ] Convert audio
+  - [ ] `src/audio/SoundTypes.js` → `SoundTypes.ts`
+
+### Phase 8: Convert HUD Components to TypeScript (Still vanilla)
+Note: These will remain vanilla Three.js objects for now, just with TypeScript
+- [ ] `src/objects/hud/HUD.js` → `HUD.ts`
+- [ ] `src/objects/hud/BulletDisplay.js` → `BulletDisplay.ts`
+- [ ] `src/objects/hud/CollectibleDisplay.js` → `CollectibleDisplay.ts`
+- [ ] `src/objects/hud/DeathIndicator.js` → `DeathIndicator.ts`
+- [ ] `src/objects/hud/GameCompletionDisplay.js` → `GameCompletionDisplay.ts`
+- [ ] `src/objects/hud/GameOverStats.js` → `GameOverStats.ts`
+- [ ] `src/objects/hud/LevelTransitionDisplay.js` → `LevelTransitionDisplay.ts`
+- [ ] `src/objects/hud/MiningDisplay.js` → `MiningDisplay.ts`
+- [ ] `src/objects/hud/PowerUpDisplay.js` → `PowerUpDisplay.ts`
+- [ ] `src/objects/hud/ScreenFlash.js` → `ScreenFlash.ts`
+- [ ] `src/objects/hud/ShieldEffect.js` → `ShieldEffect.ts`
+- [ ] `src/objects/hud/TimerDisplay.js` → `TimerDisplay.ts`
+- [ ] `src/objects/hud/index.js` → `index.ts`
+
+### Phase 9: Convert React Components (From Preact/Vanilla to React)
+- [ ] Create React app structure
+  - [ ] Create `src/App.tsx` as main React component
+  - [ ] Create `src/main.tsx` to replace `main.js`
+  - [ ] Set up React root and rendering
+- [ ] Convert Entry Screen to React
+  - [ ] Create `src/components/EntryScreen.tsx`
+  - [ ] Remove Preact imports, use React
+  - [ ] Convert htm template literals to JSX
+  - [ ] Add proper TypeScript types for props
+  - [ ] Add proper event handler types
+- [ ] Create Leaderboard React component
+  - [ ] Create `src/components/Leaderboard.tsx`
+  - [ ] Remove inline Preact code from `main.js`
+  - [ ] Convert to proper React component with TypeScript
+  - [ ] Add types for leaderboard data
+  - [ ] Add loading and error states with proper types
+- [ ] Convert Help Menu to React (optional)
+  - [ ] Create `src/components/HelpMenu.tsx`
+  - [ ] Convert `src/components/HelpMenu.js` to React component
+  - [ ] Or keep as vanilla JS if it's working well
+- [ ] Convert Controls Bar to React (optional)
+  - [ ] Create `src/components/ControlsBar.tsx`
+  - [ ] Convert `src/components/ControlsBar.js` to React
+  - [ ] Or keep as vanilla JS if preferred
+- [ ] Convert Game Over Overlay to React
+  - [ ] Create `src/components/GameOverOverlay.tsx`
+  - [ ] Convert `src/components/GameOverOverlay.js` to React
+  - [ ] Add proper TypeScript types
+
+### Phase 10: Implement Solana Wallet Adapter (React)
+- [ ] Create wallet provider setup
+  - [ ] Create `src/components/WalletProvider.tsx`
+  - [ ] Set up `WalletAdapterNetwork` (devnet/mainnet)
+  - [ ] Configure wallet list (Phantom, Solflare, etc.)
+  - [ ] Wrap app with `ConnectionProvider` and `WalletProvider`
+- [ ] Create wallet UI components
+  - [ ] Create `src/components/WalletButton.tsx` using adapter UI
+  - [ ] Replace custom `WalletUI.js` component
+  - [ ] Add wallet modal for multi-wallet support
+- [ ] Update wallet integration
+  - [ ] Remove `src/utils/wallet-connection.js` (custom implementation)
+  - [ ] Create `src/hooks/useWallet.ts` hook wrapper
+  - [ ] Create `src/hooks/useSolana.ts` for Solana interactions
+  - [ ] Update NFT minting to use wallet adapter
+- [ ] Update leaderboard with wallet integration
+  - [ ] Use wallet adapter in Leaderboard component
+  - [ ] Show connected wallet instead of fingerprint
+  - [ ] Optional: authenticate with wallet signature
+
+### Phase 11: Convert Firebase & Backend Scripts
+- [ ] Convert Firebase scripts to TypeScript
+  - [ ] `src/scripts/firebase-config.js` → `firebase-config.ts`
+  - [ ] `src/scripts/firebase-module.js` → `firebase-module.ts`
+  - [ ] `src/scripts/firebase-service.js` → `firebase-service.ts`
+  - [ ] Add proper types for Firestore documents
+- [ ] Convert other scripts
+  - [ ] `src/scripts/fingerprint.js` → `fingerprint.ts`
+  - [ ] `src/scripts/webrtc-client.js` → `webrtc-client.ts` (or remove if not needed)
+  - [ ] `src/scripts/webrtc-test.js` → `webrtc-test.ts` (or remove if not needed)
+- [ ] Update server files (if needed)
+  - [ ] Consider converting `server.js` to `server.ts`
+  - [ ] Add types for Express routes and middleware
+  - [ ] Add types for NFT service
+
+### Phase 12: Update HTML Entry Points
+- [ ] Update `index.html`
+  - [ ] Change script tag from `/main.js` to `/src/main.tsx`
+  - [ ] Add root div for React app: `<div id="root"></div>`
+  - [ ] Keep game container separate or integrate with React
+  - [ ] Update meta tags if needed
+- [ ] Update `leaderboard.html`
+  - [ ] Point to new React app entry
+  - [ ] Remove inline Preact loading code
+  - [ ] Simplify structure
+- [ ] Update or remove `entry-screen.html`
+  - [ ] May no longer be needed if integrated into React app
+  - [ ] Decide if it should be a separate page or part of main app
+
+### Phase 13: Testing & Validation
+- [ ] Test TypeScript compilation
+  - [ ] Run `npm run type-check` and fix all type errors
+  - [ ] Ensure no `any` types where possible
+  - [ ] Add explicit return types to functions
+- [ ] Test build process
+  - [ ] Run `npm run build` successfully
+  - [ ] Check bundle size compared to before
+  - [ ] Verify sourcemaps are generated
+- [ ] Test game functionality
+  - [ ] Game loads and initializes correctly
+  - [ ] Player movement works (WASD)
+  - [ ] Collectibles spawn and can be collected
+  - [ ] Enemies spawn and behave correctly (if enabled)
+  - [ ] Scoring and stats work
+  - [ ] Level progression works
+- [ ] Test React components
+  - [ ] Entry screen displays and functions
+  - [ ] Leaderboard loads and displays data
+  - [ ] Game over overlay shows correctly
+  - [ ] Help menu works
+- [ ] Test Solana integration
+  - [ ] Wallet adapter UI appears
+  - [ ] Can connect to Phantom wallet
+  - [ ] Can connect to other wallets (Solflare, etc.)
+  - [ ] NFT minting works with new adapter
+  - [ ] Transaction signing works
+- [ ] Test Firebase integration
+  - [ ] Scores save to Firestore
+  - [ ] Leaderboard fetches and displays correctly
+  - [ ] Error handling works
+- [ ] Browser compatibility testing
+  - [ ] Test in Chrome
+  - [ ] Test in Firefox
+  - [ ] Test in Safari
+  - [ ] Test on mobile devices
+
+### Phase 14: Cleanup & Optimization
+- [ ] Remove old files
+  - [ ] Delete all `.js` files that have been converted to `.ts`/`.tsx`
+  - [ ] Remove old `main.js` (replaced by `main.tsx`)
+  - [ ] Remove `src/components/WalletUI.js` (replaced by wallet adapter)
+  - [ ] Remove `src/utils/wallet-connection.js` (replaced by hooks)
+- [ ] Update imports throughout codebase
+  - [ ] Search for any remaining `.js` extensions in imports
+  - [ ] Update to `.ts`/`.tsx` or remove extensions
+- [ ] Code quality improvements
+  - [ ] Add ESLint configuration for TypeScript
+  - [ ] Run linter and fix issues
+  - [ ] Add Prettier for code formatting
+  - [ ] Consider adding `strict: true` to tsconfig.json
+- [ ] Documentation updates
+  - [ ] Update README.md with TypeScript/React info
+  - [ ] Document new project structure
+  - [ ] Add instructions for development with TypeScript
+  - [ ] Update architecture.md with new tech stack
+- [ ] Performance optimization
+  - [ ] Check bundle size and optimize if needed
+  - [ ] Implement code splitting for routes
+  - [ ] Lazy load heavy components
+  - [ ] Optimize Three.js imports
+
+### Phase 15: Final Verification
+- [ ] Code review
+  - [ ] Review all TypeScript conversions for quality
+  - [ ] Check for proper type safety
+  - [ ] Verify no type errors or warnings
+- [ ] Production build test
+  - [ ] Build for production: `npm run build`
+  - [ ] Test production build locally
+  - [ ] Verify all features work in production mode
+- [ ] Git commit and documentation
+  - [ ] Commit all changes with clear message
+  - [ ] Tag release as major version bump
+  - [ ] Update CHANGELOG if you have one
+  - [ ] Push to GitHub
+- [ ] Deployment preparation
+  - [ ] Update deployment scripts if needed
+  - [ ] Test deployment to staging environment
+  - [ ] Verify environment variables work in production
+
+---
+
 ## 🔥 High Priority: Infrastructure & Security
 
 ### Environment & Security Setup

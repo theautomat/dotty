@@ -1,0 +1,168 @@
+/**
+ * Timer.ts - Pure logic timer for game events
+ * Handles time tracking without any visual representation
+ */
+class Timer {
+  private durationSeconds: number;
+  private remainingSeconds: number;
+  private startTime: number | null;
+  private isRunning: boolean;
+  private onCompleteCallback: (() => void) | null;
+  private hasEnded: boolean;
+  private callbackExecuted: boolean;
+  private _lastWholeSeconds: number;
+
+  constructor(durationSeconds: number = 100) {
+    this.durationSeconds = durationSeconds;
+    this.remainingSeconds = durationSeconds;
+    this.startTime = null;
+    this.isRunning = false;
+    this.onCompleteCallback = null;
+    this.hasEnded = false;
+    this.callbackExecuted = false;
+    this._lastWholeSeconds = 0;
+  }
+
+  /**
+   * Set callback function to call when timer completes
+   * @param callback - Function to call when timer ends
+   */
+  setOnComplete(callback: () => void): void {
+    this.onCompleteCallback = callback;
+  }
+
+  /**
+   * Starts the timer countdown
+   */
+  start(): void {
+    this.startTime = Date.now();
+    this.isRunning = true;
+    this.hasEnded = false;
+  }
+
+  /**
+   * Pauses the timer
+   */
+  pause(): void {
+    if (this.isRunning) {
+      this.remainingSeconds = this.getTimeRemaining();
+      this.isRunning = false;
+    }
+  }
+
+  /**
+   * Resumes the timer
+   */
+  resume(): void {
+    if (!this.isRunning && !this.hasEnded) {
+      this.startTime = Date.now() - ((this.durationSeconds - this.remainingSeconds) * 1000);
+      this.isRunning = true;
+    }
+  }
+
+  /**
+   * Resets the timer to the initial duration
+   */
+  reset(): void {
+    this.remainingSeconds = this.durationSeconds;
+    this.startTime = null;
+    this.isRunning = false;
+    this.hasEnded = false;
+    this.callbackExecuted = false; // Important: reset callback execution flag
+  }
+
+  /**
+   * Sets a new duration for the timer
+   * @param seconds - The new duration in seconds
+   */
+  setDuration(seconds: number): void {
+    this.durationSeconds = seconds;
+    this.reset();
+  }
+
+  /**
+   * Gets the remaining time in seconds
+   * @returns Remaining time in seconds
+   */
+  getTimeRemaining(): number {
+    if (!this.isRunning) return this.remainingSeconds;
+
+    const elapsedMilliseconds = Date.now() - (this.startTime || 0);
+    const elapsedSeconds = elapsedMilliseconds / 1000;
+    return Math.max(0, this.durationSeconds - elapsedSeconds);
+  }
+
+  /**
+   * Gets the elapsed time in seconds
+   * @returns Elapsed time in seconds
+   */
+  getElapsedTime(): number {
+    if (!this.isRunning && this.startTime === null) return 0;
+
+    if (!this.isRunning) {
+      return this.durationSeconds - this.remainingSeconds;
+    }
+
+    const elapsedMilliseconds = Date.now() - (this.startTime || 0);
+    const elapsedSeconds = elapsedMilliseconds / 1000;
+    return Math.min(this.durationSeconds, elapsedSeconds);
+  }
+
+  /**
+   * Gets the time as a percentage (0-1) of completion
+   * @returns Percentage of time elapsed (0-1)
+   */
+  getPercentComplete(): number {
+    return this.getElapsedTime() / this.durationSeconds;
+  }
+
+  /**
+   * Gets percentage of time remaining (0-1)
+   * @returns Percentage of time remaining (0-1)
+   */
+  getPercentRemaining(): number {
+    return this.getTimeRemaining() / this.durationSeconds;
+  }
+
+  /**
+   * Updates the timer state
+   * @returns True if timer is still running, false if it has ended
+   */
+  update(): boolean {
+    if (!this.isRunning) {
+      return !this.hasEnded;
+    }
+
+    // Calculate remaining time
+    const remaining = this.getTimeRemaining();
+    this.remainingSeconds = remaining;
+
+    // Track whole seconds remaining (for potential events triggered at specific times)
+    const wholeSecondsRemaining = Math.ceil(remaining);
+    if (wholeSecondsRemaining !== this._lastWholeSeconds) {
+      this._lastWholeSeconds = wholeSecondsRemaining;
+    }
+
+    // Check if timer has ended
+    if (remaining <= 0) {
+      this.isRunning = false;
+      this.hasEnded = true;
+
+      // Call the completion callback if defined
+      if (this.onCompleteCallback && !this.callbackExecuted) {
+        this.callbackExecuted = true;
+        this.onCompleteCallback();
+      } else if (!this.onCompleteCallback) {
+        console.error("No timer completion callback defined!");
+      } else if (this.callbackExecuted) {
+        console.warn("Timer callback already executed, not calling again");
+      }
+
+      return false;
+    }
+
+    return true;
+  }
+}
+
+export default Timer;

@@ -2,10 +2,10 @@
  * GameOverStatsDisplay.js - Enhanced display of game over statistics
  * Shows collected ores, asteroid count, enemies destroyed and total score using GeometryFactory
  */
-import GeometryFactory from '../shapes/GeometryFactory.js';
+import GeometryFactory from '../shapes/GeometryFactory';
 import { COLLECTIBLE_TYPES } from '../collectibles/index.js';
-import CollectibleConfig from '../collectibles/CollectibleConfig.js';
-import EnemyConfig from '../enemies/EnemyConfig.js';
+import CollectibleConfig from '../collectibles/CollectibleConfig';
+import EnemyConfig from '../enemies/EnemyConfig';
 
 class GameOverStatsDisplay {
     /**

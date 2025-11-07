@@ -1,12 +1,12 @@
 /**
  * EnemyWeapon.js - Base class for enemy projectiles and weapons
  */
-import GameObject from '../GameObject.js';
+import GameObject from '../GameObject';
 import * as THREE from 'three';
-import soundManager from '../../managers/SoundManager.js';
-import GameConfig from '../../game/GameConfig.js'; // Import GameConfig for global settings
-import { isOutsideWorldBoundary } from '../../utils/WorldUtils.js'; // Import for boundary checking
-import GeometryFactory from '../shapes/GeometryFactory.js'; // Import GeometryFactory for projectile geometry
+import soundManager from '../../managers/SoundManager';
+import GameConfig from '../../game/GameConfig'; // Import GameConfig for global settings
+import { isOutsideWorldBoundary } from '../../utils/WorldUtils'; // Import for boundary checking
+import GeometryFactory from '../shapes/GeometryFactory'; // Import GeometryFactory for projectile geometry
 
 class EnemyWeapon extends GameObject {
     constructor(scene, position, direction, params = {}) {

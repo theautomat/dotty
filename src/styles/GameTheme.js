@@ -1,5 +1,5 @@
 /**
- * GameTheme.js
+ * GameTheme
  * Defines visual styles and colors for game elements.
  */
 import * as THREE from 'three';

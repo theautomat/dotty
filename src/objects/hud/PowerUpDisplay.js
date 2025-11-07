@@ -2,7 +2,7 @@
  * PowerUpDisplay.js - Displays active power-ups at the top of the HUD
  * with responsive centering and animations
  */
-import GeometryFactory from '../shapes/GeometryFactory.js';
+import GeometryFactory from '../shapes/GeometryFactory';
 
 class PowerUpDisplay {
     constructor() {

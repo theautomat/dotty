@@ -5,8 +5,8 @@
  * Provides visual feedback when the shield blocks projectiles or asteroids
  */
 
-import GameObject from '../GameObject.js';
-import soundManager from '../../managers/SoundManager.js';
+import GameObject from '../GameObject';
+import soundManager from '../../managers/SoundManager';
 
 class ShieldEffect extends GameObject {
     /**

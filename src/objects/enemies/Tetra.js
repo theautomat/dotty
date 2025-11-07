@@ -5,9 +5,9 @@
  * Enhanced behavior: Drops heat-seeking mines that track the player.
  */
 import Enemy from './Enemy.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
-import soundManager from '../../managers/SoundManager.js';
-import { isOutsideWorldBoundary } from '../../utils/WorldUtils.js';
+import GeometryFactory from '../shapes/GeometryFactory';
+import soundManager from '../../managers/SoundManager';
+import { isOutsideWorldBoundary } from '../../utils/WorldUtils';
 import * as THREE from 'three';
 
 class Tetra extends Enemy {

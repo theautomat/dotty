@@ -2,8 +2,8 @@
  * MiningDisplay.js - 3D display of mining resources for the HUD
  * Uses the unified GeometryFactory for consistent rendering
  */
-import CollectibleConfig from '../collectibles/CollectibleConfig.js';
-import GeometryFactory from '../shapes/GeometryFactory.js';
+import CollectibleConfig from '../collectibles/CollectibleConfig';
+import GeometryFactory from '../shapes/GeometryFactory';
 
 class MiningDisplay {
     constructor() {

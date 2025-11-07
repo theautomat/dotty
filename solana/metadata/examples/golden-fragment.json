@@ -1,0 +1,33 @@
+{
+  "name": "Golden Asteroid Fragment",
+  "symbol": "DOTTY",
+  "description": "A rare golden fragment discovered in the depths of space. This precious mineral shimmers with an otherworldly glow.",
+  "image": "https://placeholder.com/golden-fragment.png",
+  "attributes": [
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Asteroid Fragment"
+    },
+    {
+      "trait_type": "Color",
+      "value": "Gold"
+    },
+    {
+      "trait_type": "Discovery Date",
+      "value": "2025-11-02"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://placeholder.com/golden-fragment.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}
