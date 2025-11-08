@@ -209,210 +209,98 @@ anchor test --provider.cluster devnet --skip-local-validator
 
 ## $BOOTY Token Setup
 
-The $BOOTY token is the in-game currency used for ship movement and earned by burying treasure. It's implemented as a custom SPL token with mining (minting) and burning capabilities.
+The $BOOTY token is the in-game currency used for ship movement and earned by burying treasure. It's implemented as a **standard SPL token** integrated directly into the game program - no separate token program needed!
+
+### How It Works
+
+The game program includes three BOOTY-related instructions:
+- `initialize_booty_mint` - Creates the standard SPL token (one-time setup)
+- `mine_booty` - Mints BOOTY to players when they bury treasure
+- `burn_booty_for_travel` - Burns BOOTY when players move their ships
 
 ### Token Features
 
+- **Standard SPL Token**: Works with all Solana wallets and exchanges
 - **Mining**: Players earn BOOTY when they bury treasure (deposit tokens)
 - **Burning**: Players spend BOOTY to move their ships around the map
-- **Supply Tracking**: Tracks total mined and total burned tokens
+- **Supply Tracking**: Tracks total mined and total burned in game state
 - **Configurable**: Optional max supply limit
 - **Decimal Precision**: 9 decimals (standard for Solana tokens)
+- **Single Program**: No separate token program needed - all logic in game program
 
-### Build BOOTY Token Program
+### Build & Test
 
 ```bash
 cd solana
 
-# Build both programs (game + booty)
+# Build the game program (includes BOOTY functionality)
 anchor build
 
-# Build only booty program
-anchor build --program-name booty
-```
-
-### Test BOOTY Token
-
-```bash
-cd solana
-
-# Run all tests including BOOTY token tests
+# Run all tests
 anchor test
-
-# Run only BOOTY token tests
-anchor test tests/booty.ts
 ```
 
-### Deploy to Devnet
+### Initialize BOOTY Token
+
+After deploying the game program, you need to initialize the BOOTY token mint (one-time):
 
 ```bash
-cd solana
+# This creates the SPL token mint and sets up tracking
+anchor run initialize-booty -- --decimals 9
 
-# Option 1: Use the deployment script (recommended)
-./scripts/deploy-booty-devnet.sh
-
-# Option 2: Manual deployment
-anchor deploy --provider.cluster devnet --program-name booty
-
-# Initialize the token after deployment
-npx ts-node scripts/initialize-booty.ts devnet
+# Or call via TypeScript
+npx ts-node scripts/initialize-booty.ts
 ```
 
-The deployment script will:
-1. Configure Solana CLI for devnet
-2. Check wallet balance (requests airdrop if needed)
-3. Build the program
-4. Deploy to devnet
-5. Update Anchor.toml and lib.rs with the program ID
-6. Rebuild and redeploy with correct ID
-
-After deployment, you'll receive:
-- **Program ID**: The deployed program address
-- **Mint Address**: The BOOTY token mint (from initialization)
-- **Config PDA**: The program configuration account
-
-### Deploy to Mainnet
-
-**⚠️ WARNING**: Mainnet deployment uses REAL SOL and deploys to production. Only proceed when you've thoroughly tested on devnet.
-
-```bash
-cd solana
-
-# Use the mainnet deployment script
-./scripts/deploy-booty-mainnet.sh
-
-# Initialize the token
-npx ts-node scripts/initialize-booty.ts mainnet
-```
-
-The mainnet script includes:
-- Safety confirmations and warnings
-- Pre-deployment checklist
-- Balance verification (requires 5+ SOL)
-- Verifiable build
-- Deployment cost estimation
-- Automatic keypair backup
-- Post-deployment verification
-
-**Mainnet Prerequisites:**
-- Minimum 5 SOL in wallet
-- Tested on devnet ✅
-- All tests passing ✅
-- Code audited ✅
-
-### Token Program Structure
-
-```
-solana/programs/booty/
-├── src/
-│   └── lib.rs              # BOOTY token program
-├── Cargo.toml
-tests/
-└── booty.ts                # Comprehensive tests
-scripts/
-├── deploy-booty-devnet.sh  # Devnet deployment
-├── deploy-booty-mainnet.sh # Mainnet deployment
-└── initialize-booty.ts     # Token initialization
-```
+This creates:
+- **BOOTY Mint**: A standard SPL token mint
+- **BOOTY State PDA**: Tracks total mined/burned supply
+- Game program is set as the mint authority
 
 ### Using BOOTY Token in Your Game
 
-After deployment and initialization, integrate the token into your game:
-
 ```typescript
 import { Program } from "@coral-xyz/anchor";
-import { Booty } from "./target/types/booty";
+import { Game } from "./target/types/game";
 
-// Load the BOOTY program
-const bootyProgram = anchor.workspace.Booty as Program<Booty>;
+const gameProgram = anchor.workspace.Game as Program<Game>;
 
 // Mine BOOTY tokens for a player (when they bury treasure)
-await bootyProgram.methods
-  .mineTokens(new anchor.BN(1_000_000_000)) // 1 BOOTY
+await gameProgram.methods
+  .mineBooty(new anchor.BN(1_000_000_000)) // 1 BOOTY (9 decimals)
   .accounts({
-    mint: bootyMintAddress,
-    config: bootyConfigPda,
     player: playerPublicKey,
-    playerTokenAccount: playerTokenAccount,
-    payer: payerPublicKey,
-    // ... other accounts
+    bootyMint: bootyMintAddress,
+    playerBootyAccount: playerBootyTokenAccount,
+    bootyState: bootyStatePda,
+    tokenProgram: TOKEN_PROGRAM_ID,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+    systemProgram: SystemProgram.programId,
   })
+  .signers([playerKeypair])
   .rpc();
 
 // Burn BOOTY tokens (when player moves ship)
-await bootyProgram.methods
-  .burnTokens(new anchor.BN(500_000_000)) // 0.5 BOOTY
+await gameProgram.methods
+  .burnBootyForTravel(new anchor.BN(500_000_000)) // 0.5 BOOTY
   .accounts({
-    mint: bootyMintAddress,
-    config: bootyConfigPda,
     player: playerPublicKey,
-    playerTokenAccount: playerTokenAccount,
+    bootyMint: bootyMintAddress,
+    playerBootyAccount: playerBootyTokenAccount,
+    bootyState: bootyStatePda,
     tokenProgram: TOKEN_PROGRAM_ID,
   })
   .signers([playerKeypair])
   .rpc();
 ```
 
-### BOOTY Token Economics
+### Benefits of This Architecture
 
-**Earning BOOTY (Mining):**
-- Bury 100-999 tokens → Mine X BOOTY
-- Bury 1,000-9,999 tokens → Mine 2X BOOTY
-- Bury 10,000-99,999 tokens → Mine 5X BOOTY
-- Bury 100,000+ tokens → Mine 10X BOOTY
-
-**Spending BOOTY (Burning):**
-- Move 1 tile → 0.1 BOOTY
-- Move 10 tiles → 1 BOOTY
-- Teleport across map → 50 BOOTY
-
-*Note: These economics can be adjusted in your game logic.*
-
-### Managing BOOTY Token
-
-```bash
-# Check token configuration
-anchor run get-booty-config
-
-# Update mint authority (admin only)
-anchor run update-booty-authority
-
-# View token supply
-anchor run get-booty-supply
-
-# Update max supply (admin only)
-anchor run update-booty-max-supply
-```
-
-### Troubleshooting
-
-**Build errors:**
-```bash
-# Clean and rebuild
-anchor clean
-anchor build
-```
-
-**Test failures:**
-```bash
-# Run with verbose logging
-anchor test -- --nocapture
-
-# Test specific function
-anchor test -- test_name
-```
-
-**Deployment issues:**
-```bash
-# Check Solana config
-solana config get
-
-# Verify wallet balance
-solana balance
-
-# Check program deployment
-solana program show <PROGRAM_ID>
-```
+✅ **Simpler**: One program instead of two
+✅ **Standard**: Uses standard SPL tokens (works with all wallets)
+✅ **Cheaper**: No CPI overhead between programs
+✅ **Cleaner**: All game logic in one place
+✅ **Better**: Follows Solana best practices
 
 ## Project Structure
 
@@ -482,20 +370,18 @@ npm run dev         # Express server with nodemon
 ## Current Status
 
 **✅ Implemented:**
-- Solana game program (NFT minting + token deposits)
-- $BOOTY token program (mining/burning mechanics)
-- Comprehensive test suite (game + token)
+- Unified Solana game program (NFT minting + token deposits + BOOTY token)
+- $BOOTY token integrated as standard SPL token
+- Comprehensive test suite
 - Metadata structure (theme-agnostic)
 - Basic Three.js game engine
 - Phantom wallet integration
-- Devnet deployment scripts
-- Mainnet deployment scripts
 
 **🚧 In Progress:**
 - Map/plot system
 - Ship movement mechanics
 - Treasure encryption system
-- Integration between game and BOOTY token
+- Connecting treasure deposits to BOOTY mining rewards
 
 **📋 Planned:**
 - Multiplayer (Socket.io)
