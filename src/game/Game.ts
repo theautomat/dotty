@@ -373,7 +373,10 @@ class Game {
                     gridSize: GameConfig.map.gridSize,
                     gridColor: GameConfig.map.gridColor,
                     gridOpacity: GameConfig.map.gridOpacity,
-                    backgroundImage: GameConfig.map.backgroundImage
+                    backgroundImage: GameConfig.map.backgroundImage,
+                    highlightColor: GameConfig.map.highlightColor,
+                    highlightOpacity: GameConfig.map.highlightOpacity,
+                    cameraPanSpeed: GameConfig.map.cameraPanSpeed
                 }
             );
 
@@ -536,6 +539,11 @@ class Game {
 
         //     this.levelManager?.update(deltaTime);
         // }
+
+        // BOOTY: Update map (for grid navigation)
+        if (this.map) {
+            this.map.update(this.deltaTime);
+        }
 
         // BOOTY: Simple render - no ASCII effect for map view
         // if (this.asciiEffect && this.asciiEffect.isEnabled) {
