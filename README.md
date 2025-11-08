@@ -78,7 +78,7 @@ Create a `.env` file in the root:
 ```bash
 # Solana Configuration
 SOLANA_NETWORK=devnet
-SOLANA_WALLET_PATH=~/.config/solana/id.json
+SOLANA_WALLET_PATH=./wallets/devnet-deployer.json
 SOLANA_PROGRAM_ID=<your-deployed-program-id>
 ```
 
@@ -94,16 +94,20 @@ This is a file-based keypair used to:
 
 **Create the wallet:**
 ```bash
-# For local/devnet testing
-solana-keygen new
+# Create wallets directory (gitignored)
+mkdir -p wallets
 
-# For mainnet (use a SECURE location)
+# For local/devnet testing
+solana-keygen new -o wallets/devnet-deployer.json
+
+# For mainnet (use a SECURE location outside the project)
 solana-keygen new -o ~/.config/solana/mainnet-deployer.json
 ```
 
 **Where it's stored:**
-- Default location: `~/.config/solana/id.json`
-- Set custom path in `.env`: `SOLANA_WALLET_PATH=/path/to/wallet.json`
+- Local/devnet: `wallets/devnet-deployer.json` (gitignored)
+- Mainnet: Store OUTSIDE the project in a secure location
+- Set path in `.env`: `SOLANA_WALLET_PATH=./wallets/devnet-deployer.json`
 
 **Fund the wallet:**
 ```bash
@@ -171,8 +175,8 @@ cd solana
 # Configure for devnet
 solana config set --url https://api.devnet.solana.com
 
-# Create/load wallet
-solana-keygen new
+# Set Solana CLI to use your wallet
+solana config set --keypair ../wallets/devnet-deployer.json
 
 # Get devnet SOL
 solana airdrop 2
