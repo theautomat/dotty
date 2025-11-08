@@ -38,12 +38,25 @@ interface DebugConfig {
   enabled: boolean;
 }
 
+interface MapConfig {
+  worldSize: number;
+  gridSize: number;
+  gridColor: number;
+  gridOpacity: number;
+  minZoom: number;
+  maxZoom: number;
+  zoomSpeed: number;
+  defaultZoom: number;
+  backgroundImage?: string;
+}
+
 interface GameConfigType {
   world: WorldConfig;
   ship: ShipConfig;
   powerUps: PowerUpsConfig;
   collectibles: CollectiblesConfig;
   debug: DebugConfig;
+  map: MapConfig;
 }
 
 const GameConfig: GameConfigType = {
@@ -116,6 +129,36 @@ const GameConfig: GameConfigType = {
   debug: {
     // Whether to show debug information
     enabled: false
+  },
+
+  // Map settings
+  map: {
+    // Physical size of the map in Three.js world units
+    worldSize: 1000,
+
+    // Grid dimensions (100x100 = 10,000 squares)
+    gridSize: 100,
+
+    // Grid line color (white)
+    gridColor: 0xffffff,
+
+    // Grid line opacity
+    gridOpacity: 0.3,
+
+    // Minimum zoom level
+    minZoom: 0.5,
+
+    // Maximum zoom level
+    maxZoom: 3.0,
+
+    // Zoom speed multiplier
+    zoomSpeed: 0.1,
+
+    // Default zoom level
+    defaultZoom: 1.0,
+
+    // Optional background image path
+    backgroundImage: undefined
   }
 };
 
