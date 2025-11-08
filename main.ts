@@ -2,6 +2,10 @@
 import * as THREE from 'three';
 import { Game } from './src/game/index';
 import { io } from 'socket.io-client';
+import './src/styles/globals.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { MetadataPanel } from './src/components/MetadataPanel';
 
 // Make THREE globally available for legacy code
 declare global {
@@ -60,7 +64,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initialize the game
   game.init();
+
+  // Initialize the metadata panel
+  initMetadataPanel();
 });
+
+/**
+ * Initialize the React metadata panel
+ */
+function initMetadataPanel(): void {
+  // Create a container for the React panel
+  const panelContainer = document.createElement('div');
+  panelContainer.id = 'metadata-panel-root';
+  document.body.appendChild(panelContainer);
+
+  // Render the MetadataPanel component
+  const root = ReactDOM.createRoot(panelContainer);
+  root.render(
+    React.createElement(React.StrictMode, null,
+      React.createElement(MetadataPanel, { plotNumber: 1 })
+    )
+  );
+}
 
 /**
  * Dynamically load and render the leaderboard
