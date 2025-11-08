@@ -82,6 +82,64 @@ SOLANA_WALLET_PATH=~/.config/solana/id.json
 SOLANA_PROGRAM_ID=<your-deployed-program-id>
 ```
 
+## Wallet Setup
+
+This project uses **two types of wallets**:
+
+### 1. Backend/Deployer Wallet (CLI Wallet)
+
+This is a file-based keypair used to:
+- Deploy the Solana program
+- Mint NFTs from the backend (pays gas fees)
+
+**Create the wallet:**
+```bash
+# For local/devnet testing
+solana-keygen new
+
+# For mainnet (use a SECURE location)
+solana-keygen new -o ~/.config/solana/mainnet-deployer.json
+```
+
+**Where it's stored:**
+- Default location: `~/.config/solana/id.json`
+- Set custom path in `.env`: `SOLANA_WALLET_PATH=/path/to/wallet.json`
+
+**Fund the wallet:**
+```bash
+# Devnet (free test SOL)
+solana airdrop 2
+
+# Mainnet (send real SOL to your wallet address)
+solana address  # Get your wallet address
+# Send SOL from an exchange or another wallet
+```
+
+**🚨 SECURITY WARNING - Mainnet:**
+- NEVER commit wallet JSON files to git (`.gitignore` blocks this)
+- Use separate wallets for devnet and mainnet
+- For mainnet, store wallet in secure environment variables or secrets manager (AWS Secrets, HashiCorp Vault)
+- Consider using a hardware wallet for deployment
+- Keep backups of your seed phrase in a secure location
+
+### 2. Player Wallet (Browser Wallet)
+
+Players use [Phantom](https://phantom.com/) browser extension.
+
+**Setup for testing:**
+1. Install Phantom browser extension
+2. Create a new wallet (save your seed phrase!)
+3. Switch networks:
+   - **Local**: Settings → Change Network → Localhost
+   - **Devnet**: Settings → Developer Settings → Testnet Mode ON → Change Network → Devnet
+   - **Mainnet-beta**: Default network (live network with real SOL)
+
+**Get test SOL for devnet:**
+```bash
+# Airdrop to your Phantom wallet address
+solana airdrop 1 <YOUR_PHANTOM_ADDRESS> --url devnet
+```
+
 ## Solana Program Setup
 
 The game uses a unified Solana program that handles:

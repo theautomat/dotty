@@ -17,6 +17,13 @@ package-lock.json
 .env.test.local
 .env.production.local
 
+# Solana Wallets - NEVER commit these!
+*.json
+!package.json
+!tsconfig.json
+!**/target/idl/*.json
+!**/metadata/**/*.json
+
 # Build output
 # dist/ - Uncommented to allow committing built files for Heroku
 build/
