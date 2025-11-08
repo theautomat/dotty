@@ -48,6 +48,9 @@ interface MapConfig {
   zoomSpeed: number;
   defaultZoom: number;
   backgroundImage?: string;
+  highlightColor: number;
+  highlightOpacity: number;
+  cameraPanSpeed: number;
 }
 
 interface GameConfigType {
@@ -158,7 +161,17 @@ const GameConfig: GameConfigType = {
     defaultZoom: 1.0,
 
     // Optional background image path
-    backgroundImage: undefined
+    backgroundImage: undefined,
+
+    // Grid navigation settings
+    // Highlight color for selected square (yellow/gold)
+    highlightColor: 0xffd700,
+
+    // Highlight opacity
+    highlightOpacity: 0.6,
+
+    // Camera pan speed (0-1, higher = faster/snappier)
+    cameraPanSpeed: 0.15
   }
 };
 

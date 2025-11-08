@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import GridNavigator from './GridNavigator';
 
 interface MapConfig {
     worldSize: number;
@@ -11,6 +12,9 @@ interface MapConfig {
     gridColor: number;
     gridOpacity: number;
     backgroundImage?: string;
+    highlightColor?: number;
+    highlightOpacity?: number;
+    cameraPanSpeed?: number;
 }
 
 class Map {
@@ -20,6 +24,7 @@ class Map {
     private gridGroup: THREE.Group;
     private config: MapConfig;
     private mapWorldSize: number;
+    private navigator: GridNavigator | null = null;
 
     constructor(
         scene: THREE.Scene,
@@ -39,8 +44,31 @@ class Map {
     async init(): Promise<void> {
         await this.createBackground();
         this.createGrid();
+        this.initNavigator();
 
         console.log(`Map initialized: ${this.config.gridSize}x${this.config.gridSize} grid, world size: ${this.mapWorldSize}`);
+    }
+
+    /**
+     * Initialize the grid navigator for WASD controls
+     */
+    private initNavigator(): void {
+        const cellSize = this.mapWorldSize / this.config.gridSize;
+
+        this.navigator = new GridNavigator(
+            this.scene,
+            this.camera,
+            {
+                gridSize: this.config.gridSize,
+                cellSize: cellSize,
+                worldSize: this.mapWorldSize,
+                highlightColor: this.config.highlightColor || 0xffff00, // Yellow by default
+                highlightOpacity: this.config.highlightOpacity || 0.5,
+                cameraPanSpeed: this.config.cameraPanSpeed || 0.1
+            }
+        );
+
+        this.navigator.init();
     }
 
     /**
@@ -230,9 +258,39 @@ class Map {
     }
 
     /**
+     * Update the map - called every frame
+     */
+    update(deltaTime: number = 0.016): void {
+        if (this.navigator) {
+            this.navigator.update(deltaTime);
+        }
+    }
+
+    /**
+     * Get the current grid position from the navigator
+     */
+    getCurrentGridPosition(): { x: number; y: number } | null {
+        return this.navigator ? this.navigator.getCurrentPosition() : null;
+    }
+
+    /**
+     * Set the navigator position
+     */
+    setNavigatorPosition(x: number, y: number): void {
+        if (this.navigator) {
+            this.navigator.setPosition(x, y);
+        }
+    }
+
+    /**
      * Cleanup and destroy map resources
      */
     destroy(): void {
+        if (this.navigator) {
+            this.navigator.destroy();
+            this.navigator = null;
+        }
+
         if (this.background) {
             this.scene.remove(this.background);
             this.background.geometry.dispose();
