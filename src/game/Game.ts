@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import Map from '../objects/Map';
 import Asteroid from '../objects/Asteroid';
 import WorldBoundary from '../objects/WorldBoundary';
 import { HUD } from '../objects/hud/index.js';
@@ -36,6 +37,7 @@ class Game {
     camera: THREE.OrthographicCamera | null;
     renderer: THREE.WebGLRenderer | null;
     gameState: typeof gameState;
+    map: Map | null;
 
     // Managers
     asteroidManager: typeof asteroidManager | null;
@@ -79,6 +81,7 @@ class Game {
         this.camera = null;
         this.renderer = null;
         this.gameState = gameState;
+        this.map = null;
 
         // Managers for game objects
         this.asteroidManager = null;
@@ -198,33 +201,33 @@ class Game {
         this.camera.lookAt(0, 0, 0);
         this.scene.add(this.camera);
 
-        // DOTTY: Add a grid ground plane
-        const gridHelper = new THREE.GridHelper(200, 20, 0x444444, 0x222222);
-        gridHelper.rotation.x = 0;
-        this.scene.add(gridHelper);
+        // DOTTY: Grid helper removed - replaced by Map grid
+        // const gridHelper = new THREE.GridHelper(200, 20, 0x444444, 0x222222);
+        // gridHelper.rotation.x = 0;
+        // this.scene.add(gridHelper);
 
-        // DOTTY: Create the player character (simple circle for now)
-        const dotGeometry = new THREE.CircleGeometry(2, 32);
-        const dotMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        this.playerDot = new THREE.Mesh(dotGeometry, dotMaterial);
-        this.playerDot.rotation.x = -Math.PI / 2;
-        this.playerDot.position.set(0, 0.1, 0);
-        this.scene.add(this.playerDot);
+        // DOTTY: Player dot removed - not needed for map view
+        // const dotGeometry = new THREE.CircleGeometry(2, 32);
+        // const dotMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        // this.playerDot = new THREE.Mesh(dotGeometry, dotMaterial);
+        // this.playerDot.rotation.x = -Math.PI / 2;
+        // this.playerDot.position.set(0, 0.1, 0);
+        // this.scene.add(this.playerDot);
 
         // Make camera available globally
         (window as any).mainCamera = this.camera;
 
-        // Initialize singleton managers
-        this.explosionManager = explosionManager;
-        this.explosionManager.init({ scene: this.scene });
+        // BOOTY: Managers disabled for map view
+        // this.explosionManager = explosionManager;
+        // this.explosionManager.init({ scene: this.scene });
 
-        this.collectibleManager = collectibleManager;
-        this.powerUpManager = powerUpManager;
+        // this.collectibleManager = collectibleManager;
+        // this.powerUpManager = powerUpManager;
 
-        this.powerUpManager.init(this);
+        // this.powerUpManager.init(this);
 
-        this.collectibleManager.scene = this.scene;
-        this.collectibleManager.init(this);
+        // this.collectibleManager.scene = this.scene;
+        // this.collectibleManager.init(this);
 
         // Create renderer
         this.renderer = new THREE.WebGLRenderer();
@@ -232,76 +235,75 @@ class Game {
 
         document.body.appendChild(this.renderer.domElement);
 
-        // Initialize ASCII effect renderer
-        this.asciiEffect = new ASCIIEffect(this.renderer, ' .:-=+*#%@', {
-            resolution: 0.2,
-            scale: 1,
-            color: false,
-            enabled: false
-        });
+        // BOOTY: ASCII effect disabled for map view
+        // this.asciiEffect = new ASCIIEffect(this.renderer, ' .:-=+*#%@', {
+        //     resolution: 0.2,
+        //     scale: 1,
+        //     color: false,
+        //     enabled: false
+        // });
 
-        // Create distant stars
-        this.createStars();
+        // BOOTY: Stars disabled - map has its own background
+        // this.createStars();
 
-        // Initialize world boundary
-        this.worldBoundary = new WorldBoundary(this.scene, this.WORLD_SIZE);
+        // BOOTY: World boundary disabled for map view
+        // this.worldBoundary = new WorldBoundary(this.scene, this.WORLD_SIZE);
 
-        // Initialize 3D HUD system
-        this.initHUD();
+        // BOOTY: HUD disabled for map view
+        // this.initHUD();
 
         // Handle window resize
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
-        // Initialize remaining managers
-        this.asteroidManager = asteroidManager;
-        this.bulletManager = bulletManager;
-        this.enemyManager = enemyManager;
+        // BOOTY: All game managers disabled for map view
+        // this.asteroidManager = asteroidManager;
+        // this.bulletManager = bulletManager;
+        // this.enemyManager = enemyManager;
 
-        this.bulletManager.init({ scene: this.scene });
+        // this.bulletManager.init({ scene: this.scene });
 
-        this.asteroidManager.init({ scene: this.scene });
-        this.asteroidManager.explosionManager = this.explosionManager;
-        this.asteroidManager.collectibleManager = this.collectibleManager;
-        this.asteroidManager.powerUpManager = this.powerUpManager;
+        // this.asteroidManager.init({ scene: this.scene });
+        // this.asteroidManager.explosionManager = this.explosionManager;
+        // this.asteroidManager.collectibleManager = this.collectibleManager;
+        // this.asteroidManager.powerUpManager = this.powerUpManager;
 
-        this.enemyManager.init({
-            scene: this.scene,
-            camera: this.camera,
-            explosionManager: this.explosionManager,
-            collectibleManager: this.collectibleManager,
-            powerUpManager: this.powerUpManager,
-            gameStateMachine: gameStateMachine
-        });
+        // this.enemyManager.init({
+        //     scene: this.scene,
+        //     camera: this.camera,
+        //     explosionManager: this.explosionManager,
+        //     collectibleManager: this.collectibleManager,
+        //     powerUpManager: this.powerUpManager,
+        //     gameStateMachine: gameStateMachine
+        // });
 
-        // Initialize levelManager
-        this.levelManager = levelManager;
-        this.levelManager.init({
-            scene: this.scene,
-            camera: this.camera,
-            hud: this.hud,
-            managers: {
-                asteroidManager: this.asteroidManager,
-                bulletManager: this.bulletManager,
-                collectibleManager: this.collectibleManager,
-                explosionManager: this.explosionManager,
-                powerUpManager: this.powerUpManager,
-                enemyManager: this.enemyManager,
-                enemyProjectiles: (this as any).enemyProjectiles
-            }
-        });
+        // this.levelManager = levelManager;
+        // this.levelManager.init({
+        //     scene: this.scene,
+        //     camera: this.camera,
+        //     hud: this.hud,
+        //     managers: {
+        //         asteroidManager: this.asteroidManager,
+        //         bulletManager: this.bulletManager,
+        //         collectibleManager: this.collectibleManager,
+        //         explosionManager: this.explosionManager,
+        //         powerUpManager: this.powerUpManager,
+        //         enemyManager: this.enemyManager,
+        //         enemyProjectiles: (this as any).enemyProjectiles
+        //     }
+        // });
 
         // Make game instance available globally
         (window as any).game = this;
 
-        // Fetch first level config
-        const initialLevelConfig = LevelConfig.getLevelById(1);
-        const initialModifiers = initialLevelConfig ? initialLevelConfig.levelModifiers : {};
+        // BOOTY: Level config disabled for map view
+        // const initialLevelConfig = LevelConfig.getLevelById(1);
+        // const initialModifiers = initialLevelConfig ? initialLevelConfig.levelModifiers : {};
 
-        // Initialize controls system
+        // BOOTY: Controls kept for map navigation (zoom, pan, etc.)
         this.controls = new Controls({
             camera: this.camera,
             renderer: this.renderer,
-            player: this.playerDot,
+            player: undefined, // No player in map view
             helpToggleCallback: (visible: boolean) => {
                 this.helpMenuVisible = visible;
                 if (visible) {
@@ -309,76 +311,83 @@ class Game {
                 }
             },
             hudClickCallback: () => {
-                if (this.hud) {
-                    return this.hud.handleClick();
-                }
+                // No HUD in map view
+                return false;
             },
             worldBoundaryToggleCallback: () => {
-                if (this.worldBoundary) {
-                    return this.worldBoundary.toggle();
-                }
+                // No world boundary in map view
+                return false;
             },
-            hud: this.hud,
+            hud: null,
             gameStateMachine: gameStateMachine,
-            initialModifiers: initialModifiers
+            initialModifiers: {}
         });
 
-        // Initialize CollisionManager
-        collisionManager.init({
-            asteroidManager: this.asteroidManager,
-            bulletManager: this.bulletManager,
-            collectibleManager: this.collectibleManager,
-            explosionManager: this.explosionManager,
-            enemyManager: this.enemyManager,
-            camera: this.camera,
-            playerDot: this.playerDot,
-            shipCollisionRadius: GameConfig.ship.collisionRadius,
-            powerUpManager: this.powerUpManager,
-            levelManager: this.levelManager
-        });
+        // BOOTY: Collision manager disabled for map view
+        // collisionManager.init({
+        //     asteroidManager: this.asteroidManager,
+        //     bulletManager: this.bulletManager,
+        //     collectibleManager: this.collectibleManager,
+        //     explosionManager: this.explosionManager,
+        //     enemyManager: this.enemyManager,
+        //     camera: this.camera,
+        //     playerDot: this.playerDot,
+        //     shipCollisionRadius: GameConfig.ship.collisionRadius,
+        //     powerUpManager: this.powerUpManager,
+        //     levelManager: this.levelManager
+        // });
 
-        (window as any).collisionManager = collisionManager;
+        // (window as any).collisionManager = collisionManager;
 
-        // Set callback for asteroid destruction
-        this.asteroidManager.onAsteroidDestroyed = (destroyedAsteroid: Asteroid) => {
-            if (typeof this.handleAsteroidDestruction === 'function') {
-                this.handleAsteroidDestruction(destroyedAsteroid);
-            } else {
-                console.warn('Asteroid destroyed, but handleAsteroidDestruction method not found!');
-            }
-        };
+        // BOOTY: Asteroid callbacks disabled for map view
+        // this.asteroidManager.onAsteroidDestroyed = (destroyedAsteroid: Asteroid) => {
+        //     if (typeof this.handleAsteroidDestruction === 'function') {
+        //         this.handleAsteroidDestruction(destroyedAsteroid);
+        //     } else {
+        //         console.warn('Asteroid destroyed, but handleAsteroidDestruction method not found!');
+        //     }
+        // };
 
-        // Initialize gameStateMachine
-        gameStateMachine.init(soundManager, this.hud || null);
+        // BOOTY: Game state machine init (kept for state management)
+        gameStateMachine.init(soundManager, null);
 
         // Show entry screen
-        showEntryScreen(() => {
-            console.log("Entry screen callback executed");
+        showEntryScreen(async () => {
+            console.log("Entry screen callback executed - initializing map");
 
-            if (this.renderer && this.renderer.domElement) {
-                try {
-                    this.renderer.domElement.requestPointerLock();
+            // BOOTY: Pointer lock not needed for map view
+            // if (this.renderer && this.renderer.domElement) {
+            //     try {
+            //         this.renderer.domElement.requestPointerLock();
+            //     } catch (e) {
+            //         console.error("Error requesting pointer lock:", e);
+            //     }
+            // }
 
-                    const crosshair = document.getElementById('crosshair');
-                    if (crosshair) {
-                        crosshair.style.display = 'block';
-                    }
-
-                    setTimeout(() => {
-                        if (!document.pointerLockElement) {
-                            this.renderer!.domElement.requestPointerLock();
-                        }
-                    }, 100);
-                } catch (e) {
-                    console.error("Error requesting pointer lock:", e);
+            // BOOTY: Initialize the map
+            this.map = new Map(
+                this.scene!,
+                this.camera!,
+                {
+                    worldSize: GameConfig.map.worldSize,
+                    gridSize: GameConfig.map.gridSize,
+                    gridColor: GameConfig.map.gridColor,
+                    gridOpacity: GameConfig.map.gridOpacity,
+                    backgroundImage: GameConfig.map.backgroundImage
                 }
-            }
+            );
 
-            // DOTTY: Spawn test treasures
-            this.collectibleManager!.spawnCollectible(new THREE.Vector3(10, 6, 10), 'iron', 100, 300000);
-            this.collectibleManager!.spawnCollectible(new THREE.Vector3(-15, 6, 5), 'copper', 150, 300000);
+            await this.map.init();
+            console.log("Map initialized successfully");
 
-            // Transition to PLAYING state
+            // Add mouse wheel zoom handler
+            window.addEventListener('wheel', (event: WheelEvent) => {
+                if (this.map) {
+                    this.map.handleZoom(event.deltaY);
+                }
+            }, { passive: true });
+
+            // Transition to PLAYING state (or we could add a MAP_VIEWING state)
             gameStateMachine.transitionTo(GAME_STATES.PLAYING);
         });
 
@@ -491,46 +500,50 @@ class Game {
 
         this.frameCount++;
 
-        if (this.hud) {
-            this.hud.update();
-        }
+        // BOOTY: HUD disabled for map view
+        // if (this.hud) {
+        //     this.hud.update();
+        // }
 
-        const shouldUpdateGameObjects =
-            gameStateMachine.isInState(GAME_STATES.PLAYING) ||
-            gameStateMachine.isInState(GAME_STATES.TRANSITIONING);
+        // BOOTY: All game object updates disabled for map view
+        // const shouldUpdateGameObjects =
+        //     gameStateMachine.isInState(GAME_STATES.PLAYING) ||
+        //     gameStateMachine.isInState(GAME_STATES.TRANSITIONING);
 
-        if (shouldUpdateGameObjects) {
-            if (!this.clock) {
-                this.clock = new THREE.Clock();
-            }
+        // if (shouldUpdateGameObjects) {
+        //     if (!this.clock) {
+        //         this.clock = new THREE.Clock();
+        //     }
 
-            const deltaTime = Math.min(0.1, this.clock.getDelta());
-            this.deltaTime = deltaTime;
+        //     const deltaTime = Math.min(0.1, this.clock.getDelta());
+        //     this.deltaTime = deltaTime;
 
-            this.handlePlayerMovement();
+        //     this.handlePlayerMovement();
 
-            this.updateAsteroids(deltaTime);
-            this.updateOres(deltaTime);
-            this.updateBullets(deltaTime);
-            this.updateExplosions();
-            this.updatePowerUps(deltaTime);
+        //     this.updateAsteroids(deltaTime);
+        //     this.updateOres(deltaTime);
+        //     this.updateBullets(deltaTime);
+        //     this.updateExplosions();
+        //     this.updatePowerUps(deltaTime);
 
-            if (this.enemyManager) {
-                this.enemyManager.update(deltaTime);
-            }
+        //     if (this.enemyManager) {
+        //         this.enemyManager.update(deltaTime);
+        //     }
 
-            if (gameStateMachine.isInState(GAME_STATES.PLAYING)) {
-                collisionManager.checkCollisions();
-            }
+        //     if (gameStateMachine.isInState(GAME_STATES.PLAYING)) {
+        //         collisionManager.checkCollisions();
+        //     }
 
-            this.levelManager?.update(deltaTime);
-        }
+        //     this.levelManager?.update(deltaTime);
+        // }
 
-        if (this.asciiEffect && this.asciiEffect.isEnabled) {
-            this.asciiEffect.render(this.scene, this.camera);
-        } else {
-            this.renderer?.render(this.scene!, this.camera!);
-        }
+        // BOOTY: Simple render - no ASCII effect for map view
+        // if (this.asciiEffect && this.asciiEffect.isEnabled) {
+        //     this.asciiEffect.render(this.scene, this.camera);
+        // } else {
+        //     this.renderer?.render(this.scene!, this.camera!);
+        // }
+        this.renderer?.render(this.scene!, this.camera!);
 
         requestAnimationFrame(this.animate);
     }
