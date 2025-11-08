@@ -105,6 +105,7 @@ pub mod game {
     pub fn deposit_for_nft(
         ctx: Context<DepositForNFT>,
         amount: u64,
+        deposit_id: i64,
     ) -> Result<()> {
         // Validate minimum deposit amount (100 tokens with 6 decimals = 100,000,000)
         require!(amount >= 100_000_000, ErrorCode::InsufficientDeposit);
@@ -128,7 +129,7 @@ pub mod game {
         let deposit_record = &mut ctx.accounts.deposit_record;
         deposit_record.player = ctx.accounts.player.key();
         deposit_record.amount = amount;
-        deposit_record.timestamp = Clock::get()?.unix_timestamp;
+        deposit_record.timestamp = deposit_id;
         deposit_record.claimed = false;
         deposit_record.bump = ctx.bumps.deposit_record;
 
@@ -331,6 +332,7 @@ pub struct InitializeVault<'info> {
 }
 
 #[derive(Accounts)]
+#[instruction(amount: u64, deposit_id: i64)]
 pub struct DepositForNFT<'info> {
     /// Player making the deposit
     #[account(mut)]
@@ -356,7 +358,7 @@ pub struct DepositForNFT<'info> {
     pub vault: Account<'info, DepositVault>,
 
     /// Deposit record PDA (unique per player, per deposit)
-    /// Using timestamp as seed to allow multiple deposits per player
+    /// Using deposit_id as seed to allow multiple deposits per player
     #[account(
         init,
         payer = player,
@@ -364,7 +366,7 @@ pub struct DepositForNFT<'info> {
         seeds = [
             b"deposit",
             player.key().as_ref(),
-            &Clock::get()?.unix_timestamp.to_le_bytes()
+            &deposit_id.to_le_bytes()
         ],
         bump
     )]

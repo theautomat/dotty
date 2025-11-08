@@ -1,5 +1,8 @@
 [toolchain]
 
+[workspace]
+members = ["programs/*"]
+
 [features]
 seeds = false
 skip-lint = false
