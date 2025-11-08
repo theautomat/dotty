@@ -53,23 +53,36 @@ A blockchain-based treasure hunting game where players bury memecoin treasure an
 # 1. Clone and install
 git clone https://github.com/yourusername/dotty.git
 cd dotty
-npm install
 
-# 2. Set up environment
-cp .env.example .env
-# Edit .env with your Solana config
+# Install dependencies (use --legacy-peer-deps due to wallet adapter React version conflicts)
+npm install --legacy-peer-deps
 
-# 3. Build Solana program
-cd solana
-anchor build
-anchor test
-
-# 4. Start development server
-cd ..
+# 2. Start development server (to test map/frontend only)
 npm run vite
 ```
 
 Access the game at [http://localhost:5173](http://localhost:5173)
+
+**Note**: The `--legacy-peer-deps` flag is needed due to React version conflicts in Solana wallet adapter dependencies. This doesn't affect game functionality.
+
+### Full Setup (with Solana)
+
+If you want to deploy and test Solana smart contracts:
+
+```bash
+# 1. Set up environment
+cp .env.example .env
+# Edit .env with your Solana config
+
+# 2. Build Solana program
+cd solana
+anchor build
+anchor test
+
+# 3. Start development server
+cd ..
+npm run vite
+```
 
 ### Environment Variables
 
