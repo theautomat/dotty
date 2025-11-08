@@ -1,245 +1,232 @@
-# Dotty
+# Pirates Booty
 
-A top-down exploration game where you play as Dotty, a little alien character exploring an alien landscape to discover hidden treasures and mint them as NFTs on Solana.
+A blockchain-based treasure hunting game where players bury memecoin treasure and compete to dig it up. Built on Solana with Three.js.
 
 ## Game Concept
 
-- **Character**: Dotty, a circular character viewed from a top-down perspective
-- **Movement**: WASD keys control movement through a 2D world
-- **Camera**: Frustrum view from above with adjustable zoom levels (min/max constraints)
-- **Treasures**: Hidden items that reveal themselves when Dotty gets close enough
-- **Interaction**: Run into treasures to collect them and mint NFTs
-- **NFT Integration**: Collect treasures and mint them as NFTs directly to your Phantom wallet
-- **Wallet Integration**: Connect your Phantom Wallet to claim NFTs (https://phantom.com/)
-- **Blockchain**: Built on Solana for fast, low-cost NFT minting
-- **Backend**: Firebase for user data and Express server for NFT minting
+**Pirates Booty** is a top-down multiplayer treasure game where you:
+- **Bury memecoins** as treasure in secret plot locations
+- **Mint NFT multipliers** to boost your rewards
+- **Use $BOOTY tokens** to move your ship around a large map
+- **Mine $BOOTY** when you bury treasure
+- **Dig up treasure** by traveling to plots (automatically claimed when you arrive)
+- **Compete** with other pirates to find encrypted treasure locations (x,y coordinates)
 
-## Current Status
+## How It Works
 
-This project is in active development with NFT integration underway:
+1. **Bury Treasure**: Deposit memecoins into a plot location. This mines $BOOTY tokens for you.
+2. **Travel the Map**: Use $BOOTY to move your ship to different plots on the map.
+3. **Auto-Collect**: When you travel to a plot, you automatically dig up any treasure there (since you paid $BOOTY to travel).
+4. **NFT Multipliers**: Mint special NFTs (ships, crew, tools) that multiply your rewards.
+5. **Encrypted Locations**: Treasure locations are encrypted on-chain - only the coordinates (x,y) reveal what's there.
 
-**Implemented:**
-- Top-down character movement with WASD controls
-- Camera system with zoom functionality
-- Treasure discovery and proximity detection system
-- Phantom wallet connection UI
-- Backend NFT minting service
-- Solana smart contract (Anchor program) structure
+## Technology Stack
 
-**In Progress:**
-- Smart contract deployment to Solana devnet
-- Integration of wallet UI with game collectibles
-- NFT metadata hosting and artwork
+**Frontend:**
+- Three.js for 3D rendering (top-down ship view)
+- Vanilla JavaScript (ES6 modules)
+- Phantom Wallet integration
 
-**Future Features:**
-- Multiple collectible types with varying rarity
-- On-chain collection tracking
-- Leaderboards for collectors
-- Enhanced anti-cheat and validation
+**Blockchain:**
+- Solana (devnet/mainnet)
+- Anchor framework v0.30.1
+- Metaplex Token Metadata for NFTs
+- Custom $BOOTY token (SPL Token)
 
-## Setup and Installation
+**Backend:**
+- Node.js with Express
+- NFT minting service
+- Game state management
+
+## Setup & Installation
 
 ### Prerequisites
 
 - Node.js 18.x or higher
-- npm or yarn
-- Phantom Wallet browser extension (for NFT features)
-- Solana CLI (for smart contract development)
-- Rust and Anchor (for smart contract development)
+- Solana CLI v1.18+
+- Rust and Anchor v0.30.1 (for smart contract development)
+- Phantom Wallet (for playing)
 
-### Installation
-
-1. Clone the repository:
+### Quick Start
 
 ```bash
+# 1. Clone and install
 git clone https://github.com/yourusername/dotty.git
 cd dotty
-```
-
-2. Install dependencies:
-
-```bash
 npm install
-# or with yarn
-yarn
+
+# 2. Set up environment
+cp .env.example .env
+# Edit .env with your Solana config
+
+# 3. Build Solana program
+cd solana
+anchor build
+anchor test
+
+# 4. Start development server
+cd ..
+npm run vite
 ```
 
-3. Set up environment variables:
+Access the game at [http://localhost:5173](http://localhost:5173)
 
-Create a `.env` file in the root directory:
+### Environment Variables
+
+Create a `.env` file in the root:
 
 ```bash
 # Solana Configuration
 SOLANA_NETWORK=devnet
 SOLANA_WALLET_PATH=~/.config/solana/id.json
-SOLANA_PROGRAM_ID=Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS
-
-# Firebase Configuration (if using)
-FIREBASE_API_KEY=your_api_key
-FIREBASE_AUTH_DOMAIN=your_auth_domain
-# ... other Firebase config
+SOLANA_PROGRAM_ID=<your-deployed-program-id>
 ```
 
-### Solana Setup (for NFT minting)
+## Solana Program Setup
 
-To enable NFT minting features, you'll need to set up Solana:
+The game uses a unified Solana program that handles:
+- NFT minting (collectibles, ships, crew)
+- Token deposits (bury treasure)
+- Reward claiming (dig up treasure)
+- Tier-based rewards (based on treasure value)
 
-1. **Install Solana CLI:**
+### Install Solana Tools
+
 ```bash
+# Install Solana CLI
 sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Install Anchor
+cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+avm install 0.30.1
+avm use 0.30.1
 ```
 
-2. **Create a Solana wallet (devnet):**
-```bash
-solana-keygen new
-```
+### Build & Deploy
 
-3. **Configure for devnet:**
-```bash
-solana config set --url https://api.devnet.solana.com
-```
-
-4. **Get devnet SOL (for testing):**
-```bash
-solana airdrop 2
-```
-
-5. **Build and deploy the smart contract:**
 ```bash
 cd solana
+
+# Configure for devnet
+solana config set --url https://api.devnet.solana.com
+
+# Create/load wallet
+solana-keygen new
+
+# Get devnet SOL
+solana airdrop 2
+
+# Build program
 anchor build
-anchor deploy
+
+# Deploy to devnet
+anchor deploy --provider.cluster devnet
+
+# Update program ID in .env and Anchor.toml with deployed ID
 ```
 
-Update the `SOLANA_PROGRAM_ID` in your `.env` file with the deployed program ID.
+Build artifacts:
+- `programs/game/target/deploy/game.so` - Compiled program
+- `target/idl/game.json` - Program interface
+- `target/types/game.ts` - TypeScript types
 
-For detailed Solana program documentation, see [solana/README.md](solana/README.md)
-
-### Running the Game
-
-For development with Hot Module Replacement (HMR):
+### Run Tests
 
 ```bash
-npm run vite
+cd solana
+
+# Run all tests with local validator
+anchor test
+
+# Or test on devnet
+anchor test --provider.cluster devnet --skip-local-validator
 ```
-
-This launches Vite's dev server with instant hot reloading:
-- Changes appear immediately in the browser without manual refresh
-- Fast HMR updates as you edit files
-- Access the game at [http://localhost:5173](http://localhost:5173)
-
-For production build and serve:
-
-```bash
-npm run dev
-```
-
-This builds the project and serves it in production mode at [http://localhost:3000](http://localhost:3000).
-
-To deploy to production:
-
-```bash
-npm run build
-npm start
-```
-
-## Game Controls
-
-- **W**: Move up
-- **A**: Move left
-- **S**: Move down
-- **D**: Move right
-- **Mouse Scroll**: Zoom in/out (within min/max limits)
-- **E/Space**: Interact with treasures (planned)
-
-## Deployment to Heroku
-
-```bash
-# Login to Heroku CLI
-heroku login
-
-# Create a new Heroku app
-heroku create your-app-name
-
-# Push to Heroku
-git push heroku main
-
-# Open the deployed app
-heroku open
-```
-
-## Technology Stack
-
-**Frontend:**
-- Three.js for 3D rendering
-- Vanilla JavaScript (ES6 modules)
-- Phantom Wallet integration via window.solana API
-
-**Backend:**
-- Node.js with Express.js
-- Socket.io for multiplayer features
-- Firebase for user data and authentication
-
-**Blockchain:**
-- Solana blockchain (devnet/mainnet)
-- Anchor framework for smart contracts
-- Metaplex Token Metadata standard for NFTs
-- @solana/web3.js for blockchain interactions
-
-**Development:**
-- Vite for fast development and HMR
-- LiveReload for instant updates
-
-## NFT Features
-
-### How It Works
-
-1. **Connect Wallet**: Click "Connect Wallet" in the top-right corner to connect your Phantom wallet
-2. **Explore**: Move Dotty around the world to discover hidden treasures
-3. **Collect**: Run into treasures to collect them
-4. **Mint NFT**: When connected, collected treasures are automatically minted as NFTs to your wallet
-5. **View**: Check your Phantom wallet to see your collected NFTs
-
-### Collectible Types
-
-- **Golden Asteroid Fragment** (Legendary) - Rare golden minerals
-- **Crystal Energy Shard** (Epic) - Mysterious glowing crystals
-- **Ancient Alien Artifact** (Rare) - Enigmatic alien technology
-
-Each NFT includes:
-- Unique artwork
-- Rarity attributes
-- Discovery timestamp
-- Metaplex-standard metadata
-
-### Security & Anti-Cheat
-
-Current implementation uses backend-validated minting:
-- Game backend validates all mint requests
-- Rate limiting prevents spam
-- Backend wallet pays gas fees (players mint for free)
-- Future: Add session verification and on-chain tracking
 
 ## Project Structure
 
 ```
 dotty/
 ├── src/
-│   ├── components/      # Game UI components
-│   │   └── WalletUI.js  # Wallet connection widget
-│   ├── game/            # Core game logic
-│   ├── objects/         # Game objects (Dotty, treasures, etc.)
-│   ├── managers/        # Game managers (scene, input, etc.)
-│   └── utils/
-│       └── wallet-connection.js  # Phantom wallet integration
-├── solana/              # Solana smart contracts
-│   ├── programs/        # Anchor programs
-│   ├── metadata/        # NFT metadata files
-│   └── tests/           # Contract tests
-├── server.js            # Express backend with NFT minting
-├── nft-service.js       # NFT minting service
-└── index.html           # Entry point
+│   ├── game/           # ThreeJS game logic
+│   ├── objects/        # Ships, treasures, etc.
+│   ├── managers/       # Scene, input, state
+│   └── components/     # UI components (wallet, HUD)
+├── solana/
+│   ├── programs/game/  # Unified Solana program
+│   │   ├── src/lib.rs  # Smart contract
+│   │   └── Cargo.toml
+│   ├── tests/          # Anchor tests
+│   ├── metadata/       # NFT metadata (theme-specific)
+│   └── Anchor.toml
+├── server.js           # Express backend
+├── nft-service.js      # NFT minting service
+└── README.md           # This file
 ```
+
+## Game Controls
+
+- **WASD**: Move ship
+- **Mouse Scroll**: Zoom in/out
+- **Click**: Select plot / bury treasure
+- **E**: Interact / dig
+
+## Development
+
+### Run Frontend
+
+```bash
+npm run vite        # Development with HMR
+npm run build       # Production build
+npm start           # Serve production build
+```
+
+### Run Backend
+
+```bash
+npm run dev         # Express server with nodemon
+```
+
+## NFT Types
+
+**Free Collectibles** (found in-game):
+- Octopus, Scallywag, Boat, Wench
+
+**Premium NFTs** (earned via token deposits):
+- Golden Chest (Tier 1: 100-999 tokens)
+- Jewel Trove (Tier 2: 1,000-9,999 tokens)
+- Ancient Map (Tier 3: 10,000-99,999 tokens)
+- Legendary Booty (Tier 4: 100,000+ tokens)
+
+## Current Status
+
+**✅ Implemented:**
+- Solana program (NFT minting + token deposits)
+- Comprehensive test suite
+- Metadata structure (theme-agnostic)
+- Basic Three.js game engine
+- Phantom wallet integration
+
+**🚧 In Progress:**
+- $BOOTY token implementation
+- Map/plot system
+- Ship movement mechanics
+- Treasure encryption system
+
+**📋 Planned:**
+- Multiplayer (Socket.io)
+- Leaderboards
+- NFT multiplier mechanics
+- Mainnet deployment
+
+## Resources
+
+- [Solana Docs](https://docs.solana.com/)
+- [Anchor Book](https://www.anchor-lang.com/)
+- [Metaplex Docs](https://docs.metaplex.com/)
+- [Three.js Docs](https://threejs.org/docs/)
 
 ## License
 
