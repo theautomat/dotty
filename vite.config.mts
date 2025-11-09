@@ -34,7 +34,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        leaderboard: resolve(__dirname, 'leaderboard.html')
+        leaderboard: resolve(__dirname, 'leaderboard.html'),
+        treasure: resolve(__dirname, 'treasure.html')
       }
     }
   },
