@@ -59,21 +59,53 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
       return;
     }
 
+    // DEBUG: Log wallet connection status
+    console.log('=== DEBUG: Wallet Connection ===');
+    console.log('publicKey:', publicKey?.toString());
+    console.log('wallet:', wallet);
+    console.log('wallet.adapter:', wallet?.adapter);
+    console.log('tokenMint:', tokenMint);
+
+    // DEBUG: Log config values
+    console.log('=== DEBUG: Config Values ===');
+    console.log('SOLANA_CONFIG:', SOLANA_CONFIG);
+    console.log('PROGRAM_ID:', SOLANA_CONFIG.PROGRAM_ID);
+    console.log('TEST_TOKEN_MINT:', SOLANA_CONFIG.TEST_TOKEN_MINT);
+
+    // DEBUG: Log IDL import
+    console.log('=== DEBUG: IDL Import ===');
+    console.log('gameIdl:', gameIdl);
+    console.log('gameIdl type:', typeof gameIdl);
+    console.log('gameIdl has metadata?:', 'metadata' in gameIdl);
+
     setIsHiding(true);
 
     try {
       // Create Anchor provider
+      console.log('=== DEBUG: Creating Provider ===');
       const provider = new AnchorProvider(
         connection,
         wallet.adapter as any,
         { commitment: 'confirmed' }
       );
+      console.log('Provider created:', provider);
 
       // Get program ID first
+      console.log('=== DEBUG: Creating Program ID ===');
       const programId = new PublicKey(SOLANA_CONFIG.PROGRAM_ID);
+      console.log('programId:', programId.toString());
+      console.log('programId type:', typeof programId);
+      console.log('programId._bn:', programId.toBuffer());
 
       // Load program with IDL and explicit program ID
+      console.log('=== DEBUG: Creating Program ===');
+      console.log('About to call: new Program(gameIdl, programId, provider)');
+      console.log('  - gameIdl:', typeof gameIdl, gameIdl);
+      console.log('  - programId:', programId.toString());
+      console.log('  - provider:', provider);
+
       const program = new Program(gameIdl as Idl, programId, provider);
+      console.log('Program created successfully:', program);
 
       // Derive PDAs
       const [vaultPda] = PublicKey.findProgramAddressSync(
