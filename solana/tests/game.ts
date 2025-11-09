@@ -263,7 +263,7 @@ describe("game", () => {
     });
   });
 
-  describe("Token Deposit System", () => {
+  describe("Treasure Hiding System", () => {
     let vaultPda: PublicKey;
     let vaultBump: number;
     let tokenMint: PublicKey;
@@ -282,7 +282,7 @@ describe("game", () => {
     });
 
     describe("initialize_vault", () => {
-      it("Successfully initializes the deposit vault", async () => {
+      it("Successfully initializes the treasure vault", async () => {
         const tx = await program.methods
           .initializeVault()
           .accounts({
@@ -295,20 +295,20 @@ describe("game", () => {
         console.log("Initialize transaction:", tx);
 
         // Fetch and verify vault account
-        const vaultAccount = await program.account.depositVault.fetch(vaultPda);
+        const vaultAccount = await program.account.treasureVault.fetch(vaultPda);
 
         expect(vaultAccount.authority.toString()).to.equal(
           payer.publicKey.toString()
         );
-        expect(vaultAccount.totalDeposits.toNumber()).to.equal(0);
-        expect(vaultAccount.totalClaims.toNumber()).to.equal(0);
+        expect(vaultAccount.totalHidden.toNumber()).to.equal(0);
+        expect(vaultAccount.totalClaimed.toNumber()).to.equal(0);
         expect(vaultAccount.bump).to.equal(vaultBump);
 
         console.log("✓ Vault initialized successfully");
       });
     });
 
-    describe("deposit_for_nft", () => {
+    describe("hide_treasure", () => {
       before(async () => {
         // Create a test token (simulating a memecoin)
         player = Keypair.generate();
@@ -360,14 +360,14 @@ describe("game", () => {
         console.log("✓ Test setup complete");
       });
 
-      it("Successfully deposits tokens and creates deposit record", async () => {
-        const depositAmount = 500_000_000; // 500 tokens
+      it("Successfully hides treasure and creates treasure record", async () => {
+        const treasureAmount = 500_000_000; // 500 tokens
         const timestamp = Math.floor(Date.now() / 1000);
 
-        // Derive deposit record PDA
-        const [depositRecordPda] = PublicKey.findProgramAddressSync(
+        // Derive treasure record PDA
+        const [treasureRecordPda] = PublicKey.findProgramAddressSync(
           [
-            Buffer.from("deposit"),
+            Buffer.from("treasure"),
             player.publicKey.toBuffer(),
             Buffer.from(new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer)),
           ],
@@ -382,22 +382,22 @@ describe("game", () => {
           await getAccount(provider.connection, vaultTokenAccount)
         ).amount;
 
-        // Act: Make deposit
+        // Act: Hide treasure
         const tx = await program.methods
-          .depositForNft(new anchor.BN(depositAmount))
+          .hideTreasure(new anchor.BN(treasureAmount), new anchor.BN(timestamp))
           .accounts({
             player: player.publicKey,
             playerTokenAccount: playerTokenAccount,
             vaultTokenAccount: vaultTokenAccount,
             vault: vaultPda,
-            depositRecord: depositRecordPda,
+            treasureRecord: treasureRecordPda,
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([player])
           .rpc();
 
-        console.log("Deposit transaction:", tx);
+        console.log("Hide treasure transaction:", tx);
 
         // Assert: Check balances changed correctly
         const finalPlayerBalance = (
@@ -408,36 +408,36 @@ describe("game", () => {
         ).amount;
 
         expect(finalPlayerBalance.toString()).to.equal(
-          (initialPlayerBalance - BigInt(depositAmount)).toString()
+          (initialPlayerBalance - BigInt(treasureAmount)).toString()
         );
         expect(finalVaultBalance.toString()).to.equal(
-          (initialVaultBalance + BigInt(depositAmount)).toString()
+          (initialVaultBalance + BigInt(treasureAmount)).toString()
         );
 
         console.log("✓ Tokens transferred correctly");
 
-        // Assert: Check deposit record
-        const depositRecord = await program.account.depositRecord.fetch(
-          depositRecordPda
+        // Assert: Check treasure record
+        const treasureRecord = await program.account.treasureRecord.fetch(
+          treasureRecordPda
         );
 
-        expect(depositRecord.player.toString()).to.equal(
+        expect(treasureRecord.player.toString()).to.equal(
           player.publicKey.toString()
         );
-        expect(depositRecord.amount.toNumber()).to.equal(depositAmount);
-        expect(depositRecord.claimed).to.be.false;
-        expect(depositRecord.tier).to.equal(2); // 500 tokens = tier 2
+        expect(treasureRecord.amount.toNumber()).to.equal(treasureAmount);
+        expect(treasureRecord.claimed).to.be.false;
+        expect(treasureRecord.tier).to.equal(2); // 500 tokens = tier 2
 
-        console.log("✓ Deposit record created correctly");
+        console.log("✓ Treasure record created correctly");
       });
 
-      it("Fails when deposit amount is below minimum", async () => {
-        const depositAmount = 50_000_000; // 50 tokens (below 100 minimum)
+      it("Fails when treasure amount is below minimum", async () => {
+        const treasureAmount = 50_000_000; // 50 tokens (below 100 minimum)
         const timestamp = Math.floor(Date.now() / 1000);
 
-        const [depositRecordPda] = PublicKey.findProgramAddressSync(
+        const [treasureRecordPda] = PublicKey.findProgramAddressSync(
           [
-            Buffer.from("deposit"),
+            Buffer.from("treasure"),
             player.publicKey.toBuffer(),
             Buffer.from(new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer)),
           ],
@@ -446,37 +446,37 @@ describe("game", () => {
 
         try {
           await program.methods
-            .depositForNft(new anchor.BN(depositAmount))
+            .hideTreasure(new anchor.BN(treasureAmount), new anchor.BN(timestamp))
             .accounts({
               player: player.publicKey,
               playerTokenAccount: playerTokenAccount,
               vaultTokenAccount: vaultTokenAccount,
               vault: vaultPda,
-              depositRecord: depositRecordPda,
+              treasureRecord: treasureRecordPda,
               tokenProgram: TOKEN_PROGRAM_ID,
               systemProgram: SystemProgram.programId,
             })
             .signers([player])
             .rpc();
 
-          expect.fail("Expected transaction to fail with insufficient deposit");
+          expect.fail("Expected transaction to fail with insufficient treasure");
         } catch (error) {
-          console.log("✓ Transaction correctly failed with insufficient deposit");
+          console.log("✓ Transaction correctly failed with insufficient treasure");
         }
       });
     });
 
-    describe("claim_deposit", () => {
-      let depositRecordPda: PublicKey;
+    describe("claim_treasure", () => {
+      let treasureRecordPda: PublicKey;
 
       before(async () => {
-        // Make a deposit first
-        const depositAmount = 1_000_000_000; // 1,000 tokens
+        // Hide a treasure first
+        const treasureAmount = 1_000_000_000; // 1,000 tokens
         const timestamp = Math.floor(Date.now() / 1000);
 
-        [depositRecordPda] = PublicKey.findProgramAddressSync(
+        [treasureRecordPda] = PublicKey.findProgramAddressSync(
           [
-            Buffer.from("deposit"),
+            Buffer.from("treasure"),
             player.publicKey.toBuffer(),
             Buffer.from(new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer)),
           ],
@@ -484,29 +484,29 @@ describe("game", () => {
         );
 
         await program.methods
-          .depositForNft(new anchor.BN(depositAmount))
+          .hideTreasure(new anchor.BN(treasureAmount), new anchor.BN(timestamp))
           .accounts({
             player: player.publicKey,
             playerTokenAccount: playerTokenAccount,
             vaultTokenAccount: vaultTokenAccount,
             vault: vaultPda,
-            depositRecord: depositRecordPda,
+            treasureRecord: treasureRecordPda,
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,
           })
           .signers([player])
           .rpc();
 
-        console.log("✓ Test deposit created");
+        console.log("✓ Test treasure hidden");
       });
 
-      it("Successfully claims a deposit", async () => {
-        // Act: Claim the deposit
+      it("Successfully claims a treasure", async () => {
+        // Act: Claim the treasure
         const tx = await program.methods
-          .claimDeposit()
+          .claimTreasure()
           .accounts({
             player: player.publicKey,
-            depositRecord: depositRecordPda,
+            treasureRecord: treasureRecordPda,
             vault: vaultPda,
           })
           .signers([player])
@@ -514,27 +514,27 @@ describe("game", () => {
 
         console.log("Claim transaction:", tx);
 
-        // Assert: Check deposit record is marked as claimed
-        const depositRecord = await program.account.depositRecord.fetch(
-          depositRecordPda
+        // Assert: Check treasure record is marked as claimed
+        const treasureRecord = await program.account.treasureRecord.fetch(
+          treasureRecordPda
         );
 
-        expect(depositRecord.claimed).to.be.true;
-        console.log("✓ Deposit marked as claimed");
+        expect(treasureRecord.claimed).to.be.true;
+        console.log("✓ Treasure marked as claimed");
 
         // Assert: Check vault stats updated
-        const vaultAccount = await program.account.depositVault.fetch(vaultPda);
-        expect(vaultAccount.totalClaims.toNumber()).to.be.greaterThan(0);
+        const vaultAccount = await program.account.treasureVault.fetch(vaultPda);
+        expect(vaultAccount.totalClaimed.toNumber()).to.be.greaterThan(0);
         console.log("✓ Vault stats updated");
       });
 
-      it("Fails when trying to claim already claimed deposit", async () => {
+      it("Fails when trying to claim already claimed treasure", async () => {
         try {
           await program.methods
-            .claimDeposit()
+            .claimTreasure()
             .accounts({
               player: player.publicKey,
-              depositRecord: depositRecordPda,
+              treasureRecord: treasureRecordPda,
               vault: vaultPda,
             })
             .signers([player])
