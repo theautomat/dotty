@@ -82,35 +82,35 @@ pub mod game {
     }
 
     // ====================================================================
-    // TOKEN DEPOSIT SYSTEM (Optional - for premium NFTs)
+    // TREASURE HIDING SYSTEM (Optional - for premium NFTs)
     // ====================================================================
 
-    /// Initialize the deposit vault (one-time setup by admin)
-    /// This creates the vault that can accept token deposits
+    /// Initialize the treasure vault (one-time setup by admin)
+    /// This creates the vault that can accept hidden treasure
     pub fn initialize_vault(ctx: Context<InitializeVault>) -> Result<()> {
         let vault = &mut ctx.accounts.vault;
         vault.authority = ctx.accounts.authority.key();
-        vault.total_deposits = 0;
-        vault.total_claims = 0;
+        vault.total_hidden = 0;
+        vault.total_claimed = 0;
         vault.bump = ctx.bumps.vault;
 
-        msg!("Deposit vault initialized!");
+        msg!("Treasure vault initialized!");
         msg!("Authority: {}", vault.authority);
 
         Ok(())
     }
 
-    /// Deposit tokens to earn the right to mint a premium NFT
-    /// Player sends tokens → vault stores them → creates deposit record
-    pub fn deposit_for_nft(
-        ctx: Context<DepositForNFT>,
+    /// Hide treasure (tokens) to earn the right to mint a premium NFT
+    /// Player sends tokens → vault stores them → creates hidden treasure record
+    pub fn hide_treasure(
+        ctx: Context<HideTreasure>,
         amount: u64,
-        deposit_id: i64,
+        treasure_id: i64,
     ) -> Result<()> {
-        // Validate minimum deposit amount (100 tokens with 6 decimals = 100,000,000)
-        require!(amount >= 100_000_000, ErrorCode::InsufficientDeposit);
+        // Validate minimum treasure amount (100 tokens with 6 decimals = 100,000,000)
+        require!(amount >= 100_000_000, ErrorCode::InsufficientTreasure);
 
-        msg!("Player depositing {} tokens", amount);
+        msg!("Player hiding {} tokens as treasure", amount);
 
         // Transfer tokens from player to vault
         let cpi_accounts = Transfer {
@@ -123,56 +123,56 @@ pub mod game {
 
         token::transfer(cpi_ctx, amount)?;
 
-        msg!("Tokens transferred successfully");
+        msg!("Treasure hidden successfully");
 
-        // Record deposit in player's PDA
-        let deposit_record = &mut ctx.accounts.deposit_record;
-        deposit_record.player = ctx.accounts.player.key();
-        deposit_record.amount = amount;
-        deposit_record.timestamp = deposit_id;
-        deposit_record.claimed = false;
-        deposit_record.bump = ctx.bumps.deposit_record;
+        // Record hidden treasure in player's PDA
+        let treasure_record = &mut ctx.accounts.treasure_record;
+        treasure_record.player = ctx.accounts.player.key();
+        treasure_record.amount = amount;
+        treasure_record.timestamp = treasure_id;
+        treasure_record.claimed = false;
+        treasure_record.bump = ctx.bumps.treasure_record;
 
-        // Calculate tier based on deposit amount
-        deposit_record.tier = calculate_tier(amount);
+        // Calculate tier based on treasure amount
+        treasure_record.tier = calculate_tier(amount);
 
         // Update vault stats
         let vault = &mut ctx.accounts.vault;
-        vault.total_deposits = vault.total_deposits.checked_add(amount).unwrap();
+        vault.total_hidden = vault.total_hidden.checked_add(amount).unwrap();
 
-        msg!("Deposit recorded! Tier: {}", deposit_record.tier);
+        msg!("Treasure recorded! Tier: {}", treasure_record.tier);
         msg!("Player can now claim their premium NFT");
 
         Ok(())
     }
 
-    /// Claim deposit after depositing tokens
-    /// This marks the deposit as claimed so player can mint their premium NFT
-    pub fn claim_deposit(ctx: Context<ClaimDeposit>) -> Result<()> {
-        let deposit_record = &mut ctx.accounts.deposit_record;
+    /// Claim hidden treasure to receive premium NFT
+    /// This marks the treasure as claimed so player can mint their premium NFT
+    pub fn claim_treasure(ctx: Context<ClaimTreasure>) -> Result<()> {
+        let treasure_record = &mut ctx.accounts.treasure_record;
 
         // Validate not already claimed
-        require!(!deposit_record.claimed, ErrorCode::AlreadyClaimed);
+        require!(!treasure_record.claimed, ErrorCode::AlreadyClaimed);
 
-        msg!("Player claiming deposit (tier {})", deposit_record.tier);
+        msg!("Player claiming treasure (tier {})", treasure_record.tier);
 
         // Mark as claimed
-        deposit_record.claimed = true;
+        treasure_record.claimed = true;
 
         // Update vault stats
         let vault = &mut ctx.accounts.vault;
-        vault.total_claims = vault.total_claims.checked_add(1).unwrap();
+        vault.total_claimed = vault.total_claimed.checked_add(1).unwrap();
 
-        msg!("Deposit claimed! Total claims: {}", vault.total_claims);
+        msg!("Treasure claimed! Total claims: {}", vault.total_claimed);
 
         // Note: Actual NFT minting happens separately via mint_nft instruction
-        // This just validates the player has deposited and tracks the claim
+        // This just validates the player has hidden treasure and tracks the claim
 
         Ok(())
     }
 
     /// Admin function to whitelist a token mint
-    /// This allows adding new tokens that can be deposited
+    /// This allows adding new tokens that can be hidden as treasure
     pub fn whitelist_token(
         ctx: Context<WhitelistToken>,
         token_mint: Pubkey,
@@ -327,8 +327,8 @@ pub mod game {
 // HELPER FUNCTIONS
 // ====================================================================
 
-/// Calculate tier based on deposit amount (with 6 decimals)
-/// Returns tier 1-4, higher tier = more tokens deposited
+/// Calculate tier based on treasure amount (with 6 decimals)
+/// Returns tier 1-4, higher tier = more tokens hidden
 fn calculate_tier(amount: u64) -> u8 {
     let tokens = amount / 1_000_000; // Convert from lamports to tokens
 
@@ -349,33 +349,33 @@ fn calculate_tier(amount: u64) -> u8 {
 
 /// Main vault account storing program configuration
 #[account]
-pub struct DepositVault {
+pub struct TreasureVault {
     pub authority: Pubkey,    // Admin who can update settings (32 bytes)
-    pub total_deposits: u64,  // Total tokens deposited (8 bytes)
-    pub total_claims: u64,    // Total deposits claimed (8 bytes)
+    pub total_hidden: u64,    // Total tokens hidden (8 bytes)
+    pub total_claimed: u64,   // Total treasures claimed (8 bytes)
     pub bump: u8,             // PDA bump (1 byte)
 }
 
-impl DepositVault {
+impl TreasureVault {
     pub const LEN: usize = 8 + 32 + 8 + 8 + 1; // discriminator + fields
 }
 
-/// Player deposit record (one per player per deposit)
+/// Player treasure record (one per player per hidden treasure)
 #[account]
-pub struct DepositRecord {
+pub struct TreasureRecord {
     pub player: Pubkey,    // Player's wallet (32 bytes)
-    pub amount: u64,       // Amount deposited (8 bytes)
-    pub timestamp: i64,    // When deposited (8 bytes)
-    pub claimed: bool,     // Has deposit been claimed? (1 byte)
+    pub amount: u64,       // Amount hidden (8 bytes)
+    pub timestamp: i64,    // When hidden (8 bytes)
+    pub claimed: bool,     // Has treasure been claimed? (1 byte)
     pub tier: u8,          // Tier earned (1-4) (1 byte)
     pub bump: u8,          // PDA bump (1 byte)
 }
 
-impl DepositRecord {
+impl TreasureRecord {
     pub const LEN: usize = 8 + 32 + 8 + 8 + 1 + 1 + 1; // discriminator + fields
 }
 
-/// Token whitelist entry (which tokens can be deposited)
+/// Token whitelist entry (which tokens can be hidden as treasure)
 #[account]
 pub struct TokenWhitelist {
     pub token_mint: Pubkey,   // Token mint address (32 bytes)
@@ -453,11 +453,11 @@ pub struct InitializeVault<'info> {
     #[account(
         init,
         payer = authority,
-        space = DepositVault::LEN,
+        space = TreasureVault::LEN,
         seeds = [b"vault"],
         bump
     )]
-    pub vault: Account<'info, DepositVault>,
+    pub vault: Account<'info, TreasureVault>,
 
     /// Admin who initializes the program
     #[account(mut)]
@@ -467,9 +467,9 @@ pub struct InitializeVault<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(amount: u64, deposit_id: i64)]
-pub struct DepositForNFT<'info> {
-    /// Player making the deposit
+#[instruction(amount: u64, treasure_id: i64)]
+pub struct HideTreasure<'info> {
+    /// Player hiding the treasure
     #[account(mut)]
     pub player: Signer<'info>,
 
@@ -490,39 +490,39 @@ pub struct DepositForNFT<'info> {
         seeds = [b"vault"],
         bump = vault.bump
     )]
-    pub vault: Account<'info, DepositVault>,
+    pub vault: Account<'info, TreasureVault>,
 
-    /// Deposit record PDA (unique per player, per deposit)
-    /// Using deposit_id as seed to allow multiple deposits per player
+    /// Treasure record PDA (unique per player, per treasure)
+    /// Using treasure_id as seed to allow multiple treasures per player
     #[account(
         init,
         payer = player,
-        space = DepositRecord::LEN,
+        space = TreasureRecord::LEN,
         seeds = [
-            b"deposit",
+            b"treasure",
             player.key().as_ref(),
-            &deposit_id.to_le_bytes()
+            &treasure_id.to_le_bytes()
         ],
         bump
     )]
-    pub deposit_record: Account<'info, DepositRecord>,
+    pub treasure_record: Account<'info, TreasureRecord>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct ClaimDeposit<'info> {
-    /// Player claiming the deposit
+pub struct ClaimTreasure<'info> {
+    /// Player claiming the treasure
     pub player: Signer<'info>,
 
-    /// Deposit record being claimed
+    /// Treasure record being claimed
     #[account(
         mut,
-        constraint = deposit_record.player == player.key() @ ErrorCode::Unauthorized,
-        constraint = !deposit_record.claimed @ ErrorCode::AlreadyClaimed
+        constraint = treasure_record.player == player.key() @ ErrorCode::Unauthorized,
+        constraint = !treasure_record.claimed @ ErrorCode::AlreadyClaimed
     )]
-    pub deposit_record: Account<'info, DepositRecord>,
+    pub treasure_record: Account<'info, TreasureRecord>,
 
     /// Vault PDA
     #[account(
@@ -530,7 +530,7 @@ pub struct ClaimDeposit<'info> {
         seeds = [b"vault"],
         bump = vault.bump
     )]
-    pub vault: Account<'info, DepositVault>,
+    pub vault: Account<'info, TreasureVault>,
 }
 
 #[derive(Accounts)]
@@ -555,7 +555,7 @@ pub struct WhitelistToken<'info> {
         bump = vault.bump,
         constraint = vault.authority == authority.key() @ ErrorCode::Unauthorized
     )]
-    pub vault: Account<'info, DepositVault>,
+    pub vault: Account<'info, TreasureVault>,
 
     /// Admin authority
     #[account(mut)]
@@ -573,7 +573,7 @@ pub struct UpdateVault<'info> {
         bump = vault.bump,
         constraint = vault.authority == authority.key() @ ErrorCode::Unauthorized
     )]
-    pub vault: Account<'info, DepositVault>,
+    pub vault: Account<'info, TreasureVault>,
 
     /// Current admin authority
     pub authority: Signer<'info>,
@@ -681,10 +681,10 @@ pub struct BurnBootyForTravel<'info> {
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Deposit amount is too low (minimum 100 tokens)")]
-    InsufficientDeposit,
+    #[msg("Treasure amount is too low (minimum 100 tokens)")]
+    InsufficientTreasure,
 
-    #[msg("Deposit has already been claimed")]
+    #[msg("Treasure has already been claimed")]
     AlreadyClaimed,
 
     #[msg("You are not authorized to perform this action")]

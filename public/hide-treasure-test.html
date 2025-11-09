@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hide Treasure - Local Testing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(to bottom, #0a1128, #1e3a5f);
+            color: #f0e68c;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #d4af37;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .section {
+            background: rgba(30, 58, 95, 0.5);
+            border: 2px solid #4a7ba7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+        }
+
+        .info {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 4px solid #ffd700;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .info p {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #d4af37, #aa8c2c);
+            color: #000;
+            border: 2px solid #ffd700;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+
+        button:hover:not(:disabled) {
+            background: linear-gradient(to bottom, #ffd700, #d4af37);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        input[type="number"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4a7ba7;
+            color: #f0e68c;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 300px;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        .wallet-status {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        .connected {
+            color: #90ee90;
+        }
+
+        .disconnected {
+            color: #ff6b6b;
+        }
+
+        .log {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #4a7ba7;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #4a7ba7;
+            padding-left: 10px;
+        }
+
+        .log-success {
+            border-left-color: #90ee90;
+            color: #90ee90;
+        }
+
+        .log-error {
+            border-left-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .log-info {
+            border-left-color: #ffd700;
+            color: #f0e68c;
+        }
+
+        .balance-display {
+            font-size: 1.2em;
+            color: #ffd700;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .tier-info {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .tier-info p {
+            margin: 5px 0;
+        }
+
+        .network-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255, 165, 0, 0.3);
+            border: 2px solid #ffa500;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        code {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #90ee90;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏴‍☠️ Hide Treasure 🏴‍☠️</h1>
+        <p class="subtitle">Local Solana Testing Interface <span class="network-indicator" id="network">Localhost</span></p>
+
+        <!-- Wallet Connection Section -->
+        <div class="section">
+            <h2>1. Connect Wallet</h2>
+            <div class="wallet-status">
+                <p id="wallet-status" class="disconnected">Wallet not connected</p>
+                <p id="wallet-address" style="font-size: 0.9em; margin-top: 10px; word-break: break-all;"></p>
+            </div>
+            <div style="text-align: center;">
+                <button id="connect-wallet" onclick="connectWallet()">Connect Phantom Wallet</button>
+            </div>
+        </div>
+
+        <!-- Balance Section -->
+        <div class="section">
+            <h2>2. Check Balances</h2>
+            <div class="balance-display">
+                <p>SOL Balance: <span id="sol-balance">-</span></p>
+                <p>Test Token Balance: <span id="token-balance">-</span></p>
+            </div>
+            <div style="text-align: center;">
+                <button id="check-balance" onclick="checkBalances()" disabled>Check Balances</button>
+                <button id="airdrop-sol" onclick="airdropSOL()" disabled>Airdrop 2 SOL</button>
+            </div>
+        </div>
+
+        <!-- Hide Treasure Section -->
+        <div class="section">
+            <h2>3. Hide Treasure</h2>
+            <div class="info">
+                <p><strong>Minimum:</strong> 100 tokens</p>
+                <p><strong>Tier 1 (Common):</strong> 100-999 tokens</p>
+                <p><strong>Tier 2 (Rare):</strong> 1,000-9,999 tokens</p>
+                <p><strong>Tier 3 (Epic):</strong> 10,000-99,999 tokens</p>
+                <p><strong>Tier 4 (Legendary):</strong> 100,000+ tokens</p>
+            </div>
+            <div class="form-group">
+                <label for="treasure-amount">Amount to Hide (tokens):</label>
+                <input type="number" id="treasure-amount" placeholder="500" min="100" step="1">
+            </div>
+            <div style="text-align: center;">
+                <button id="hide-treasure" onclick="hideTreasure()" disabled>Hide Treasure</button>
+            </div>
+        </div>
+
+        <!-- Claim Treasure Section -->
+        <div class="section">
+            <h2>4. Claim Treasure</h2>
+            <div class="info">
+                <p>After hiding treasure, you can claim it to receive your premium NFT</p>
+            </div>
+            <div style="text-align: center;">
+                <button id="claim-treasure" onclick="claimTreasure()" disabled>Claim Treasure</button>
+                <button id="view-treasures" onclick="viewTreasures()" disabled>View My Treasures</button>
+            </div>
+        </div>
+
+        <!-- Blockchain Explorer Section -->
+        <div class="section">
+            <h2>5. Blockchain Analysis</h2>
+            <div class="info">
+                <p><strong>Local Explorer:</strong> <code>http://localhost:8899</code></p>
+                <p><strong>View Logs:</strong> Check the console output where you started <code>solana-test-validator</code></p>
+                <p><strong>Transaction Logs:</strong> All transactions will appear in the log below</p>
+            </div>
+            <div style="text-align: center;">
+                <button onclick="openSolanaExplorer()">Open Solana Explorer (Localhost)</button>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="section">
+            <h2>Activity Log</h2>
+            <div id="log" class="log">
+                <div class="log-entry log-info">Waiting for wallet connection...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script>
+        // Configuration
+        const PROGRAM_ID = 'Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS';
+        const NETWORK = 'http://localhost:8899'; // Local validator
+
+        let connection;
+        let wallet;
+        let treasureId = Date.now();
+
+        // Initialize connection
+        function initConnection() {
+            connection = new solanaWeb3.Connection(NETWORK, 'confirmed');
+            log('Connected to local Solana validator', 'success');
+        }
+
+        // Connect wallet
+        async function connectWallet() {
+            try {
+                if (!window.solana || !window.solana.isPhantom) {
+                    log('Phantom wallet not found! Please install Phantom.', 'error');
+                    alert('Please install Phantom wallet: https://phantom.app');
+                    return;
+                }
+
+                log('Connecting to Phantom wallet...', 'info');
+                const resp = await window.solana.connect();
+                wallet = window.solana;
+
+                document.getElementById('wallet-status').textContent = 'Connected ✓';
+                document.getElementById('wallet-status').className = 'connected';
+                document.getElementById('wallet-address').textContent = resp.publicKey.toString();
+                document.getElementById('network').textContent = 'Localhost (127.0.0.1:8899)';
+
+                log(`Wallet connected: ${resp.publicKey.toString()}`, 'success');
+
+                // Enable buttons
+                document.getElementById('check-balance').disabled = false;
+                document.getElementById('airdrop-sol').disabled = false;
+                document.getElementById('hide-treasure').disabled = false;
+                document.getElementById('claim-treasure').disabled = false;
+                document.getElementById('view-treasures').disabled = false;
+
+                initConnection();
+                await checkBalances();
+            } catch (err) {
+                log(`Error connecting wallet: ${err.message}`, 'error');
+            }
+        }
+
+        // Check balances
+        async function checkBalances() {
+            try {
+                if (!wallet || !connection) {
+                    log('Please connect wallet first', 'error');
+                    return;
+                }
+
+                log('Checking balances...', 'info');
+
+                // Check SOL balance
+                const balance = await connection.getBalance(wallet.publicKey);
+                const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+                document.getElementById('sol-balance').textContent = `${solBalance.toFixed(4)} SOL`;
+
+                log(`SOL Balance: ${solBalance.toFixed(4)} SOL`, 'success');
+
+                // Note: Token balance would require SPL token account
+                document.getElementById('token-balance').textContent = 'N/A (Create token first)';
+
+            } catch (err) {
+                log(`Error checking balances: ${err.message}`, 'error');
+            }
+        }
+
+        // Airdrop SOL
+        async function airdropSOL() {
+            try {
+                if (!wallet || !connection) {
+                    log('Please connect wallet first', 'error');
+                    return;
+                }
+
+                log('Requesting airdrop of 2 SOL...', 'info');
+
+                const signature = await connection.requestAirdrop(
+                    wallet.publicKey,
+                    2 * solanaWeb3.LAMPORTS_PER_SOL
+                );
+
+                log(`Airdrop requested. Signature: ${signature}`, 'info');
+                log('Waiting for confirmation...', 'info');
+
+                await connection.confirmTransaction(signature);
+
+                log('Airdrop confirmed! 2 SOL added to your wallet', 'success');
+                await checkBalances();
+
+            } catch (err) {
+                log(`Error requesting airdrop: ${err.message}`, 'error');
+                log('Note: Local validator must be running!', 'error');
+            }
+        }
+
+        // Hide treasure
+        async function hideTreasure() {
+            try {
+                if (!wallet || !connection) {
+                    log('Please connect wallet first', 'error');
+                    return;
+                }
+
+                const amount = document.getElementById('treasure-amount').value;
+                if (!amount || amount < 100) {
+                    log('Please enter an amount of at least 100 tokens', 'error');
+                    return;
+                }
+
+                log(`Preparing to hide ${amount} tokens as treasure...`, 'info');
+                log('Note: This requires the Solana program to be deployed locally', 'info');
+                log(`Program ID: ${PROGRAM_ID}`, 'info');
+
+                // This is a placeholder - actual implementation would require Anchor
+                log('Integration with Anchor program needed for actual transaction', 'error');
+                log('Use the test suite (npm run test:solana) for full functionality', 'info');
+
+            } catch (err) {
+                log(`Error hiding treasure: ${err.message}`, 'error');
+            }
+        }
+
+        // Claim treasure
+        async function claimTreasure() {
+            log('Claim treasure functionality - requires Anchor integration', 'info');
+            log('Use the test suite (npm run test:solana) for full functionality', 'info');
+        }
+
+        // View treasures
+        async function viewTreasures() {
+            try {
+                if (!wallet || !connection) {
+                    log('Please connect wallet first', 'error');
+                    return;
+                }
+
+                log('Querying blockchain for your treasures...', 'info');
+                log('This would fetch all TreasureRecord PDAs for your wallet', 'info');
+                log('Use Solana CLI or Anchor for detailed queries', 'info');
+
+            } catch (err) {
+                log(`Error viewing treasures: ${err.message}`, 'error');
+            }
+        }
+
+        // Open Solana explorer
+        function openSolanaExplorer() {
+            log('Opening Solana Explorer for localhost...', 'info');
+            log('Visit: https://explorer.solana.com/?cluster=custom&customUrl=http://localhost:8899', 'info');
+            window.open('https://explorer.solana.com/?cluster=custom&customUrl=http://localhost:8899', '_blank');
+        }
+
+        // Logging function
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            log('Hide Treasure Testing Interface loaded', 'success');
+            log('Connect your Phantom wallet to get started', 'info');
+            log(`Ensure local validator is running on ${NETWORK}`, 'info');
+        });
+    </script>
+</body>
+</html>

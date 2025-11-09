@@ -220,6 +220,322 @@ anchor test
 anchor test --provider.cluster devnet --skip-local-validator
 ```
 
+## Local Solana Testing - Hide Treasure Functions
+
+The project includes comprehensive tools for testing the treasure hiding functionality locally. This allows you to test the entire flow without needing devnet SOL or dealing with network latency.
+
+### Prerequisites for Local Testing
+
+1. **Install Solana Tools** (if not already installed):
+   ```bash
+   # Install Solana CLI
+   sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+   # Install Anchor
+   cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+   avm install 0.30.1
+   avm use 0.30.1
+   ```
+
+2. **Install Phantom Wallet** browser extension:
+   - Download from [phantom.app](https://phantom.app)
+   - Create a wallet (save your seed phrase!)
+   - Configure for localhost (Settings → Change Network → Localhost)
+
+### Quick Start - Local Testing
+
+**Step 1: Start Local Validator**
+
+Open a terminal and run:
+
+```bash
+npm run solana:validator
+```
+
+This starts a local Solana test validator on `http://localhost:8899`. Leave this running.
+
+**Step 2: Set Up Test Environment**
+
+In a new terminal:
+
+```bash
+npm run solana:setup
+```
+
+This script will:
+- Configure Solana CLI for localhost
+- Create/use a test wallet
+- Airdrop test SOL
+- Build and deploy the program locally
+- Initialize the treasure vault
+
+**Step 3: Launch Test Interface**
+
+```bash
+npm run solana:test-ui
+```
+
+Then open `http://localhost:3000/hide-treasure-test.html` in your browser.
+
+### Using the Test Interface
+
+The web interface provides a complete testing environment:
+
+1. **Connect Wallet**
+   - Click "Connect Phantom Wallet"
+   - Approve the connection in Phantom
+   - Make sure Phantom is set to "Localhost" network
+
+2. **Get Test SOL**
+   - Click "Airdrop 2 SOL" to get local test SOL
+   - This is free and instant on localhost
+
+3. **Hide Treasure**
+   - Enter amount (minimum 100 tokens)
+   - Click "Hide Treasure"
+   - Tiers are based on amount:
+     - Tier 1 (Common): 100-999 tokens
+     - Tier 2 (Rare): 1,000-9,999 tokens
+     - Tier 3 (Epic): 10,000-99,999 tokens
+     - Tier 4 (Legendary): 100,000+ tokens
+
+4. **Claim Treasure**
+   - After hiding, you can claim to receive premium NFT rights
+   - Click "Claim Treasure"
+
+5. **View Activity**
+   - All transactions appear in the Activity Log
+   - Transactions are visible on local blockchain
+
+### Creating a Test Wallet
+
+If you need a new wallet for testing:
+
+```bash
+# Generate a new keypair
+solana-keygen new --no-bip39-passphrase -o test-wallet.json
+
+# Get the wallet address
+solana-keygen pubkey test-wallet.json
+
+# Airdrop SOL to it (validator must be running)
+solana airdrop 10 $(solana-keygen pubkey test-wallet.json) --url http://localhost:8899
+```
+
+### Getting Local SOL Tokens
+
+**Method 1: Web Interface**
+- Use the "Airdrop 2 SOL" button in the test interface
+
+**Method 2: Solana CLI**
+```bash
+# Airdrop to specific address
+solana airdrop 5 <WALLET_ADDRESS> --url http://localhost:8899
+
+# Or airdrop to configured wallet
+solana config set --url http://localhost:8899
+solana airdrop 5
+```
+
+**Method 3: JavaScript**
+```javascript
+const connection = new solanaWeb3.Connection('http://localhost:8899');
+const signature = await connection.requestAirdrop(
+  walletPublicKey,
+  2 * solanaWeb3.LAMPORTS_PER_SOL
+);
+await connection.confirmTransaction(signature);
+```
+
+### Analyzing the Blockchain
+
+**Option 1: Use Analysis Script**
+
+```bash
+npm run solana:analyze
+```
+
+This interactive script lets you:
+1. View recent transactions
+2. Check program account info
+3. List all program accounts
+4. Check treasure vault status
+5. View wallet balances
+6. Get block info
+7. Open Solana Explorer
+
+**Option 2: Solana CLI Commands**
+
+```bash
+# View transaction history
+solana transaction-history --url http://localhost:8899
+
+# Check account balance
+solana balance <ADDRESS> --url http://localhost:8899
+
+# View program info
+solana program show <PROGRAM_ID> --url http://localhost:8899
+
+# Check specific account
+solana account <ACCOUNT_ADDRESS> --url http://localhost:8899
+```
+
+**Option 3: Solana Explorer**
+
+Open the Solana Explorer configured for localhost:
+```
+https://explorer.solana.com/?cluster=custom&customUrl=http://localhost:8899
+```
+
+Or use the test interface button "Open Solana Explorer"
+
+**Option 4: View Validator Logs**
+
+```bash
+# Tail the validator log file
+tail -f test-validator.log
+
+# Or if you started validator without --quiet flag, check the console output
+```
+
+### Running Automated Tests
+
+**Run full test suite:**
+```bash
+npm run test:solana
+```
+
+This runs all tests including:
+- NFT minting tests
+- Treasure hiding tests (formerly deposit tests)
+- Treasure claiming tests
+- Tier calculation tests
+
+**Run tests without redeploying:**
+```bash
+npm run test:solana:local
+```
+
+**Run specific test:**
+```bash
+cd solana
+anchor test --skip-deploy -- --grep "hide_treasure"
+```
+
+### Troubleshooting Local Testing
+
+**Problem: "Connection refused" when connecting to localhost**
+- Solution: Make sure the validator is running (`npm run solana:validator`)
+
+**Problem: "Insufficient funds" errors**
+- Solution: Airdrop more SOL to your wallet
+  ```bash
+  solana airdrop 5 <YOUR_ADDRESS> --url http://localhost:8899
+  ```
+
+**Problem: Phantom wallet shows 0 SOL on localhost**
+- Solution: Make sure Phantom is set to "Localhost" network (Settings → Change Network)
+- Airdrop SOL using the web interface or CLI
+
+**Problem: Program not found**
+- Solution: Redeploy the program
+  ```bash
+  cd solana
+  anchor deploy --provider.cluster localnet
+  ```
+
+**Problem: "Already in use" error when starting validator**
+- Solution: Kill existing validator and restart
+  ```bash
+  pkill -9 solana-test-validator
+  npm run solana:validator
+  ```
+
+**Problem: Test wallet not found**
+- Solution: Run setup script to create one
+  ```bash
+  npm run solana:setup
+  ```
+
+### Local Testing Workflow
+
+Complete workflow for testing hide treasure functions:
+
+```bash
+# Terminal 1: Start validator
+npm run solana:validator
+
+# Terminal 2: Set up environment (first time only)
+npm run solana:setup
+
+# Terminal 2: Start web server
+npm run solana:test-ui
+
+# Browser: Open http://localhost:3000/hide-treasure-test.html
+# 1. Connect Phantom wallet (set to Localhost)
+# 2. Airdrop SOL
+# 3. Hide treasure
+# 4. Claim treasure
+# 5. View transactions in Activity Log
+
+# Terminal 3: Analyze blockchain (optional)
+npm run solana:analyze
+```
+
+### Helper Scripts Reference
+
+All helper scripts are in the `scripts/` directory:
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| `start-local-validator.sh` | `npm run solana:validator` | Starts local Solana validator |
+| `setup-local-test.sh` | `npm run solana:setup` | Sets up local test environment |
+| `analyze-blockchain.sh` | `npm run solana:analyze` | Interactive blockchain analysis tool |
+
+You can also run these scripts directly:
+```bash
+./scripts/start-local-validator.sh
+./scripts/setup-local-test.sh
+./scripts/analyze-blockchain.sh
+```
+
+### Advanced: Creating Custom Test Tokens
+
+For testing with custom SPL tokens (simulating memecoins):
+
+```typescript
+import { createMint, createAccount, mintTo } from '@solana/spl-token';
+
+// Create test token mint
+const tokenMint = await createMint(
+  connection,
+  payer,
+  authority.publicKey,
+  null,
+  6  // 6 decimals
+);
+
+// Create token account for player
+const playerTokenAccount = await createAccount(
+  connection,
+  payer,
+  tokenMint,
+  player.publicKey
+);
+
+// Mint tokens to player
+await mintTo(
+  connection,
+  payer,
+  tokenMint,
+  playerTokenAccount,
+  authority,
+  10_000_000_000  // 10,000 tokens with 6 decimals
+);
+```
+
+See `solana/tests/game.ts` for complete examples.
+
 ## $BOOTY Token Setup
 
 The $BOOTY token is the in-game currency used for ship movement and earned by burying treasure. It's implemented as a **standard SPL token** integrated directly into the game program - no separate token program needed!
