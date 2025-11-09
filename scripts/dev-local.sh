@@ -211,8 +211,7 @@ else
     WALLET_ADDRESS=$1
     echo "Creating token for wallet: $WALLET_ADDRESS"
 
-    # Run TypeScript script to create token
-    cd solana
+    # Run TypeScript script to create token (we're already in solana/ directory)
     npx ts-node scripts/create-test-token.ts "$WALLET_ADDRESS"
 
     # Read the token mint address from file
@@ -225,12 +224,11 @@ else
         sed -i.bak "s/const TEST_TOKEN_MINT = undefined;/const TEST_TOKEN_MINT = '$TOKEN_MINT';/" hide-treasure.tsx
         rm hide-treasure.tsx.bak 2>/dev/null || true
         echo -e "${GREEN}✓${NC} Frontend updated with token mint"
+        cd solana  # Go back to solana directory to maintain consistency
     else
         echo -e "${RED}✗${NC} Token creation failed"
         TOKEN_MINT="(creation failed)"
     fi
-
-    cd ..
 fi
 
 echo ""
@@ -239,6 +237,9 @@ echo ""
 # 6. CHECK VITE SETUP
 # ============================================================================
 echo "🔍 Checking Vite setup..."
+
+# Go back to root directory to check vite config
+cd ..
 
 if [ ! -f "vite.config.mts" ]; then
     echo -e "${RED}✗${NC} vite.config.mts not found"
