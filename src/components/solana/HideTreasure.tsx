@@ -5,13 +5,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey, Transaction } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import * as anchor from '@coral-xyz/anchor';
-import { Program, AnchorProvider } from '@coral-xyz/anchor';
+import { Program, AnchorProvider, Idl } from '@coral-xyz/anchor';
 import { TOKEN_PROGRAM_ID, getAccount, getAssociatedTokenAddress } from '@solana/spl-token';
 
-// Import IDL
+// Import IDL and config
 import gameIdl from '../../../solana/target/idl/game.json';
+import { SOLANA_CONFIG } from '../../config/solana';
 
 interface HideTreasureProps {
   tokenMint?: string; // Token mint address (PEPE, BONK, etc.)
@@ -61,53 +62,36 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
     setIsHiding(true);
 
     try {
-      // Initialize program
-      const programId = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
-
-      // Create provider
+      // Create Anchor provider
       const provider = new AnchorProvider(
         connection,
         wallet.adapter as any,
         { commitment: 'confirmed' }
       );
 
-      // Load program - parse IDL to ensure proper structure
-      const idl = JSON.parse(JSON.stringify(gameIdl));
-      const program = new Program(idl, programId, provider);
+      // Load program with IDL (now includes metadata.address)
+      const program = new Program(gameIdl as Idl, provider);
 
       // Derive PDAs
+      const programId = new PublicKey(SOLANA_CONFIG.PROGRAM_ID);
       const [vaultPda] = PublicKey.findProgramAddressSync(
         [Buffer.from('vault')],
         programId
       );
 
-      const timestamp = Date.now();
-      const [treasureRecordPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from('treasure'),
-          publicKey.toBuffer(),
-          Buffer.from(new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer))
-        ],
-        programId
-      );
-
       // Get token accounts
       const mint = new PublicKey(tokenMint);
-      const playerTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
+      const depositorTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
       const vaultTokenAccount = await getAssociatedTokenAddress(mint, vaultPda, true);
 
-      // Call hide_treasure instruction
+      // Call hideTreasure instruction using Anchor
       const tx = await program.methods
-        .hideTreasure(
-          new anchor.BN(amount * 1_000_000),
-          new anchor.BN(timestamp)
-        )
+        .hideTreasure(new anchor.BN(amount * 1_000_000))
         .accounts({
-          player: publicKey,
-          playerTokenAccount,
-          vaultTokenAccount,
+          depositor: publicKey,
           vault: vaultPda,
-          treasureRecord: treasureRecordPda,
+          depositorTokenAccount,
+          vaultTokenAccount,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: anchor.web3.SystemProgram.programId,
         })

@@ -174,6 +174,21 @@ solana program deploy target/deploy/game.so --url http://localhost:8899
 
 PROGRAM_ID=$(solana address -k programs/game/target/deploy/game-keypair.json)
 echo -e "${GREEN}✓${NC} Program deployed: $PROGRAM_ID"
+
+# Add metadata field to IDL with program address
+if [ -f "target/idl/game.json" ]; then
+    # Use jq to add metadata field if available, otherwise use sed
+    if command -v jq &> /dev/null; then
+        jq --arg addr "$PROGRAM_ID" '. + {metadata: {address: $addr}}' target/idl/game.json > target/idl/game.json.tmp
+        mv target/idl/game.json.tmp target/idl/game.json
+    else
+        # Fallback: add metadata field manually before closing brace
+        sed -i.bak '$ s/}/,\n  "metadata": {\n    "address": "'"$PROGRAM_ID"'"\n  }\n}/' target/idl/game.json
+        rm target/idl/game.json.bak 2>/dev/null || true
+    fi
+    echo -e "${GREEN}✓${NC} IDL updated with program address"
+fi
+
 echo ""
 
 # ============================================================================
@@ -201,11 +216,23 @@ else
         TOKEN_MINT=$(cat .test-token-mint)
         echo -e "${GREEN}✓${NC} Test token ready: $TOKEN_MINT"
 
-        # Update hide-treasure.tsx with the token mint
+        # Update config file with program ID and token mint
         cd ..
-        sed -i.bak "s/const TEST_TOKEN_MINT = undefined;/const TEST_TOKEN_MINT = '$TOKEN_MINT';/" hide-treasure.tsx
-        rm hide-treasure.tsx.bak 2>/dev/null || true
-        echo -e "${GREEN}✓${NC} Frontend updated with token mint"
+        cat > src/config/solana.ts <<EOL
+/**
+ * Solana Program Configuration
+ * This file is auto-updated by dev-local.sh script
+ */
+
+export const SOLANA_CONFIG = {
+  // Program ID - stays constant across deployments
+  PROGRAM_ID: '$PROGRAM_ID',
+
+  // Test token mint - updated by dev:local script
+  TEST_TOKEN_MINT: '$TOKEN_MINT',
+};
+EOL
+        echo -e "${GREEN}✓${NC} Config updated with program ID and token mint"
         cd solana  # Go back to solana directory to maintain consistency
     else
         echo -e "${RED}✗${NC} Token creation failed"

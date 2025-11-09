@@ -6,6 +6,7 @@ import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-r
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { HideTreasure } from './src/components/solana/HideTreasure';
+import { SOLANA_CONFIG } from './src/config/solana';
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -17,9 +18,8 @@ const endpoint = 'http://localhost:8899'; // Local validator
 const wallets = [new PhantomWalletAdapter()];
 
 function App() {
-  // TODO: Replace with actual token mint address
-  // For now, you'll need to create a test token
-  const TEST_TOKEN_MINT = '26sqF2oNfqngd5gXSeKQ4v29Qvdojfc5LVwd2arTaw4d'; // Set this after creating a test token
+  // Token mint from config (auto-updated by dev:local script)
+  const TEST_TOKEN_MINT = SOLANA_CONFIG.TEST_TOKEN_MINT;
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
