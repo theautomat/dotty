@@ -46,17 +46,25 @@ npm run vite
 
 1. Open Phantom extension
 2. **Settings → Change Network → Localhost**
-3. Copy your wallet address (you'll need it)
+3. Copy your wallet address (click the address at the top to copy)
 
 ### 5. Get Test SOL
 
 Your Phantom wallet needs SOL for transaction fees:
 
+**Option A - Using CLI (Recommended):**
 ```bash
-solana airdrop 2 YOUR_PHANTOM_ADDRESS --url http://localhost:8899
+solana airdrop 5 YOUR_PHANTOM_ADDRESS --url http://localhost:8899
 ```
 
 Replace `YOUR_PHANTOM_ADDRESS` with your actual address from step 4.
+
+**Option B - Check Balance:**
+```bash
+solana balance YOUR_PHANTOM_ADDRESS --url http://localhost:8899
+```
+
+You should see SOL appear in your Phantom wallet immediately (refresh if needed).
 
 ### 6. Create & Mint Test Tokens
 
@@ -136,6 +144,31 @@ const TEST_TOKEN_MINT = 'YOUR_MINT_ADDRESS';  // Paste your mint address here
 6. Click "Hide Treasure"
 7. Approve transaction in Phantom
 8. Success!
+
+### 9. View Your Transaction
+
+After hiding treasure, you can view the transaction in several ways:
+
+**Option A - Solana Explorer (Recommended):**
+1. Copy the transaction signature from the success message
+2. Open: https://explorer.solana.com/?cluster=custom&customUrl=http://localhost:8899
+3. Paste the signature in the search box
+
+**Option B - Browser Console:**
+1. Open browser DevTools (F12)
+2. Check the Console tab for transaction logs
+3. Look for the transaction signature
+
+**Option C - Command Line:**
+```bash
+# Using the transaction signature from the browser
+solana confirm YOUR_TRANSACTION_SIGNATURE --url http://localhost:8899
+
+# View recent transactions for your wallet
+solana transaction-history YOUR_PHANTOM_ADDRESS --url http://localhost:8899
+```
+
+**Note:** The local validator logs are very verbose. Using the browser console or Solana Explorer is much easier than trying to read the validator logs directly.
 
 ## Troubleshooting
 

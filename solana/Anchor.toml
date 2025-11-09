@@ -4,9 +4,6 @@ anchor_version = "0.30.1"
 [workspace]
 members = ["programs/*"]
 
-[workspace]
-members = ["programs/*"]
-
 [features]
 seeds = false
 skip-lint = false

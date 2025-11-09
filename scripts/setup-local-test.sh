@@ -71,13 +71,20 @@ echo ""
 # Build and deploy the program
 echo "Building Solana program..."
 cd solana
-anchor build
+
+# Use cargo build-sbf instead of anchor build to avoid IDL generation bug
+# (Anchor 0.30.1 has a known issue with proc-macro2 and source_file() method)
+cargo build-sbf --manifest-path=programs/game/Cargo.toml
+
+# Copy the binary to the expected location for deployment
+mkdir -p target/deploy
+cp programs/game/target/deploy/game.so target/deploy/
 
 echo ""
 echo "Deploying program to localhost..."
-anchor deploy --provider.cluster localnet
+solana program deploy target/deploy/game.so --url http://localhost:8899
 
-PROGRAM_ID=$(solana address -k target/deploy/game-keypair.json)
+PROGRAM_ID=$(solana address -k programs/game/target/deploy/game-keypair.json)
 echo ""
 echo "✓ Program deployed!"
 echo "Program ID: $PROGRAM_ID"

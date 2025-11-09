@@ -49,9 +49,41 @@ The `npm run solana:setup` script fails to build the Solana program due to multi
    ```
    This is due to newer Rust compiler incompatibility with anchor-cli 0.30.1 dependencies.
 
-## Current Workarounds
+## ✅ SOLUTION: Use cargo build-sbf (RECOMMENDED)
 
-### Option 1: Use Pre-built Program (RECOMMENDED)
+The Anchor build issue has been resolved by bypassing Anchor's IDL generation entirely and using Solana's BPF builder directly:
+
+```bash
+cd solana
+
+# Build the program binary
+cargo build-sbf --manifest-path=programs/game/Cargo.toml
+
+# Copy to deployment location
+mkdir -p target/deploy
+cp programs/game/target/deploy/game.so target/deploy/
+
+# Deploy
+solana program deploy target/deploy/game.so --url http://localhost:8899
+```
+
+**Why this works:**
+- Bypasses Anchor's IDL generation bug (proc-macro2 `source_file()` issue)
+- Uses Solana's native 1.84.1-dev toolchain (no Rust version conflicts)
+- Still produces a working program binary
+- Can be deployed and tested normally
+
+**What you lose:**
+- No IDL file generated (but not needed for local testing)
+- Can't use `anchor deploy` command
+
+**This solution is now integrated into:**
+- `scripts/setup-local-test.sh` (npm run solana:setup)
+- Documentation in README.md
+
+## Previous Workarounds (Historical)
+
+### Option 1: Use Pre-built Program
 
 If you already have a deployed program on localnet from previous work, you can skip the build step:
 
