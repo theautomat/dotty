@@ -161,7 +161,7 @@ const GameConfig: GameConfigType = {
     defaultZoom: 1.0,
 
     // Optional background image path
-    backgroundImage: undefined,
+    backgroundImage: '/assets/images/pirate-game-map.png',
 
     // Grid navigation settings
     // Highlight color for selected square (yellow/gold)
