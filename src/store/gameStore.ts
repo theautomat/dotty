@@ -39,11 +39,15 @@ interface GameState {
   // Input state
   inputs: InputState;
 
+  // Zoom state (delta from wheel events)
+  zoomDelta: number;
+
   // Actions
   setMapReady: (ready: boolean) => void;
   setGridPosition: (x: number, y: number) => void;
   setInput: (key: keyof InputState, pressed: boolean) => void;
   resetInputs: () => void;
+  setZoomDelta: (delta: number) => void;
 }
 
 /**
@@ -59,6 +63,7 @@ export const useGameStore = create<GameState>((set) => ({
   // Initial state
   mapReady: false,
   gridPosition: { x: 50, y: 50 }, // Start at center of 100x100 grid
+  zoomDelta: 0,
   inputs: {
     up: false,
     down: false,
@@ -96,6 +101,7 @@ export const useGameStore = create<GameState>((set) => ({
         r: false,
       },
     }),
+  setZoomDelta: (delta) => set({ zoomDelta: delta }),
 }));
 
 // Export a non-hook version for use in non-React code
