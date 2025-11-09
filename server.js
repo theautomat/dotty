@@ -149,6 +149,15 @@ app.get('/leaderboard', (req, res) => {
   }
 });
 
+// Treasure gallery route
+app.get('/treasure', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    res.sendFile(path.join(__dirname, 'dist/treasure.html'));
+  } else {
+    res.sendFile(path.join(__dirname, 'treasure.html'));
+  }
+});
+
 // Entry screen route
 app.get('/entry-screen', (req, res, next) => {
   if (isDev) {
@@ -208,7 +217,13 @@ if (isDev) {
     const leaderboardPath = path.join(__dirname, 'leaderboard.html');
     injectLiveReload(req, res, next, leaderboardPath);
   });
-  
+
+  // Inject LiveReload for the clean /treasure URL
+  app.get('/treasure', (req, res, next) => {
+    const treasurePath = path.join(__dirname, 'treasure.html');
+    injectLiveReload(req, res, next, treasurePath);
+  });
+
   // Inject LiveReload for entry screen
   app.get('/entry-screen', (req, res, next) => {
     const entryScreenPath = path.join(__dirname, 'src/entry-screen/entry-screen.html');
