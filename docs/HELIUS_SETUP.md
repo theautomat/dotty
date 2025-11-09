@@ -57,7 +57,12 @@ Forwarding   https://abc123.ngrok.io -> http://localhost:3000
 
 1. Go to https://helius.dev
 2. Sign up (free tier is fine)
-3. Create an API key
+3. Create an API key and project
+4. Add to your `.env` file:
+   ```bash
+   HELIUS_API_KEY=your-api-key-here
+   HELIUS_PROJECT_ID=your-project-id-here
+   ```
 
 ### B. Create a Webhook
 

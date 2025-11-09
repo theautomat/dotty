@@ -93,6 +93,26 @@ Create a `.env` file in the root:
 SOLANA_NETWORK=devnet
 SOLANA_WALLET_PATH=./wallets/devnet-deployer.json
 SOLANA_PROGRAM_ID=<your-deployed-program-id>
+
+# Helius (for webhook tracking - optional, free tier available)
+HELIUS_API_KEY=<your-helius-api-key>
+HELIUS_PROJECT_ID=<your-helius-project-id>
+
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=<your-firebase-api-key>
+VITE_FIREBASE_AUTH_DOMAIN=<your-project>.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=<your-project-id>
+VITE_FIREBASE_STORAGE_BUCKET=<your-project>.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
+VITE_FIREBASE_APP_ID=<your-app-id>
+VITE_FIREBASE_MEASUREMENT_ID=<your-measurement-id>
+
+# FingerprintJS Pro (for device identification)
+VITE_FINGERPRINT_API_KEY=<your-fingerprint-api-key>
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
 ```
 
 ## Wallet Setup
