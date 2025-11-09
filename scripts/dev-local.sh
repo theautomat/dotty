@@ -15,41 +15,22 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # ============================================================================
-# 1. CHECK/START VALIDATOR
+# 1. CHECK VALIDATOR
 # ============================================================================
 echo "📡 Checking local validator..."
 
 if curl -s http://localhost:8899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' &> /dev/null; then
-    echo -e "${GREEN}✓${NC} Validator is already running"
+    echo -e "${GREEN}✓${NC} Validator is running"
 else
-    echo -e "${YELLOW}⚠${NC} Validator not running, starting it..."
-
-    # Check if there's a stale validator process
-    if lsof -ti:8899 > /dev/null 2>&1; then
-        echo "Killing stale validator process..."
-        lsof -ti:8899 | xargs kill -9 || true
-        sleep 2
-    fi
-
-    # Start validator in background
-    cd "$(dirname "$0")/.."
-    solana-test-validator --reset --quiet > test-validator.log 2>&1 &
-    VALIDATOR_PID=$!
-    echo "Started validator (PID: $VALIDATOR_PID)"
-
-    # Wait for validator to be ready
-    echo "Waiting for validator to start..."
-    for i in {1..30}; do
-        if curl -s http://localhost:8899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' &> /dev/null; then
-            echo -e "${GREEN}✓${NC} Validator is ready"
-            break
-        fi
-        sleep 1
-        if [ $i -eq 30 ]; then
-            echo -e "${RED}✗${NC} Validator failed to start"
-            exit 1
-        fi
-    done
+    echo -e "${RED}✗${NC} Validator is not running"
+    echo ""
+    echo "Please start the validator in a separate terminal:"
+    echo "  npm run solana:validator"
+    echo ""
+    echo "Then run this script again:"
+    echo "  npm run dev:local YOUR_PHANTOM_ADDRESS"
+    echo ""
+    exit 1
 fi
 
 echo ""
@@ -60,7 +41,8 @@ echo ""
 echo "🔨 Building Solana program..."
 
 cd solana
-cargo build-sbf --manifest-path=programs/game/Cargo.toml
+# Suppress warnings by filtering stderr
+cargo build-sbf --manifest-path=programs/game/Cargo.toml 2>&1 | grep -v "warning:" | grep -v "^$" || true
 
 # Copy binary to deploy location
 mkdir -p target/deploy
@@ -266,9 +248,9 @@ if [ ! -z "$TOKEN_MINT" ] && [ "$TOKEN_MINT" != "(not created - wallet address r
 fi
 
 echo ""
-echo "🎯 Next step:"
-echo "  Run: npm run vite"
-echo "  Open: http://localhost:5173/hide-treasure.html"
+echo "🎯 Next steps:"
+echo "  1. In a separate terminal, run: npm run vite"
+echo "  2. Open: http://localhost:5173/hide-treasure.html"
 echo ""
 
 if [ -z "$1" ]; then
@@ -277,5 +259,8 @@ if [ -z "$1" ]; then
     echo ""
 fi
 
-echo "💡 Tip: Validator logs in test-validator.log"
+echo "💡 Tips:"
+echo "  - Keep the validator running in a separate terminal to see its logs"
+echo "  - Keep vite running in a separate terminal to see frontend logs"
+echo "  - Validator logs are also saved to test-validator.log"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

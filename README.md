@@ -315,28 +315,39 @@ solana airdrop 5 <YOUR_PHANTOM_ADDRESS> --url http://localhost:8899
 
 ### Quick Start - Local Testing
 
-**Simplified One-Command Setup:**
+**Three Terminal Workflow:**
 
+**Terminal 1 - Start the local validator:**
+```bash
+npm run solana:validator
+```
+Keep this running to see validator logs in real-time.
+
+**Terminal 2 - Run the setup script:**
 ```bash
 # Run setup with your Phantom wallet address
 npm run dev:local YOUR_PHANTOM_ADDRESS
 ```
 
 This command:
-- Starts/checks local validator on `http://localhost:8899`
+- Checks that the local validator is running
 - Builds and deploys the Solana program
 - Generates the program IDL
 - Creates a test SPL token
 - Mints 10,000 tokens to your Phantom wallet
 - Auto-updates the frontend with token address
 
-**Then start the frontend:**
-
+**Terminal 3 - Start the frontend:**
 ```bash
 npm run vite
 ```
+Keep this running to see frontend build logs and hot reload changes.
 
+**Then open your browser:**
 Open `http://localhost:5173/hide-treasure.html` in your browser. Connect your Phantom wallet (set to Localhost network) and you're ready to test treasure hiding!
+
+**Why separate terminals?**
+Running the validator and vite in separate terminals lets you see their logs clearly and monitor them independently. The dev:local script just does the one-time setup (build, deploy, create token).
 
 **Alternative - Manual Step-by-Step:**
 
