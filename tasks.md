@@ -505,12 +505,12 @@ Note: These remain vanilla Three.js objects with TypeScript
 
 ## 🎨 Branding & Asset Cleanup
 
-### Update Branding (Mancer → Dotty)
-- [ ] Update `index.html` title and meta tags
-- [ ] Update Open Graph tags for social sharing
-- [ ] Update leaderboard page branding
-- [ ] Replace or remove Mancer-branded images
-- [ ] Update any remaining references in HTML/CSS
+### Update Branding (Game → Booty)
+- [x] Update `index.html` title and meta tags
+- [x] Update Open Graph tags for social sharing
+- [x] Update leaderboard page branding
+- [ ] Replace or remove old game-branded images
+- [x] Update any remaining references in HTML/CSS
 
 ### Clean Up Sound Assets
 - [ ] Remove spaceship engine sounds
@@ -521,7 +521,7 @@ Note: These remain vanilla Three.js objects with TypeScript
 - [ ] Document remaining sound files and their purposes
 
 ### Simplify Entry Experience
-- [x] Update entry screen branding: "Mancer" → "Dotty"
+- [x] Update entry screen branding: Game name now "Booty"
 - [x] Remove spinning object from entry screen
 - [ ] Remove or simplify entry screen complexity
 - [ ] Consider removing Preact dependency from entry screen
