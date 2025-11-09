@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import GridNavigator from './GridNavigator';
+import { gameStore } from '../store/gameStore';
 
 interface MapConfig {
     worldSize: number;
@@ -33,6 +34,7 @@ class Map {
     private maxZoom: number;
     private zoomSpeed: number;
     private defaultZoom: number;
+    private unsubscribeZoom: (() => void) | null = null;
 
     constructor(
         scene: THREE.Scene,
@@ -63,6 +65,18 @@ class Map {
         await this.createBackground();
         this.createGrid();
         this.initNavigator();
+
+        // Subscribe to zoom events from the store
+        this.unsubscribeZoom = gameStore.subscribe(
+            (state) => state.zoomDelta,
+            (zoomDelta) => {
+                if (zoomDelta !== 0) {
+                    this.handleZoom(zoomDelta);
+                    // Reset zoom delta after handling
+                    gameStore.getState().setZoomDelta(0);
+                }
+            }
+        );
 
         console.log(`Map initialized: ${this.config.gridSize}x${this.config.gridSize} grid, world size: ${this.mapWorldSize}, initial zoom: ${this.camera.zoom}`);
     }
@@ -300,6 +314,12 @@ class Map {
      * Cleanup and destroy map resources
      */
     destroy(): void {
+        // Unsubscribe from zoom events
+        if (this.unsubscribeZoom) {
+            this.unsubscribeZoom();
+            this.unsubscribeZoom = null;
+        }
+
         if (this.navigator) {
             this.navigator.destroy();
             this.navigator = null;
