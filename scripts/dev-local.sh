@@ -27,11 +27,15 @@ if echo "$HEALTH_RESPONSE" | grep -q '"result":"ok"'; then
 else
     echo -e "${RED}✗${NC} Validator is not running"
     echo ""
-    echo "Please start the validator in a separate terminal:"
-    echo "  npm run solana:validator"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "To start the validator, open a separate terminal and run:"
+    echo ""
+    echo "  ${GREEN}npm run solana:validator${NC}"
     echo ""
     echo "Then run this script again:"
-    echo "  npm run dev:local YOUR_PHANTOM_ADDRESS"
+    echo ""
+    echo "  ${GREEN}npm run dev:local YOUR_PHANTOM_ADDRESS${NC}"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo -e "${RED}Exiting: Cannot deploy program without a running validator${NC}"
     exit 1
