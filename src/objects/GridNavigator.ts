@@ -4,6 +4,7 @@
  */
 
 import * as THREE from 'three';
+import { gameStore } from '../store/gameStore';
 
 interface GridNavigatorConfig {
     gridSize: number;          // Total grid dimensions (e.g., 100 for 100x100)
@@ -32,9 +33,6 @@ class GridNavigator {
     // For smooth camera panning
     private targetCameraX: number = 0;
     private targetCameraZ: number = 0;
-
-    // Callback for position changes
-    private onPositionChange: ((x: number, y: number) => void) | null = null;
 
     constructor(
         scene: THREE.Scene,
@@ -194,10 +192,8 @@ class GridNavigator {
 
         this.updateCameraTarget();
 
-        // Notify listeners of position change
-        if (this.onPositionChange) {
-            this.onPositionChange(this.currentX, this.currentY);
-        }
+        // Update the store with the new position
+        gameStore.getState().setGridPosition(this.currentX, this.currentY);
     }
 
     /**
@@ -250,13 +246,6 @@ class GridNavigator {
 
         this.updateHighlightPosition();
         console.log(`Set grid position to (${this.currentX}, ${this.currentY})`);
-    }
-
-    /**
-     * Register a callback for position changes
-     */
-    setPositionChangeCallback(callback: (x: number, y: number) => void): void {
-        this.onPositionChange = callback;
     }
 
     /**
