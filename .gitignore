@@ -22,6 +22,10 @@ wallets/
 .wallets/
 *-keypair.json
 
+# Solana test validator
+test-ledger/
+test-validator.log
+
 # Build output
 dist/
 build/

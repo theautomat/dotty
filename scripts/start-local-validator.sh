@@ -38,12 +38,13 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 solana-test-validator \
   --reset \
   --ledger test-ledger \
-  --log test-validator.log \
+  --log \
   --rpc-port 8899 \
   --faucet-port 9900 \
   --gossip-port 8001 \
-  --dynamic-port-range 8002-8020 \
+  --dynamic-port-range 8002-8030 \
   --limit-ledger-size 50000000 \
-  --quiet
+  > test-validator.log 2>&1
 
-# Note: Remove --quiet if you want to see logs in console
+# Note: --log writes detailed logs to test-ledger/validator.log
+# Output is redirected to test-validator.log for convenience

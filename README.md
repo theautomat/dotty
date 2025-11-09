@@ -169,7 +169,7 @@ The game uses a unified Solana program that handles:
 
 ```bash
 # Install Solana CLI
-sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
 
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -224,12 +224,63 @@ anchor test --provider.cluster devnet --skip-local-validator
 
 The project includes comprehensive tools for testing the treasure hiding functionality locally. This allows you to test the entire flow without needing devnet SOL or dealing with network latency.
 
+### Installing Solana Test Validator (macOS)
+
+**Install Solana CLI** (includes test validator):
+```bash
+sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+```
+
+**Run the test validator**:
+```bash
+solana-test-validator
+```
+
+This starts a local Solana blockchain at `http://localhost:8899`.
+
+### Using Phantom Wallet with Local Validator
+
+To interact with your local website and test treasure hiding:
+
+**1. Install Phantom Wallet**
+- Install the [Phantom](https://phantom.app) browser extension
+- Create a new wallet (save your seed phrase!)
+
+**2. Switch Phantom to Localhost**
+- Open Phantom settings (click gear icon)
+- Navigate to: **Settings → Change Network → Localhost**
+- This connects Phantom to `http://localhost:8899`
+
+**3. Get Test SOL**
+
+Two ways to get free local SOL:
+
+**Option A - Using CLI:**
+```bash
+# Start the validator first
+npm run solana:validator
+
+# In a new terminal, airdrop SOL to your Phantom address
+solana airdrop 5 <YOUR_PHANTOM_ADDRESS> --url http://localhost:8899
+```
+
+**Option B - Using the Test UI:**
+- Start the test interface: `npm run solana:test-ui`
+- Open `http://localhost:3000/hide-treasure-test.html`
+- Click "Connect Phantom Wallet"
+- Click "Airdrop 2 SOL" button
+
+**4. Test Your Website**
+- Your local website will connect to Phantom
+- Phantom will connect to your local validator
+- Transactions are instant and free on localhost
+
 ### Prerequisites for Local Testing
 
 1. **Install Solana Tools** (if not already installed):
    ```bash
    # Install Solana CLI
-   sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+   sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
 
    # Install Anchor
    cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
