@@ -145,8 +145,8 @@ const GameConfig: GameConfigType = {
     // Grid line color (white)
     gridColor: 0xffffff,
 
-    // Grid line opacity
-    gridOpacity: 0.3,
+    // Grid line opacity (reduced to minimize dulling of background colors)
+    gridOpacity: 0.15,
 
     // Minimum zoom level
     minZoom: 0.5,
