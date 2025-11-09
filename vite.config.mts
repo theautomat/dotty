@@ -18,14 +18,14 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
-  
+
   // Server configuration
   server: {
     port: 5173, // Different from the Socket.IO server port
     strictPort: true, // Ensures it doesn't try another port if 5173 is taken
     open: false // Don't open browser automatically
   },
-  
+
   // Build options
   build: {
     outDir: 'dist',
@@ -40,7 +40,7 @@ export default defineConfig({
       }
     }
   },
-  
+
   // Make sure these dependencies are properly processed
   optimizeDeps: {
     include: [

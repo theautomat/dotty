@@ -26,8 +26,13 @@ wallets/
 test-ledger/
 test-validator.log
 
+# Firebase service account keys - NEVER commit these!
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+
 # Build output
 dist/
+dist-server/
 build/
 public/build/
 .cache/

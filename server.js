@@ -5,6 +5,15 @@ const http = require('http');
 // WebRTC signaling implementation is inline below (removed unused import)
 const { nftService } = require('./nft-service');
 
+// Import TypeScript modules (tsx/ts-node will handle .ts files)
+const { firebaseAdmin } = require('./firebase-admin-config.ts');
+const { treasureService } = require('./treasure-service.ts');
+const {
+  verifyHeliusAuth,
+  handleHeliusWebhook,
+  webhookHealthCheck
+} = require('./helius-webhook-handler.ts');
+
 // Create Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -126,18 +135,173 @@ app.get('/api/nft-status', (req, res) => {
   });
 });
 
-// Helius webhook endpoint - receives treasure deposit events from blockchain
-app.post('/api/webhooks/helius', (req, res) => {
-  console.log('\n🎉 ===== HELIUS WEBHOOK RECEIVED =====');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Payload:', JSON.stringify(req.body, null, 2));
-  console.log('=====================================\n');
+// ============================================================================
+// HELIUS WEBHOOK ENDPOINTS
+// ============================================================================
 
-  // Acknowledge receipt
-  res.status(200).json({
-    received: true,
-    timestamp: Date.now()
-  });
+/**
+ * Helius Webhook Endpoint
+ *
+ * This endpoint receives transaction notifications from Helius when:
+ * - A user deposits treasure in your Solana program
+ * - Any transaction matches your webhook configuration
+ *
+ * Configuration Steps:
+ * 1. Create a Helius account: https://www.helius.dev/
+ * 2. Set up a webhook pointing to: https://your-domain.com/api/webhooks/helius
+ * 3. Configure the webhook with:
+ *    - Account addresses: Your Solana program ID
+ *    - Transaction types: Any (or specific instruction types)
+ *    - Auth header: Set HELIUS_WEBHOOK_AUTH_HEADER env var
+ */
+app.post('/api/webhooks/helius',
+  verifyHeliusAuth(process.env.HELIUS_WEBHOOK_AUTH_HEADER),
+  handleHeliusWebhook
+);
+
+// Webhook health check endpoint
+app.get('/api/webhooks/helius/health', webhookHealthCheck);
+
+// Get active treasure deposits
+app.get('/api/treasures', async (req, res) => {
+  try {
+    const { limit, tokenType, status } = req.query;
+
+    if (!treasureService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const treasures = await treasureService.getActiveTreasures({
+      limit: limit ? parseInt(limit) : 100,
+      tokenType,
+      status: status || 'active'
+    });
+
+    res.json({
+      success: true,
+      count: treasures.length,
+      treasures
+    });
+
+  } catch (error) {
+    console.error('Error fetching treasures:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch treasures'
+    });
+  }
+});
+
+// Get treasures by wallet address
+app.get('/api/treasures/wallet/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const { limit } = req.query;
+
+    if (!treasureService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const treasures = await treasureService.getTreasuresByWallet(address, {
+      limit: limit ? parseInt(limit) : 100
+    });
+
+    res.json({
+      success: true,
+      count: treasures.length,
+      treasures
+    });
+
+  } catch (error) {
+    console.error('Error fetching treasures by wallet:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch treasures'
+    });
+  }
+});
+
+// Get specific treasure by transaction signature
+app.get('/api/treasures/:signature', async (req, res) => {
+  try {
+    const { signature } = req.params;
+
+    if (!treasureService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const treasure = await treasureService.getTreasureDeposit(signature);
+
+    if (!treasure) {
+      return res.status(404).json({
+        success: false,
+        error: 'Treasure not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      treasure
+    });
+
+  } catch (error) {
+    console.error('Error fetching treasure:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch treasure'
+    });
+  }
+});
+
+// Update treasure status (claim, expire, etc.)
+app.patch('/api/treasures/:signature', async (req, res) => {
+  try {
+    const { signature } = req.params;
+    const { status, claimedBy } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        error: 'Status is required'
+      });
+    }
+
+    if (!['active', 'claimed', 'expired'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Must be: active, claimed, or expired'
+      });
+    }
+
+    if (!treasureService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const result = await treasureService.updateTreasureStatus(signature, status, {
+      claimedBy
+    });
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('Error updating treasure:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to update treasure'
+    });
+  }
 });
 
 // Simplified leaderboard URL route
@@ -333,6 +497,14 @@ if (ENABLE_MULTIPLAYER) {
   console.log('Multiplayer mode enabled');
 } else {
   console.log('Multiplayer mode disabled');
+}
+
+// Initialize Firebase Admin
+const firebaseInitialized = firebaseAdmin.initialize();
+if (firebaseInitialized) {
+  console.log(`✅ Firebase Admin initialized (Project: ${firebaseAdmin.getProjectId()})`);
+} else {
+  console.log('⚠️  Firebase Admin not configured - treasure tracking disabled');
 }
 
 // Initialize NFT service
