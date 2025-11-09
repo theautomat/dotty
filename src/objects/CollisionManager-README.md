@@ -1,4 +1,4 @@
-# CollisionManager for Mancer Asteroids
+# CollisionManager
 
 ## Overview
 
