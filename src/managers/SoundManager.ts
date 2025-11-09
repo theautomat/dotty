@@ -609,7 +609,7 @@ class SoundManager {
    * @returns The Audio object that was played
    */
   playGameOver(): HTMLAudioElement | null {
-    return this.play('/sounds/game/mancer-death-game-over.mp3');
+    return this.play('/sounds/game/booty-death-game-over.mp3');
   }
 
   /**
@@ -617,7 +617,7 @@ class SoundManager {
    * @returns The Audio object that was played
    */
   playGameComplete(): HTMLAudioElement | null {
-    return this.play('/sounds/game/mancer-completed-game.mp3');
+    return this.play('/sounds/game/booty-completed-game.mp3');
   }
 
   /**
@@ -672,18 +672,18 @@ class SoundManager {
   }
 
   /**
-   * Play the Mancer theme song
+   * Play the game theme song
    * @returns The Audio object that was played
    */
-  playMancerTheme(): HTMLAudioElement | null {
-    return this.play('/sounds/game/theme-songs/mancer-kill-all-aliens.mp3', 'mancer_theme');
+  playTheme(): HTMLAudioElement | null {
+    return this.play('/sounds/game/theme-songs/booty-theme.mp3', 'game_theme');
   }
 
   /**
-   * Stop the Mancer theme song if it's playing
+   * Stop the game theme song if it's playing
    */
-  stopMancerTheme(): void {
-    this.stop('mancer_theme');
+  stopTheme(): void {
+    this.stop('game_theme');
   }
 
   /**
