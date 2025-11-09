@@ -44,14 +44,20 @@ echo ""
 echo "🔨 Building Solana program..."
 
 cd solana
-# Suppress warnings by filtering stderr
-cargo build-sbf --manifest-path=programs/game/Cargo.toml 2>&1 | grep -v "warning:" | grep -v "^$" || true
+# Build program and suppress verbose output
+cargo build-sbf --manifest-path=programs/game/Cargo.toml > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✓${NC} Program binary built"
+else
+    echo -e "${RED}✗${NC} Build failed, showing errors:"
+    cargo build-sbf --manifest-path=programs/game/Cargo.toml
+    exit 1
+fi
 
 # Copy binary to deploy location
 mkdir -p target/deploy
 cp programs/game/target/deploy/game.so target/deploy/
 
-echo -e "${GREEN}✓${NC} Program binary built"
 echo ""
 
 # ============================================================================
@@ -173,10 +179,16 @@ echo ""
 echo "🚀 Deploying program..."
 
 solana config set --url http://localhost:8899 > /dev/null 2>&1
-solana program deploy target/deploy/game.so --url http://localhost:8899
 
-PROGRAM_ID=$(solana address -k programs/game/target/deploy/game-keypair.json)
-echo -e "${GREEN}✓${NC} Program deployed: $PROGRAM_ID"
+# Deploy program and suppress verbose output
+if solana program deploy target/deploy/game.so --url http://localhost:8899 > /dev/null 2>&1; then
+    PROGRAM_ID=$(solana address -k programs/game/target/deploy/game-keypair.json)
+    echo -e "${GREEN}✓${NC} Program deployed: $PROGRAM_ID"
+else
+    echo -e "${RED}✗${NC} Deployment failed, showing errors:"
+    solana program deploy target/deploy/game.so --url http://localhost:8899
+    exit 1
+fi
 
 # Add metadata field to IDL with program address
 if [ -f "target/idl/game.json" ]; then
@@ -211,8 +223,8 @@ else
     WALLET_ADDRESS=$1
     echo "Creating token for wallet: $WALLET_ADDRESS"
 
-    # Run TypeScript script to create token (we're already in solana/ directory)
-    npx ts-node scripts/create-test-token.ts "$WALLET_ADDRESS"
+    # Run TypeScript script to create token (suppress npx noise, keep script output)
+    npx ts-node scripts/create-test-token.ts "$WALLET_ADDRESS" 2>/dev/null
 
     # Read the token mint address from file
     if [ -f ".test-token-mint" ]; then
