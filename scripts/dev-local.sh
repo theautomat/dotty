@@ -33,6 +33,7 @@ else
     echo "Then run this script again:"
     echo "  npm run dev:local YOUR_PHANTOM_ADDRESS"
     echo ""
+    echo -e "${RED}Exiting: Cannot deploy program without a running validator${NC}"
     exit 1
 fi
 
