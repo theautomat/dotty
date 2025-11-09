@@ -33,6 +33,9 @@ class GridNavigator {
     private targetCameraX: number = 0;
     private targetCameraZ: number = 0;
 
+    // Callback for position changes
+    private onPositionChange: ((x: number, y: number) => void) | null = null;
+
     constructor(
         scene: THREE.Scene,
         camera: THREE.OrthographicCamera,
@@ -181,6 +184,11 @@ class GridNavigator {
         this.highlight.position.z = worldPos.z;
 
         this.updateCameraTarget();
+
+        // Notify listeners of position change
+        if (this.onPositionChange) {
+            this.onPositionChange(this.currentX, this.currentY);
+        }
     }
 
     /**
@@ -233,6 +241,13 @@ class GridNavigator {
 
         this.updateHighlightPosition();
         console.log(`Set grid position to (${this.currentX}, ${this.currentY})`);
+    }
+
+    /**
+     * Register a callback for position changes
+     */
+    setPositionChangeCallback(callback: (x: number, y: number) => void): void {
+        this.onPositionChange = callback;
     }
 
     /**
