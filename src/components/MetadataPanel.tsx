@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { getPlotMetadata, type PlotMetadata } from '@/data/mockPlotData';
+import { useGameStore } from '@/store/gameStore';
 
 interface MetadataPanelProps {
   plotNumber?: number;
-  x?: number;
-  y?: number;
 }
 
-export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1, x, y }) => {
+export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Subscribe to grid position from Zustand store
+  const gridPosition = useGameStore((state) => state.gridPosition);
+  const { x, y } = gridPosition;
+
   const plotData: PlotMetadata | null = getPlotMetadata(plotNumber);
 
   return (
@@ -80,17 +84,15 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1, x,
 
           {plotData ? (
             <div className="space-y-6">
-              {/* Coordinates */}
-              {x !== undefined && y !== undefined && (
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-1">
-                    Coordinates
-                  </h3>
-                  <p className="text-xl font-bold text-white">
-                    ({x}, {y})
-                  </p>
-                </div>
-              )}
+              {/* Coordinates - Always shown from store */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                  Coordinates
+                </h3>
+                <p className="text-xl font-bold text-white">
+                  ({x}, {y})
+                </p>
+              </div>
 
               {/* Plot Number */}
               <div>
