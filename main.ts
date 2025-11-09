@@ -71,6 +71,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /**
  * Initialize the React metadata panel
+ *
+ * The panel automatically subscribes to the Zustand store for coordinate updates.
+ * No need for callbacks or event listeners!
  */
 function initMetadataPanel(): void {
   // Create a container for the React panel
@@ -81,35 +84,12 @@ function initMetadataPanel(): void {
   // Create the root
   const root = ReactDOM.createRoot(panelContainer);
 
-  // Function to render the panel with current coordinates
-  const renderPanel = (x: number, y: number) => {
-    root.render(
-      React.createElement(React.StrictMode, null,
-        React.createElement(MetadataPanel, { plotNumber: 1, x, y })
-      )
-    );
-  };
-
-  // Function to set up the position callback
-  const setupCallback = () => {
-    const initialPos = window.game?.map?.getCurrentGridPosition();
-
-    // Render with initial position
-    if (initialPos) {
-      renderPanel(initialPos.x, initialPos.y);
-    } else {
-      // Default to center if position not available yet
-      renderPanel(50, 50);
-    }
-
-    // Set up callback to update panel when position changes
-    window.game?.map?.setPositionChangeCallback((x: number, y: number) => {
-      renderPanel(x, y);
-    });
-  };
-
-  // Listen for map ready event
-  window.addEventListener('mapReady', setupCallback, { once: true });
+  // Simply render the panel - it will subscribe to the store internally
+  root.render(
+    React.createElement(React.StrictMode, null,
+      React.createElement(MetadataPanel, { plotNumber: 1 })
+    )
+  );
 }
 
 /**
