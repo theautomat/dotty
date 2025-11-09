@@ -9,7 +9,7 @@
  * to the input state in the store and react accordingly.
  */
 
-import { gameStore } from '../store/gameStore';
+import { gameStore, type InputState } from '../store/gameStore';
 
 interface InputControllerConfig {
   enableKeyboard?: boolean;
@@ -135,7 +135,7 @@ class InputController {
    * Map keyboard codes to input state keys
    * Supports both WASD and arrow keys for directional input
    */
-  private mapKeyCodeToInput(code: string): keyof typeof gameStore.getState().inputs | null {
+  private mapKeyCodeToInput(code: string): keyof InputState | null {
     switch (code) {
       // Directional inputs - WASD
       case 'KeyW':
