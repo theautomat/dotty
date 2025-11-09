@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 # ============================================================================
 # 1. CHECK VALIDATOR
 # ============================================================================
-echo "📡 Checking local validator..."
+echo "📡 Checking local Solana validator (Solana blockchain running locally)..."
 
 # Check if validator is running and responding correctly
 # Disable exit-on-error temporarily for this check
@@ -27,7 +27,7 @@ VALIDATOR_HEALTHY=$(echo "$HEALTH_RESPONSE" | grep -c '"result":"ok"')
 set -e
 
 if [ "$VALIDATOR_HEALTHY" -gt 0 ]; then
-    echo -e "${GREEN}✓${NC} Validator is running and healthy"
+    echo -e "${GREEN}✓${NC} Validator is running and healthy on http://localhost:8899"
 else
     echo -e "${RED}✗${NC} Validator is not running"
     echo ""
@@ -50,13 +50,13 @@ echo ""
 # ============================================================================
 # 2. BUILD PROGRAM
 # ============================================================================
-echo "🔨 Building Solana program..."
+echo "🔨 Building game program (Solana smart contract)..."
 
 cd solana
 # Build program and suppress verbose output
 cargo build-sbf --manifest-path=programs/game/Cargo.toml > /dev/null 2>&1
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓${NC} Program binary built"
+    echo -e "${GREEN}✓${NC} Game program binary built → solana/programs/game/target/deploy/game.so"
 else
     echo -e "${RED}✗${NC} Build failed, showing errors:"
     cargo build-sbf --manifest-path=programs/game/Cargo.toml
@@ -72,14 +72,14 @@ echo ""
 # ============================================================================
 # 3. GENERATE IDL
 # ============================================================================
-echo "📝 Generating IDL file..."
+echo "📝 Generating IDL file (interface definition for frontend)..."
 
 # Create IDL directory if it doesn't exist
 mkdir -p target/idl
 
 # Try to generate IDL with anchor
 if anchor idl build -p game 2>/dev/null; then
-    echo -e "${GREEN}✓${NC} IDL generated with anchor"
+    echo -e "${GREEN}✓${NC} IDL generated with anchor → solana/target/idl/game.json"
 else
     echo -e "${YELLOW}⚠${NC} anchor idl build failed, creating IDL manually..."
 
@@ -177,7 +177,7 @@ else
   ]
 }
 EOF
-    echo -e "${GREEN}✓${NC} IDL created manually"
+    echo -e "${GREEN}✓${NC} IDL created manually → solana/target/idl/game.json"
 fi
 
 echo ""
@@ -185,14 +185,14 @@ echo ""
 # ============================================================================
 # 4. DEPLOY PROGRAM
 # ============================================================================
-echo "🚀 Deploying program..."
+echo "🚀 Deploying game program to local validator..."
 
 solana config set --url http://localhost:8899 > /dev/null 2>&1
 
 # Deploy program and suppress verbose output
 if solana program deploy target/deploy/game.so --url http://localhost:8899 > /dev/null 2>&1; then
     PROGRAM_ID=$(solana address -k programs/game/target/deploy/game-keypair.json)
-    echo -e "${GREEN}✓${NC} Program deployed: $PROGRAM_ID"
+    echo -e "${GREEN}✓${NC} Game program deployed to blockchain address: $PROGRAM_ID"
 else
     echo -e "${RED}✗${NC} Deployment failed, showing errors:"
     solana program deploy target/deploy/game.so --url http://localhost:8899
@@ -218,7 +218,7 @@ echo ""
 # ============================================================================
 # 5. CREATE TEST TOKEN
 # ============================================================================
-echo "🪙 Creating test SPL token..."
+echo "🪙 Creating test SPL token (TREASURE token for game testing)..."
 
 # Check if wallet address provided
 if [ -z "$1" ]; then
@@ -230,7 +230,7 @@ if [ -z "$1" ]; then
     TOKEN_MINT="(not created - wallet address required)"
 else
     WALLET_ADDRESS=$1
-    echo "Creating token for wallet: $WALLET_ADDRESS"
+    echo "Creating test token and funding wallet $WALLET_ADDRESS with 10,000 tokens..."
 
     # Run TypeScript script to create token (suppress npx noise, keep script output)
     npx ts-node scripts/create-test-token.ts "$WALLET_ADDRESS" 2>/dev/null
@@ -238,7 +238,7 @@ else
     # Read the token mint address from file
     if [ -f ".test-token-mint" ]; then
         TOKEN_MINT=$(cat .test-token-mint)
-        echo -e "${GREEN}✓${NC} Test token ready: $TOKEN_MINT"
+        echo -e "${GREEN}✓${NC} Test token mint address (used by frontend): $TOKEN_MINT"
 
         # Update config file with program ID and token mint
         cd ..

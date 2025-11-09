@@ -21,7 +21,6 @@ async function main() {
   }
 
   const wallet = new PublicKey(walletAddress);
-  console.log("Creating test token for wallet:", wallet.toString());
   console.log("");
 
   // Connect to local validator
@@ -31,17 +30,17 @@ async function main() {
   const payer = Keypair.generate();
 
   // Airdrop SOL to payer for fees
-  console.log("Funding payer account...");
+  console.log("  → Funding transaction fee account with SOL (for gas fees)...");
   const airdropSig = await connection.requestAirdrop(
     payer.publicKey,
     2 * anchor.web3.LAMPORTS_PER_SOL
   );
   await connection.confirmTransaction(airdropSig);
-  console.log("✓ Payer funded");
+  console.log("  ✓ Transaction fee account funded with 2 SOL");
   console.log("");
 
   // Create token mint (6 decimals, standard for most tokens)
-  console.log("Creating token mint...");
+  console.log("  → Creating TREASURE token mint (allows creation of tokens)...");
   const tokenMint = await createMint(
     connection,
     payer,
@@ -49,22 +48,22 @@ async function main() {
     null,            // freeze authority
     6                // decimals
   );
-  console.log("✓ Token mint created:", tokenMint.toString());
+  console.log("  ✓ Token mint created at address:", tokenMint.toString());
   console.log("");
 
   // Create token account for the wallet
-  console.log("Creating token account for your wallet...");
+  console.log("  → Creating token account for wallet", wallet.toString() + "...");
   const walletTokenAccount = await createAccount(
     connection,
     payer,
     tokenMint,
     wallet
   );
-  console.log("✓ Token account created");
+  console.log("  ✓ Token account created at address:", walletTokenAccount.toString());
   console.log("");
 
   // Mint 10,000 tokens to the wallet
-  console.log("Minting 10,000 tokens to your wallet...");
+  console.log("  → Minting 10,000 TREASURE tokens to wallet", wallet.toString() + "...");
   await mintTo(
     connection,
     payer,
@@ -73,25 +72,14 @@ async function main() {
     payer.publicKey,
     10_000_000_000 // 10,000 tokens with 6 decimals
   );
-  console.log("✓ Tokens minted");
+  console.log("  ✓ 10,000 tokens minted successfully");
   console.log("");
 
   // Save mint address to file for later use
   const mintFilePath = path.join(__dirname, "..", ".test-token-mint");
   fs.writeFileSync(mintFilePath, tokenMint.toString());
-  console.log("✓ Mint address saved to:", mintFilePath);
+  console.log("  ✓ Token mint address saved to solana/.test-token-mint (for config update)");
   console.log("");
-
-  // Output summary
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("✅ Test token ready!");
-  console.log("");
-  console.log("Token Mint:     ", tokenMint.toString());
-  console.log("Your Balance:    10,000 tokens");
-  console.log("Token Account:  ", walletTokenAccount.toString());
-  console.log("");
-  console.log("Next: The frontend will automatically use this token");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 }
 
 main().catch((error) => {
