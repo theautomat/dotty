@@ -27,8 +27,13 @@ class GridNavigator {
     // Visual highlight (border/stroke)
     private highlight: THREE.LineLoop | null = null;
 
-    // Keyboard state
-    private keyReleased: Map<string, boolean> = new Map();
+    // Previous input state (for edge detection)
+    private previousInputs = {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+    };
 
     // For smooth camera panning
     private targetCameraX: number = 0;
@@ -47,22 +52,15 @@ class GridNavigator {
         this.currentX = Math.floor(config.gridSize / 2);
         this.currentY = Math.floor(config.gridSize / 2);
 
-        // Initialize key state
-        this.keyReleased.set('KeyW', true);
-        this.keyReleased.set('KeyA', true);
-        this.keyReleased.set('KeyS', true);
-        this.keyReleased.set('KeyD', true);
-
         // Set initial camera target
         this.updateCameraTarget();
     }
 
     /**
-     * Initialize the navigator - create highlight and setup controls
+     * Initialize the navigator - create highlight
      */
     init(): void {
         this.createHighlight();
-        this.setupKeyboardControls();
         this.updateHighlightPosition();
 
         console.log(`GridNavigator initialized at (${this.currentX}, ${this.currentY})`);
@@ -97,43 +95,32 @@ class GridNavigator {
     }
 
     /**
-     * Setup keyboard event listeners for WASD navigation
+     * Process input state changes from the store
+     * Detects rising edge (key press) to move grid position
      */
-    private setupKeyboardControls(): void {
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            // Only process if key was released (prevents holding)
-            if (this.keyReleased.get(event.code)) {
-                switch (event.code) {
-                    case 'KeyW':
-                        this.moveUp();
-                        this.keyReleased.set('KeyW', false);
-                        break;
-                    case 'KeyS':
-                        this.moveDown();
-                        this.keyReleased.set('KeyS', false);
-                        break;
-                    case 'KeyA':
-                        this.moveLeft();
-                        this.keyReleased.set('KeyA', false);
-                        break;
-                    case 'KeyD':
-                        this.moveRight();
-                        this.keyReleased.set('KeyD', false);
-                        break;
-                }
-            }
-        });
+    private processInputs(): void {
+        const inputs = gameStore.getState().inputs;
 
-        document.addEventListener('keyup', (event: KeyboardEvent) => {
-            switch (event.code) {
-                case 'KeyW':
-                case 'KeyS':
-                case 'KeyA':
-                case 'KeyD':
-                    this.keyReleased.set(event.code, true);
-                    break;
-            }
-        });
+        // Detect rising edge (key just pressed) for each direction
+        // This prevents holding the key from continuously moving
+        if (inputs.up && !this.previousInputs.up) {
+            this.moveUp();
+        }
+        if (inputs.down && !this.previousInputs.down) {
+            this.moveDown();
+        }
+        if (inputs.left && !this.previousInputs.left) {
+            this.moveLeft();
+        }
+        if (inputs.right && !this.previousInputs.right) {
+            this.moveRight();
+        }
+
+        // Update previous state for next frame
+        this.previousInputs.up = inputs.up;
+        this.previousInputs.down = inputs.down;
+        this.previousInputs.left = inputs.left;
+        this.previousInputs.right = inputs.right;
     }
 
     /**
@@ -219,9 +206,13 @@ class GridNavigator {
     }
 
     /**
-     * Update camera position - call this in the game loop for smooth panning
+     * Update method - call this in the game loop
+     * Processes inputs and updates camera position for smooth panning
      */
     update(deltaTime: number = 0.016): void {
+        // Process input state from the store
+        this.processInputs();
+
         // Smooth camera panning using lerp
         const panSpeed = this.config.cameraPanSpeed;
 
