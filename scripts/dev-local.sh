@@ -19,8 +19,11 @@ NC='\033[0m' # No Color
 # ============================================================================
 echo "📡 Checking local validator..."
 
-if curl -s http://localhost:8899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' &> /dev/null; then
-    echo -e "${GREEN}✓${NC} Validator is running"
+# Check if validator is running and responding correctly
+HEALTH_RESPONSE=$(curl -s http://localhost:8899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' 2>/dev/null)
+
+if echo "$HEALTH_RESPONSE" | grep -q '"result":"ok"'; then
+    echo -e "${GREEN}✓${NC} Validator is running and healthy"
 else
     echo -e "${RED}✗${NC} Validator is not running"
     echo ""
