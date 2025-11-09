@@ -18,7 +18,11 @@
     "heroku-postbuild": "npm run build",
     "test:solana": "cd solana && anchor test",
     "test:solana:local": "cd solana && anchor test --skip-deploy",
-    "test:solana:devnet": "cd solana && anchor test --provider.cluster devnet"
+    "test:solana:devnet": "cd solana && anchor test --provider.cluster devnet",
+    "solana:validator": "./scripts/start-local-validator.sh",
+    "solana:setup": "./scripts/setup-local-test.sh",
+    "solana:analyze": "./scripts/analyze-blockchain.sh",
+    "solana:test-ui": "echo 'Open http://localhost:3000/hide-treasure-test.html in your browser' && npm run server:prod"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.30.1",
