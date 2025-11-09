@@ -37,7 +37,8 @@
     "serve": "^14.2.4",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
-    "three": "^0.159.0"
+    "three": "^0.159.0",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import Map from '../objects/Map';
+import { gameStore } from '../store/gameStore';
 import Asteroid from '../objects/Asteroid';
 import WorldBoundary from '../objects/WorldBoundary';
 import { HUD } from '../objects/hud/index.js';
@@ -390,8 +391,8 @@ class Game {
                 }
             }, { passive: true });
 
-            // Dispatch event that map is ready for metadata panel
-            window.dispatchEvent(new CustomEvent('mapReady'));
+            // Update store to signal map is ready
+            gameStore.getState().setMapReady(true);
 
             // Transition to PLAYING state (or we could add a MAP_VIEWING state)
             gameStateMachine.transitionTo(GAME_STATES.PLAYING);
