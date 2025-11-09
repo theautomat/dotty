@@ -18,14 +18,14 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
-  
+
   // Server configuration
   server: {
     port: 5173, // Different from the Socket.IO server port
     strictPort: true, // Ensures it doesn't try another port if 5173 is taken
     open: false // Don't open browser automatically
   },
-  
+
   // Build options
   build: {
     outDir: 'dist',
@@ -35,11 +35,12 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         leaderboard: resolve(__dirname, 'leaderboard.html'),
-        treasure: resolve(__dirname, 'treasure.html')
+        treasure: resolve(__dirname, 'treasure.html'),
+        hideTreasure: resolve(__dirname, 'hide-treasure.html')
       }
     }
   },
-  
+
   // Make sure these dependencies are properly processed
   optimizeDeps: {
     include: [

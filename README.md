@@ -93,6 +93,26 @@ Create a `.env` file in the root:
 SOLANA_NETWORK=devnet
 SOLANA_WALLET_PATH=./wallets/devnet-deployer.json
 SOLANA_PROGRAM_ID=<your-deployed-program-id>
+
+# Helius (for webhook tracking - optional, free tier available)
+HELIUS_API_KEY=<your-helius-api-key>
+HELIUS_PROJECT_ID=<your-helius-project-id>
+
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=<your-firebase-api-key>
+VITE_FIREBASE_AUTH_DOMAIN=<your-project>.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=<your-project-id>
+VITE_FIREBASE_STORAGE_BUCKET=<your-project>.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=<your-sender-id>
+VITE_FIREBASE_APP_ID=<your-app-id>
+VITE_FIREBASE_MEASUREMENT_ID=<your-measurement-id>
+
+# FingerprintJS Pro (for device identification)
+VITE_FINGERPRINT_API_KEY=<your-fingerprint-api-key>
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
 ```
 
 ## Wallet Setup
@@ -169,7 +189,7 @@ The game uses a unified Solana program that handles:
 
 ```bash
 # Install Solana CLI
-sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
 
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -224,12 +244,63 @@ anchor test --provider.cluster devnet --skip-local-validator
 
 The project includes comprehensive tools for testing the treasure hiding functionality locally. This allows you to test the entire flow without needing devnet SOL or dealing with network latency.
 
+### Installing Solana Test Validator (macOS)
+
+**Install Solana CLI** (includes test validator):
+```bash
+sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+```
+
+**Run the test validator**:
+```bash
+solana-test-validator
+```
+
+This starts a local Solana blockchain at `http://localhost:8899`.
+
+### Using Phantom Wallet with Local Validator
+
+To interact with your local website and test treasure hiding:
+
+**1. Install Phantom Wallet**
+- Install the [Phantom](https://phantom.app) browser extension
+- Create a new wallet (save your seed phrase!)
+
+**2. Switch Phantom to Localhost**
+- Open Phantom settings (click gear icon)
+- Navigate to: **Settings → Change Network → Localhost**
+- This connects Phantom to `http://localhost:8899`
+
+**3. Get Test SOL**
+
+Two ways to get free local SOL:
+
+**Option A - Using CLI:**
+```bash
+# Start the validator first
+npm run solana:validator
+
+# In a new terminal, airdrop SOL to your Phantom address
+solana airdrop 5 <YOUR_PHANTOM_ADDRESS> --url http://localhost:8899
+```
+
+**Option B - Using the Test UI:**
+- Start the test interface: `npm run solana:test-ui`
+- Open `http://localhost:3000/hide-treasure-test.html`
+- Click "Connect Phantom Wallet"
+- Click "Airdrop 2 SOL" button
+
+**4. Test Your Website**
+- Your local website will connect to Phantom
+- Phantom will connect to your local validator
+- Transactions are instant and free on localhost
+
 ### Prerequisites for Local Testing
 
 1. **Install Solana Tools** (if not already installed):
    ```bash
    # Install Solana CLI
-   sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+   sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
 
    # Install Anchor
    cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
@@ -346,6 +417,63 @@ const signature = await connection.requestAirdrop(
 );
 await connection.confirmTransaction(signature);
 ```
+
+### Testing Helius Webhooks (Track Treasure Deposits)
+
+Once you can hide treasure locally, you can test Helius webhooks to automatically track deposits. This is useful for:
+- Building a treasure tracker UI
+- Storing deposit metadata in Firebase
+- Getting real-time notifications when treasure is hidden
+
+**What is Helius?**
+- Cloud service that watches Solana blockchain for events
+- Calls your server via webhook when treasure is hidden
+- Free tier: 100,000 credits/month (plenty for testing)
+- No installation needed - just configure in their dashboard
+
+**Quick Start:**
+
+1. **Start your server**
+   ```bash
+   npm run server:prod
+   ```
+
+2. **Expose localhost with ngrok** (for testing)
+   ```bash
+   # Install ngrok
+   brew install ngrok  # macOS
+   # or download from https://ngrok.com/download
+
+   # Run ngrok to expose port 3000
+   ngrok http 3000
+   ```
+
+   Copy the HTTPS URL (e.g., `https://abc123.ngrok.io`)
+
+3. **Configure Helius webhook**
+   - Sign up at https://helius.dev (free tier)
+   - Create webhook pointing to: `https://YOUR_NGROK_URL.ngrok.io/api/webhooks/helius`
+   - Watch your Solana program ID
+   - Select "Account Create" event type
+   - Choose network (devnet or mainnet)
+
+4. **Test it**
+   - Hide treasure using the test UI
+   - Watch your server console for webhook logs:
+     ```
+     🎉 ===== HELIUS WEBHOOK RECEIVED =====
+     Timestamp: 2025-11-09T...
+     Payload: { ... treasure data ... }
+     =====================================
+     ```
+
+**Full Documentation:** See `docs/HELIUS_SETUP.md` for detailed setup instructions and troubleshooting.
+
+**Next Steps:** Once webhooks work, you can:
+- Parse treasure deposit data from webhook payload
+- Store in Firebase for fast queries
+- Build a `/treasures` page to display all hidden treasures
+- Add real-time UI updates when treasure is hidden
 
 ### Analyzing the Blockchain
 

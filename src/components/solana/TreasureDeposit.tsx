@@ -1,6 +1,6 @@
 /**
- * Treasure Deposit Component
- * UI for depositing memecoins to receive monster NFTs
+ * Treasure Hiding Component
+ * UI for hiding treasure (depositing tokens into the vault)
  */
 
 import React, { useState, useEffect } from 'react';
@@ -10,8 +10,8 @@ import * as anchor from '@coral-xyz/anchor';
 import { Program, AnchorProvider } from '@coral-xyz/anchor';
 import { TOKEN_PROGRAM_ID, getAccount, getAssociatedTokenAddress } from '@solana/spl-token';
 
-// Import IDL (will be generated after building)
-// import treasureDepositIdl from '../../../solana/target/idl/treasure_deposit.json';
+// Import IDL
+import gameIdl from '../../../solana/target/idl/game.json';
 
 interface TreasureDepositProps {
   tokenMint?: string; // Token mint address (PEPE, BONK, etc.)
@@ -21,10 +21,9 @@ export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
   const { connection } = useConnection();
   const { publicKey, sendTransaction, wallet } = useWallet();
 
-  const [depositAmount, setDepositAmount] = useState<number>(100);
+  const [amount, setAmount] = useState<number>(100);
   const [tokenBalance, setTokenBalance] = useState<number>(0);
-  const [isDepositing, setIsDepositing] = useState(false);
-  const [depositRecords, setDepositRecords] = useState<any[]>([]);
+  const [isHiding, setIsHiding] = useState(false);
 
   // Fetch user's token balance
   useEffect(() => {
@@ -47,37 +46,23 @@ export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
     fetchBalance();
   }, [publicKey, tokenMint, connection]);
 
-  // Fetch user's deposit records
-  useEffect(() => {
-    if (!publicKey) return;
 
-    async function fetchDeposits() {
-      // TODO: Fetch deposit records from program
-      // For now, just placeholder
-      setDepositRecords([]);
-    }
-
-    fetchDeposits();
-  }, [publicKey]);
-
-  const handleDeposit = async () => {
+  const handleHideTreasure = async () => {
     if (!publicKey || !wallet || !tokenMint) {
       alert('Please connect your wallet first!');
       return;
     }
 
-    if (depositAmount < 100) {
-      alert('Minimum deposit is 100 tokens');
+    if (amount < 100) {
+      alert('Minimum amount is 100 tokens');
       return;
     }
 
-    setIsDepositing(true);
+    setIsHiding(true);
 
     try {
-      // TODO: Replace with actual program interaction
-      // This is a stub showing the structure
-
-      const programId = new PublicKey(process.env.TREASURE_DEPOSIT_PROGRAM_ID!);
+      // Initialize program
+      const programId = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
 
       // Create provider
       const provider = new AnchorProvider(
@@ -86,8 +71,8 @@ export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
         { commitment: 'confirmed' }
       );
 
-      // Load program (uncomment when IDL is available)
-      // const program = new Program(treasureDepositIdl as any, programId, provider);
+      // Load program
+      const program = new Program(gameIdl as any, programId, provider);
 
       // Derive PDAs
       const [vaultPda] = PublicKey.findProgramAddressSync(
@@ -95,12 +80,12 @@ export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
         programId
       );
 
-      const timestamp = Math.floor(Date.now() / 1000);
-      const [depositRecordPda] = PublicKey.findProgramAddressSync(
+      const timestamp = Date.now();
+      const [treasureRecordPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from('deposit'),
+          Buffer.from('treasure'),
           publicKey.toBuffer(),
-          Buffer.from(new anchor.BN(timestamp).toArray('le', 8))
+          Buffer.from(new Uint8Array(new BigInt64Array([BigInt(timestamp)]).buffer))
         ],
         programId
       );
@@ -110,60 +95,49 @@ export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
       const playerTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
       const vaultTokenAccount = await getAssociatedTokenAddress(mint, vaultPda, true);
 
-      // Call deposit_for_monster instruction
-      // const tx = await program.methods
-      //   .depositForMonster(new anchor.BN(depositAmount * 1_000_000))
-      //   .accounts({
-      //     player: publicKey,
-      //     playerTokenAccount,
-      //     vaultTokenAccount,
-      //     vault: vaultPda,
-      //     depositRecord: depositRecordPda,
-      //     tokenProgram: TOKEN_PROGRAM_ID,
-      //     systemProgram: anchor.web3.SystemProgram.programId,
-      //   })
-      //   .rpc();
+      // Call hide_treasure instruction
+      const tx = await program.methods
+        .hideTreasure(
+          new anchor.BN(amount * 1_000_000),
+          new anchor.BN(timestamp)
+        )
+        .accounts({
+          player: publicKey,
+          playerTokenAccount,
+          vaultTokenAccount,
+          vault: vaultPda,
+          treasureRecord: treasureRecordPda,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .rpc();
 
-      // For now, just simulate
-      console.log('Would deposit:', depositAmount, 'tokens');
-      alert('Deposit successful! (Simulated - contract not deployed yet)');
+      console.log('Treasure hidden! Transaction:', tx);
+      alert(`Treasure hidden successfully!\n\nAmount: ${amount} tokens\nTransaction: ${tx}`);
 
       // Refresh balances
-      setDepositAmount(100);
+      setAmount(100);
     } catch (error: any) {
-      console.error('Deposit failed:', error);
-      alert(`Deposit failed: ${error.message}`);
+      console.error('Failed to hide treasure:', error);
+      alert(`Failed to hide treasure: ${error.message}`);
     } finally {
-      setIsDepositing(false);
-    }
-  };
-
-  const handleClaim = async (depositRecordAddress: string) => {
-    if (!publicKey || !wallet) return;
-
-    try {
-      // TODO: Implement claim monster instruction
-      console.log('Would claim monster for deposit:', depositRecordAddress);
-      alert('Claim successful! (Simulated)');
-    } catch (error: any) {
-      console.error('Claim failed:', error);
-      alert(`Claim failed: ${error.message}`);
+      setIsHiding(false);
     }
   };
 
   if (!publicKey) {
     return (
       <div style={styles.container}>
-        <h2 style={styles.title}>🏴‍☠️ Treasure Deposit</h2>
-        <p style={styles.subtitle}>Connect your wallet to deposit memecoins and receive monster NFTs!</p>
+        <h2 style={styles.title}>🏴‍☠️ Hide Treasure</h2>
+        <p style={styles.subtitle}>Connect your wallet to hide treasure!</p>
       </div>
     );
   }
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>🏴‍☠️ Treasure Deposit</h2>
-      <p style={styles.subtitle}>Deposit memecoins to receive random monster NFTs</p>
+      <h2 style={styles.title}>🏴‍☠️ Hide Treasure</h2>
+      <p style={styles.subtitle}>Hide treasure by depositing tokens into the vault</p>
 
       {/* Balance Display */}
       <div style={styles.balanceCard}>
@@ -171,87 +145,34 @@ export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
         <div style={styles.balanceAmount}>{tokenBalance.toLocaleString()} Tokens</div>
       </div>
 
-      {/* Deposit Form */}
+      {/* Hide Treasure Form */}
       <div style={styles.depositCard}>
         <label style={styles.label}>
-          Deposit Amount (min. 100 tokens)
+          Amount to Hide (min. 100 tokens)
           <input
             type="number"
             min="100"
-            step="10"
-            value={depositAmount}
-            onChange={(e) => setDepositAmount(Number(e.target.value))}
+            step="100"
+            value={amount}
+            onChange={(e) => setAmount(Number(e.target.value))}
             style={styles.input}
           />
         </label>
 
-        <div style={styles.monsterPreview}>
-          <div style={styles.monsterLabel}>Monster Type:</div>
-          <div style={styles.monsterType}>
-            {getMonsterType(depositAmount)}
-            <span style={styles.monsterEmoji}>{getMonsterEmoji(depositAmount)}</span>
-          </div>
-          <div style={styles.monsterHint}>
-            (Changes based on deposit amount)
-          </div>
-        </div>
-
         <button
-          onClick={handleDeposit}
-          disabled={isDepositing || depositAmount < 100}
+          onClick={handleHideTreasure}
+          disabled={isHiding || amount < 100}
           style={{
             ...styles.depositButton,
-            opacity: (isDepositing || depositAmount < 100) ? 0.6 : 1,
-            cursor: (isDepositing || depositAmount < 100) ? 'not-allowed' : 'pointer',
+            opacity: (isHiding || amount < 100) ? 0.6 : 1,
+            cursor: (isHiding || amount < 100) ? 'not-allowed' : 'pointer',
           }}
         >
-          {isDepositing ? 'Depositing...' : `Deposit ${depositAmount} Tokens`}
+          {isHiding ? 'Hiding Treasure...' : `Hide ${amount} Tokens`}
         </button>
-      </div>
-
-      {/* Deposit History */}
-      <div style={styles.historyCard}>
-        <h3 style={styles.historyTitle}>Your Deposits</h3>
-        {depositRecords.length === 0 ? (
-          <p style={styles.emptyState}>No deposits yet. Make your first deposit above!</p>
-        ) : (
-          depositRecords.map((record, index) => (
-            <div key={index} style={styles.depositRecord}>
-              <div>
-                <div style={styles.recordAmount}>{record.amount} tokens</div>
-                <div style={styles.recordDate}>{new Date(record.timestamp * 1000).toLocaleDateString()}</div>
-              </div>
-              <div>
-                {record.claimed ? (
-                  <span style={styles.claimedBadge}>✓ Claimed</span>
-                ) : (
-                  <button
-                    onClick={() => handleClaim(record.address)}
-                    style={styles.claimButton}
-                  >
-                    Claim Monster
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        )}
       </div>
     </div>
   );
-}
-
-// Helper functions
-function getMonsterType(amount: number): string {
-  const type = (amount % 5);
-  const types = ['Dragon', 'Goblin', 'Phoenix', 'Kraken', 'Unicorn'];
-  return types[type];
-}
-
-function getMonsterEmoji(amount: number): string {
-  const type = (amount % 5);
-  const emojis = ['🐉', '👺', '🔥', '🦑', '🦄'];
-  return emojis[type];
 }
 
 // Styles
