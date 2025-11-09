@@ -25,6 +25,7 @@ wallets/
 # Solana test validator
 test-ledger/
 test-validator.log
+.test-token-mint
 
 # Firebase service account keys - NEVER commit these!
 firebase-service-account.json
