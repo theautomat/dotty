@@ -232,7 +232,13 @@ class Game {
 
         // Create renderer
         this.renderer = new THREE.WebGLRenderer();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Initial size will be set by onWindowResize() call below
+        // This ensures consistent sizing logic between init and resize
+        const PANEL_WIDTH = 320;
+        const isPanelOpen = gameStore.getState().isRightPanelOpen;
+        const initialWidth = isPanelOpen ? window.innerWidth - PANEL_WIDTH : window.innerWidth;
+        this.renderer.setSize(initialWidth, window.innerHeight);
 
         document.body.appendChild(this.renderer.domElement);
 
@@ -420,31 +426,41 @@ class Game {
      * Handle window resizing
      */
     onWindowResize(): void {
+        const PANEL_WIDTH = 320; // w-80 in Tailwind = 20rem = 320px
+        const isPanelOpen = gameStore.getState().isRightPanelOpen;
+
         let width = window.innerWidth;
         let height = window.innerHeight;
 
-        if (this.isMobile && window.innerHeight > window.innerWidth) {
-            width = window.innerHeight;
-            height = window.innerWidth;
+        // Subtract panel width from available space when panel is open
+        if (isPanelOpen) {
+            width -= PANEL_WIDTH;
         }
 
-        // Update camera aspect ratio
+        if (this.isMobile && window.innerHeight > window.innerWidth) {
+            const tempWidth = window.innerHeight;
+            height = window.innerWidth;
+            width = isPanelOpen ? tempWidth - PANEL_WIDTH : tempWidth;
+        }
+
+        // Update camera aspect ratio based on available viewport
         if (this.camera) {
             (this.camera as any).aspect = width / height;
             this.camera.updateProjectionMatrix();
         }
 
-        this.renderer?.setSize(window.innerWidth, window.innerHeight);
+        // Set renderer size to available viewport (not full window)
+        this.renderer?.setSize(width, height);
 
         if (this.asciiEffect) {
-            this.asciiEffect.setSize(window.innerWidth, window.innerHeight);
+            this.asciiEffect.setSize(width, height);
         }
 
         if (this.hud) {
             this.hud.calculateHudPlacement();
         }
 
-        console.log(`Window resized: ${width}x${height}`);
+        console.log(`Window resized: ${width}x${height} (panel ${isPanelOpen ? 'open' : 'closed'})`);
     }
 
     /**

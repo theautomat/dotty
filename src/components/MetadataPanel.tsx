@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { getPlotMetadata, type PlotMetadata } from '@/data/mockPlotData';
@@ -11,9 +11,17 @@ interface MetadataPanelProps {
 export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Subscribe to grid position from Zustand store
+  // Subscribe to grid position and panel state setter from Zustand store
   const gridPosition = useGameStore((state) => state.gridPosition);
+  const setRightPanelOpen = useGameStore((state) => state.setRightPanelOpen);
   const { x, y } = gridPosition;
+
+  // Sync panel state with store and trigger canvas resize
+  useEffect(() => {
+    setRightPanelOpen(isOpen);
+    // Trigger resize event so Game.ts onWindowResize() recalculates canvas dimensions
+    window.dispatchEvent(new Event('resize'));
+  }, [isOpen, setRightPanelOpen]);
 
   const plotData: PlotMetadata | null = getPlotMetadata(plotNumber);
 
