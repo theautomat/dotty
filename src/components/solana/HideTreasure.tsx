@@ -13,11 +13,11 @@ import { TOKEN_PROGRAM_ID, getAccount, getAssociatedTokenAddress } from '@solana
 // Import IDL
 import gameIdl from '../../../solana/target/idl/game.json';
 
-interface TreasureDepositProps {
+interface HideTreasureProps {
   tokenMint?: string; // Token mint address (PEPE, BONK, etc.)
 }
 
-export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
+export function HideTreasure({ tokenMint }: HideTreasureProps) {
   const { connection } = useConnection();
   const { publicKey, sendTransaction, wallet } = useWallet();
 
@@ -71,8 +71,9 @@ export function TreasureDeposit({ tokenMint }: TreasureDepositProps) {
         { commitment: 'confirmed' }
       );
 
-      // Load program
-      const program = new Program(gameIdl as any, programId, provider);
+      // Load program - parse IDL to ensure proper structure
+      const idl = JSON.parse(JSON.stringify(gameIdl));
+      const program = new Program(idl, programId, provider);
 
       // Derive PDAs
       const [vaultPda] = PublicKey.findProgramAddressSync(

@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
-import { TreasureDeposit } from './src/components/solana/TreasureDeposit';
+import { HideTreasure } from './src/components/solana/HideTreasure';
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -19,7 +19,7 @@ const wallets = [new PhantomWalletAdapter()];
 function App() {
   // TODO: Replace with actual token mint address
   // For now, you'll need to create a test token
-  const TEST_TOKEN_MINT = undefined; // Set this after creating a test token
+  const TEST_TOKEN_MINT = '26sqF2oNfqngd5gXSeKQ4v29Qvdojfc5LVwd2arTaw4d'; // Set this after creating a test token
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -49,11 +49,11 @@ function App() {
           <WalletModalProvider>
             {/* Connect Wallet Button */}
             <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-              <wallet-multi-button></wallet-multi-button>
+              <WalletMultiButton />
             </div>
 
-            {/* Treasure Deposit Component */}
-            <TreasureDeposit tokenMint={TEST_TOKEN_MINT} />
+            {/* Hide Treasure Component */}
+            <HideTreasure tokenMint={TEST_TOKEN_MINT} />
           </WalletModalProvider>
         </WalletProvider>
       </ConnectionProvider>
