@@ -283,6 +283,15 @@ class Map {
     }
 
     /**
+     * Register a callback for grid position changes
+     */
+    setPositionChangeCallback(callback: (x: number, y: number) => void): void {
+        if (this.navigator) {
+            this.navigator.setPositionChangeCallback(callback);
+        }
+    }
+
+    /**
      * Cleanup and destroy map resources
      */
     destroy(): void {

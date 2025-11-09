@@ -5,9 +5,11 @@ import { getPlotMetadata, type PlotMetadata } from '@/data/mockPlotData';
 
 interface MetadataPanelProps {
   plotNumber?: number;
+  x?: number;
+  y?: number;
 }
 
-export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) => {
+export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1, x, y }) => {
   const [isOpen, setIsOpen] = useState(false);
   const plotData: PlotMetadata | null = getPlotMetadata(plotNumber);
 
@@ -78,6 +80,18 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) 
 
           {plotData ? (
             <div className="space-y-6">
+              {/* Coordinates */}
+              {x !== undefined && y !== undefined && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                    Coordinates
+                  </h3>
+                  <p className="text-xl font-bold text-white">
+                    ({x}, {y})
+                  </p>
+                </div>
+              )}
+
               {/* Plot Number */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-1">
