@@ -69,11 +69,13 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
         { commitment: 'confirmed' }
       );
 
-      // Load program with IDL (now includes metadata.address)
-      const program = new Program(gameIdl as Idl, provider);
+      // Get program ID first
+      const programId = new PublicKey(SOLANA_CONFIG.PROGRAM_ID);
+
+      // Load program with IDL and explicit program ID
+      const program = new Program(gameIdl as Idl, programId, provider);
 
       // Derive PDAs
-      const programId = new PublicKey(SOLANA_CONFIG.PROGRAM_ID);
       const [vaultPda] = PublicKey.findProgramAddressSync(
         [Buffer.from('vault')],
         programId
