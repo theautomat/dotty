@@ -194,28 +194,32 @@ class Controls {
         case 'KeyW':
           this.moveForward = true;
           if (this.wKeyReleased) {
-            soundManager.playThrusterForward();
+            // TODO: Replace with appropriate sound for this game
+            // soundManager.playThrusterForward();
             this.wKeyReleased = false;
           }
           break;
         case 'KeyS':
           this.moveBackward = true;
           if (this.sKeyReleased) {
-            soundManager.playThrusterReverse();
+            // TODO: Replace with appropriate sound for this game
+            // soundManager.playThrusterReverse();
             this.sKeyReleased = false;
           }
           break;
         case 'KeyA':
           this.strafeLeft = true;
           if (this.aKeyReleased) {
-            soundManager.playThrusterStrafe();
+            // TODO: Replace with appropriate sound for this game
+            // soundManager.playThrusterStrafe();
             this.aKeyReleased = false;
           }
           break;
         case 'KeyD':
           this.strafeRight = true;
           if (this.dKeyReleased) {
-            soundManager.playThrusterStrafe();
+            // TODO: Replace with appropriate sound for this game
+            // soundManager.playThrusterStrafe();
             this.dKeyReleased = false;
           }
           break;
@@ -265,6 +269,10 @@ class Controls {
       }
     });
 
+    // REMOVED: Mouse movement camera rotation from previous 3D game
+    // This was causing unwanted perspective changes in the top-down map view
+    // The current game uses an orthographic camera that should not rotate
+    /*
     document.addEventListener('mousemove', (event) => {
       if (gameStateMachine.shouldLockControls()) {
         return;
@@ -288,6 +296,7 @@ class Controls {
         (this.camera as THREE.PerspectiveCamera).quaternion.normalize();
       }
     });
+    */
 
     document.addEventListener('click', () => {
       if (this.hudClickCallback) {
