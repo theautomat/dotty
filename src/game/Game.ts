@@ -16,7 +16,7 @@ import { initFingerprint } from '../scripts/fingerprint.js';
 import soundManager from '../managers/SoundManager';
 import powerUpManager from '../managers/PowerUpManager';
 import GameTheme from './GameTheme';
-import Controls from './Controls';
+import InputController from './InputController';
 import gameState from './GameState';
 import { initHelpMenu, updateHelpMenu, toggleHelpMenu } from '../components/HelpMenu.js';
 import { initGameOverOverlay } from '../components/GameOverOverlay.js';
@@ -61,7 +61,7 @@ class Game {
     deltaTime: number;
     clock: THREE.Clock;
     WORLD_SIZE: number;
-    controls: Controls | null;
+    controls: InputController | null;
     velocity: THREE.Vector3;
     geometryFactory: GeometryFactory;
     asciiEffect: any | null;
@@ -300,29 +300,13 @@ class Game {
         // const initialLevelConfig = LevelConfig.getLevelById(1);
         // const initialModifiers = initialLevelConfig ? initialLevelConfig.levelModifiers : {};
 
-        // BOOTY: Controls kept for map navigation (zoom, pan, etc.)
-        this.controls = new Controls({
-            camera: this.camera,
-            renderer: this.renderer,
-            player: undefined, // No player in map view
-            helpToggleCallback: (visible: boolean) => {
-                this.helpMenuVisible = visible;
-                if (visible) {
-                    this.updateDebugInfo();
-                }
-            },
-            hudClickCallback: () => {
-                // No HUD in map view
-                return false;
-            },
-            worldBoundaryToggleCallback: () => {
-                // No world boundary in map view
-                return false;
-            },
-            hud: null,
-            gameStateMachine: gameStateMachine,
-            initialModifiers: {}
+        // Initialize InputController for capturing keyboard/gamepad inputs
+        this.controls = new InputController({
+            enableKeyboard: true,
+            enableGamepad: false,
+            preventDefaults: true
         });
+        this.controls.init();
 
         // BOOTY: Collision manager disabled for map view
         // collisionManager.init({
@@ -592,23 +576,21 @@ class Game {
      * Handle player movement based on controls
      */
     handlePlayerMovement(): void {
-        this.controls?.update();
+        // Update InputController (processes gamepad state if enabled)
+        this.controls?.update(this.deltaTime);
 
-        if (this.controls) {
-            this.velocity = this.controls.getVelocity();
-        }
+        // BOOTY: World boundary and velocity disabled for map view
+        // if (!this.worldBoundary || !gameStateMachine.isInState(GAME_STATES.PLAYING)) {
+        //     return;
+        // }
 
-        if (!this.worldBoundary || !gameStateMachine.isInState(GAME_STATES.PLAYING)) {
-            return;
-        }
+        // if (this.camera) {
+        //     const shouldDie = this.worldBoundary.checkOutOfBounds(this.camera.position, this.hud);
 
-        if (this.camera) {
-            const shouldDie = this.worldBoundary.checkOutOfBounds(this.camera.position, this.hud);
-
-            if (shouldDie) {
-                this.playerDied();
-            }
-        }
+        //     if (shouldDie) {
+        //         this.playerDied();
+        //     }
+        // }
     }
 
     /**
