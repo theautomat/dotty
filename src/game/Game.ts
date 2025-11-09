@@ -390,6 +390,9 @@ class Game {
                 }
             }, { passive: true });
 
+            // Dispatch event that map is ready for metadata panel
+            window.dispatchEvent(new CustomEvent('mapReady'));
+
             // Transition to PLAYING state (or we could add a MAP_VIEWING state)
             gameStateMachine.transitionTo(GAME_STATES.PLAYING);
         });
