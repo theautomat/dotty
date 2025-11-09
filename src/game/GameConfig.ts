@@ -142,11 +142,11 @@ const GameConfig: GameConfigType = {
     // Grid dimensions (100x100 = 10,000 squares)
     gridSize: 100,
 
-    // Grid line color (white)
-    gridColor: 0xffffff,
+    // Grid line color (parchment/tan like old map lines)
+    gridColor: 0xD4AF77,
 
-    // Grid line opacity (reduced to minimize dulling of background colors)
-    gridOpacity: 0.15,
+    // Grid line opacity (fully opaque lines, transparent squares)
+    gridOpacity: 1.0,
 
     // Minimum zoom level
     minZoom: 0.5,
