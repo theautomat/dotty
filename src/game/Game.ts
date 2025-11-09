@@ -361,19 +361,19 @@ class Game {
                     backgroundImage: GameConfig.map.backgroundImage,
                     highlightColor: GameConfig.map.highlightColor,
                     highlightOpacity: GameConfig.map.highlightOpacity,
-                    cameraPanSpeed: GameConfig.map.cameraPanSpeed
+                    cameraPanSpeed: GameConfig.map.cameraPanSpeed,
+                    minZoom: GameConfig.map.minZoom,
+                    maxZoom: GameConfig.map.maxZoom,
+                    zoomSpeed: GameConfig.map.zoomSpeed,
+                    defaultZoom: GameConfig.map.defaultZoom
                 }
             );
 
             await this.map.init();
             console.log("Map initialized successfully");
 
-            // Add mouse wheel zoom handler
-            window.addEventListener('wheel', (event: WheelEvent) => {
-                if (this.map) {
-                    this.map.handleZoom(event.deltaY);
-                }
-            }, { passive: true });
+            // Zoom is now handled by InputController broadcasting to gameStore
+            // and Map subscribing to zoom events
 
             // Update store to signal map is ready
             gameStore.getState().setMapReady(true);

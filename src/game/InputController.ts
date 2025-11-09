@@ -14,6 +14,7 @@ import { gameStore } from '../store/gameStore';
 interface InputControllerConfig {
   enableKeyboard?: boolean;
   enableGamepad?: boolean;
+  enableWheel?: boolean; // Enable mouse wheel zoom
   preventDefaults?: boolean; // Prevent default browser behavior for game keys
 }
 
@@ -21,16 +22,19 @@ class InputController {
   private config: InputControllerConfig;
   private keyboardListenersAttached: boolean = false;
   private gamepadListenersAttached: boolean = false;
+  private wheelListenersAttached: boolean = false;
 
   // Keyboard event handlers (stored as class properties so we can remove them)
   private handleKeyDown: (event: KeyboardEvent) => void;
   private handleKeyUp: (event: KeyboardEvent) => void;
   private handleBlur: () => void;
+  private handleWheel: (event: WheelEvent) => void;
 
   constructor(config: InputControllerConfig = {}) {
     this.config = {
       enableKeyboard: config.enableKeyboard ?? true,
       enableGamepad: config.enableGamepad ?? false,
+      enableWheel: config.enableWheel ?? true,
       preventDefaults: config.preventDefaults ?? true,
     };
 
@@ -38,6 +42,7 @@ class InputController {
     this.handleKeyDown = this.onKeyDown.bind(this);
     this.handleKeyUp = this.onKeyUp.bind(this);
     this.handleBlur = this.onBlur.bind(this);
+    this.handleWheel = this.onWheel.bind(this);
   }
 
   /**
@@ -52,6 +57,11 @@ class InputController {
     if (this.config.enableGamepad && !this.gamepadListenersAttached) {
       this.setupGamepadListeners();
       this.gamepadListenersAttached = true;
+    }
+
+    if (this.config.enableWheel && !this.wheelListenersAttached) {
+      this.setupWheelListeners();
+      this.wheelListenersAttached = true;
     }
 
     console.log('InputController initialized', this.config);
@@ -104,6 +114,21 @@ class InputController {
    */
   private onBlur(): void {
     gameStore.getState().resetInputs();
+  }
+
+  /**
+   * Setup mouse wheel event listeners
+   */
+  private setupWheelListeners(): void {
+    window.addEventListener('wheel', this.handleWheel, { passive: true });
+  }
+
+  /**
+   * Handle wheel events and broadcast to store
+   */
+  private onWheel(event: WheelEvent): void {
+    // Broadcast the zoom delta to the store
+    gameStore.getState().setZoomDelta(event.deltaY);
   }
 
   /**
@@ -177,6 +202,11 @@ class InputController {
       document.removeEventListener('keyup', this.handleKeyUp);
       window.removeEventListener('blur', this.handleBlur);
       this.keyboardListenersAttached = false;
+    }
+
+    if (this.wheelListenersAttached) {
+      window.removeEventListener('wheel', this.handleWheel);
+      this.wheelListenersAttached = false;
     }
 
     // Reset all inputs
