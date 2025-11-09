@@ -20,9 +20,13 @@ NC='\033[0m' # No Color
 echo "📡 Checking local validator..."
 
 # Check if validator is running and responding correctly
+# Disable exit-on-error temporarily for this check
+set +e
 HEALTH_RESPONSE=$(curl -s http://localhost:8899 -X POST -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' 2>/dev/null)
+VALIDATOR_HEALTHY=$(echo "$HEALTH_RESPONSE" | grep -c '"result":"ok"')
+set -e
 
-if echo "$HEALTH_RESPONSE" | grep -q '"result":"ok"'; then
+if [ "$VALIDATOR_HEALTHY" -gt 0 ]; then
     echo -e "${GREEN}✓${NC} Validator is running and healthy"
 else
     echo -e "${RED}✗${NC} Validator is not running"
