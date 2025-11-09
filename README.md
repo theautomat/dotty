@@ -315,38 +315,45 @@ solana airdrop 5 <YOUR_PHANTOM_ADDRESS> --url http://localhost:8899
 
 ### Quick Start - Local Testing
 
-**Step 1: Start Local Validator**
-
-Open a terminal and run:
+**Simplified One-Command Setup:**
 
 ```bash
+# Run setup with your Phantom wallet address
+npm run dev:local YOUR_PHANTOM_ADDRESS
+```
+
+This command:
+- Starts/checks local validator on `http://localhost:8899`
+- Builds and deploys the Solana program
+- Generates the program IDL
+- Creates a test SPL token
+- Mints 10,000 tokens to your Phantom wallet
+- Auto-updates the frontend with token address
+
+**Then start the frontend:**
+
+```bash
+npm run vite
+```
+
+Open `http://localhost:5173/hide-treasure.html` in your browser. Connect your Phantom wallet (set to Localhost network) and you're ready to test treasure hiding!
+
+**Alternative - Manual Step-by-Step:**
+
+If you prefer manual setup or don't have a Phantom address yet:
+
+```bash
+# Terminal 1: Start validator
 npm run solana:validator
-```
 
-This starts a local Solana test validator on `http://localhost:8899`. Leave this running.
-
-**Step 2: Set Up Test Environment**
-
-In a new terminal:
-
-```bash
+# Terminal 2: Deploy program and setup
 npm run solana:setup
+
+# Terminal 3: Start frontend
+npm run vite
 ```
 
-This script will:
-- Configure Solana CLI for localhost
-- Create/use a test wallet
-- Airdrop test SOL
-- Build and deploy the program locally
-- Initialize the treasure vault
-
-**Step 3: Launch Test Interface**
-
-```bash
-npm run solana:test-ui
-```
-
-Then open `http://localhost:3000/hide-treasure-test.html` in your browser.
+Note: Manual setup doesn't create test tokens. You'll need to create them separately (see "Creating Custom Test Tokens" section below).
 
 ### Using the Test Interface
 
@@ -616,12 +623,16 @@ All helper scripts are in the `scripts/` directory:
 
 | Script | Command | Description |
 |--------|---------|-------------|
+| `dev-local.sh` | `npm run dev:local YOUR_WALLET` | Complete local setup + token creation (recommended) |
 | `start-local-validator.sh` | `npm run solana:validator` | Starts local Solana validator |
 | `setup-local-test.sh` | `npm run solana:setup` | Sets up local test environment |
 | `analyze-blockchain.sh` | `npm run solana:analyze` | Interactive blockchain analysis tool |
 
+**Note:** The `dev-local.sh` script combines validator startup, program deployment, and test token creation in one command. This is the recommended way to start local development.
+
 You can also run these scripts directly:
 ```bash
+./scripts/dev-local.sh YOUR_PHANTOM_ADDRESS
 ./scripts/start-local-validator.sh
 ./scripts/setup-local-test.sh
 ./scripts/analyze-blockchain.sh
