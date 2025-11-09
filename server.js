@@ -126,6 +126,20 @@ app.get('/api/nft-status', (req, res) => {
   });
 });
 
+// Helius webhook endpoint - receives treasure deposit events from blockchain
+app.post('/api/webhooks/helius', (req, res) => {
+  console.log('\n🎉 ===== HELIUS WEBHOOK RECEIVED =====');
+  console.log('Timestamp:', new Date().toISOString());
+  console.log('Payload:', JSON.stringify(req.body, null, 2));
+  console.log('=====================================\n');
+
+  // Acknowledge receipt
+  res.status(200).json({
+    received: true,
+    timestamp: Date.now()
+  });
+});
+
 // Simplified leaderboard URL route
 app.get('/leaderboard', (req, res) => {
   if (process.env.NODE_ENV === 'production') {

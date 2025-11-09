@@ -347,6 +347,63 @@ const signature = await connection.requestAirdrop(
 await connection.confirmTransaction(signature);
 ```
 
+### Testing Helius Webhooks (Track Treasure Deposits)
+
+Once you can hide treasure locally, you can test Helius webhooks to automatically track deposits. This is useful for:
+- Building a treasure tracker UI
+- Storing deposit metadata in Firebase
+- Getting real-time notifications when treasure is hidden
+
+**What is Helius?**
+- Cloud service that watches Solana blockchain for events
+- Calls your server via webhook when treasure is hidden
+- Free tier: 100,000 credits/month (plenty for testing)
+- No installation needed - just configure in their dashboard
+
+**Quick Start:**
+
+1. **Start your server**
+   ```bash
+   npm run server:prod
+   ```
+
+2. **Expose localhost with ngrok** (for testing)
+   ```bash
+   # Install ngrok
+   brew install ngrok  # macOS
+   # or download from https://ngrok.com/download
+
+   # Run ngrok to expose port 3000
+   ngrok http 3000
+   ```
+
+   Copy the HTTPS URL (e.g., `https://abc123.ngrok.io`)
+
+3. **Configure Helius webhook**
+   - Sign up at https://helius.dev (free tier)
+   - Create webhook pointing to: `https://YOUR_NGROK_URL.ngrok.io/api/webhooks/helius`
+   - Watch your Solana program ID
+   - Select "Account Create" event type
+   - Choose network (devnet or mainnet)
+
+4. **Test it**
+   - Hide treasure using the test UI
+   - Watch your server console for webhook logs:
+     ```
+     🎉 ===== HELIUS WEBHOOK RECEIVED =====
+     Timestamp: 2025-11-09T...
+     Payload: { ... treasure data ... }
+     =====================================
+     ```
+
+**Full Documentation:** See `docs/HELIUS_SETUP.md` for detailed setup instructions and troubleshooting.
+
+**Next Steps:** Once webhooks work, you can:
+- Parse treasure deposit data from webhook payload
+- Store in Firebase for fast queries
+- Build a `/treasures` page to display all hidden treasures
+- Add real-time UI updates when treasure is hidden
+
 ### Analyzing the Blockchain
 
 **Option 1: Use Analysis Script**
