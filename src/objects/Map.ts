@@ -15,6 +15,10 @@ interface MapConfig {
     highlightColor?: number;
     highlightOpacity?: number;
     cameraPanSpeed?: number;
+    minZoom?: number;
+    maxZoom?: number;
+    zoomSpeed?: number;
+    defaultZoom?: number;
 }
 
 class Map {
@@ -25,6 +29,10 @@ class Map {
     private config: MapConfig;
     private mapWorldSize: number;
     private navigator: GridNavigator | null = null;
+    private minZoom: number;
+    private maxZoom: number;
+    private zoomSpeed: number;
+    private defaultZoom: number;
 
     constructor(
         scene: THREE.Scene,
@@ -36,17 +44,27 @@ class Map {
         this.config = config;
         this.mapWorldSize = config.worldSize;
         this.gridGroup = new THREE.Group();
+
+        // Initialize zoom configuration with defaults
+        this.minZoom = config.minZoom ?? 0.5;
+        this.maxZoom = config.maxZoom ?? 3.0;
+        this.zoomSpeed = config.zoomSpeed ?? 0.1;
+        this.defaultZoom = config.defaultZoom ?? 1.0;
     }
 
     /**
      * Initialize the map - create background and grid
      */
     async init(): Promise<void> {
+        // Set initial camera zoom to maximum zoom for best view
+        this.camera.zoom = this.maxZoom;
+        this.camera.updateProjectionMatrix();
+
         await this.createBackground();
         this.createGrid();
         this.initNavigator();
 
-        console.log(`Map initialized: ${this.config.gridSize}x${this.config.gridSize} grid, world size: ${this.mapWorldSize}`);
+        console.log(`Map initialized: ${this.config.gridSize}x${this.config.gridSize} grid, world size: ${this.mapWorldSize}, initial zoom: ${this.camera.zoom}`);
     }
 
     /**
@@ -211,16 +229,12 @@ class Map {
      * Handle zoom events
      */
     handleZoom(delta: number): void {
-        const zoomSpeed = 0.1;
-        const minZoom = 0.5;
-        const maxZoom = 3.0;
-
         if (delta < 0) {
             // Zoom in
-            this.camera.zoom = Math.min(maxZoom, this.camera.zoom + zoomSpeed);
+            this.camera.zoom = Math.min(this.maxZoom, this.camera.zoom + this.zoomSpeed);
         } else {
             // Zoom out
-            this.camera.zoom = Math.max(minZoom, this.camera.zoom - zoomSpeed);
+            this.camera.zoom = Math.max(this.minZoom, this.camera.zoom - this.zoomSpeed);
         }
 
         this.camera.updateProjectionMatrix();

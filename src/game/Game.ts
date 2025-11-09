@@ -361,7 +361,11 @@ class Game {
                     backgroundImage: GameConfig.map.backgroundImage,
                     highlightColor: GameConfig.map.highlightColor,
                     highlightOpacity: GameConfig.map.highlightOpacity,
-                    cameraPanSpeed: GameConfig.map.cameraPanSpeed
+                    cameraPanSpeed: GameConfig.map.cameraPanSpeed,
+                    minZoom: GameConfig.map.minZoom,
+                    maxZoom: GameConfig.map.maxZoom,
+                    zoomSpeed: GameConfig.map.zoomSpeed,
+                    defaultZoom: GameConfig.map.defaultZoom
                 }
             );
 
