@@ -15,6 +15,7 @@
     "preview": "vite preview",
     "server": "NODE_ENV=development nodemon server.js",
     "server:prod": "NODE_ENV=production node server.js",
+    "heroku-postbuild": "npm run build",
     "test:solana": "cd solana && anchor test",
     "test:solana:local": "cd solana && anchor test --skip-deploy",
     "test:solana:devnet": "cd solana && anchor test --provider.cluster devnet"
