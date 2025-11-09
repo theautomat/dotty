@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read access to all treasure deposits
+    match /treasure-deposits/{signature} {
+      // Anyone can read treasure deposits
+      allow read: if true;
+
+      // Only server (via Firebase Admin SDK) can write
+      // Admin SDK bypasses these rules
+      allow write: if false;
+    }
+
+    // Allow read access to game stats
+    match /games/{gameId} {
+      // Anyone can read game stats
+      allow read: if true;
+
+      // Only authenticated users can write their own game stats
+      allow write: if request.auth != null;
+    }
+
+    // Default: deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
