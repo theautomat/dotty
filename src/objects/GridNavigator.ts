@@ -23,8 +23,8 @@ class GridNavigator {
     private currentX: number;
     private currentY: number;
 
-    // Visual highlight mesh
-    private highlight: THREE.Mesh | null = null;
+    // Visual highlight (border/stroke)
+    private highlight: THREE.LineLoop | null = null;
 
     // Keyboard state
     private keyReleased: Map<string, boolean> = new Map();
@@ -72,18 +72,27 @@ class GridNavigator {
 
     /**
      * Create the visual highlight mesh for the selected grid cell
+     * Uses a border/stroke instead of a filled square to avoid covering content
      */
     private createHighlight(): void {
-        const geometry = new THREE.PlaneGeometry(this.config.cellSize, this.config.cellSize);
-        const material = new THREE.MeshBasicMaterial({
+        const halfSize = this.config.cellSize / 2;
+
+        // Create a square outline using LineLoop
+        const points = [
+            new THREE.Vector3(-halfSize, 0, -halfSize),
+            new THREE.Vector3(halfSize, 0, -halfSize),
+            new THREE.Vector3(halfSize, 0, halfSize),
+            new THREE.Vector3(-halfSize, 0, halfSize)
+        ];
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineBasicMaterial({
             color: this.config.highlightColor,
-            opacity: this.config.highlightOpacity,
-            transparent: true,
-            side: THREE.DoubleSide
+            linewidth: 3, // Thicker border for better visibility
+            transparent: false // No transparency needed for a border
         });
 
-        this.highlight = new THREE.Mesh(geometry, material);
-        this.highlight.rotation.x = -Math.PI / 2; // Lay flat on XZ plane
+        this.highlight = new THREE.LineLoop(geometry, material);
         this.highlight.position.y = 0.2; // Slightly above grid to be visible
 
         this.scene.add(this.highlight);
