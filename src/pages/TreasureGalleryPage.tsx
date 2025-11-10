@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import {
-  mockTreasureDeposits,
+  mockHiddenTreasures,
   getTreasureStats,
-  type TreasureDeposit,
+  type HiddenTreasure,
   type TreasureStatus,
   type TokenType,
 } from '@/data/mockTreasureData';
@@ -19,7 +19,7 @@ export function TreasureGalleryPage() {
 
   // Filter and sort treasures
   const filteredTreasures = useMemo(() => {
-    let filtered = [...mockTreasureDeposits];
+    let filtered = [...mockHiddenTreasures];
 
     // Filter by status
     if (selectedStatus !== 'all') {
@@ -36,7 +36,7 @@ export function TreasureGalleryPage() {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         t =>
-          t.depositedBy.toLowerCase().includes(term) ||
+          t.hiddenBy.toLowerCase().includes(term) ||
           t.walletAddress.toLowerCase().includes(term) ||
           t.monsterType.toLowerCase().includes(term)
       );
@@ -45,7 +45,7 @@ export function TreasureGalleryPage() {
     // Sort
     filtered.sort((a, b) => {
       if (sortBy === 'date') {
-        return new Date(b.depositDate).getTime() - new Date(a.depositDate).getTime();
+        return new Date(b.hiddenAt).getTime() - new Date(a.hiddenAt).getTime();
       } else {
         return b.amount - a.amount;
       }
@@ -230,7 +230,7 @@ export function TreasureGalleryPage() {
 }
 
 // Treasure Card Component
-function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
+function TreasureCard({ treasure }: { treasure: HiddenTreasure }) {
   const statusConfig = {
     active: {
       color: 'from-green-500/20 to-emerald-500/20',
@@ -289,10 +289,10 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
 
       {/* Card Body */}
       <div className="p-6 space-y-3">
-        {/* Deposited By */}
+        {/* Hidden By */}
         <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Deposited By</div>
-          <div className="text-white font-medium">{treasure.depositedBy}</div>
+          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Hidden By</div>
+          <div className="text-white font-medium">{treasure.hiddenBy}</div>
           <div className="text-xs text-gray-500 font-mono mt-0.5">
             {treasure.walletAddress.slice(0, 8)}...{treasure.walletAddress.slice(-6)}
           </div>
@@ -303,7 +303,7 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
           <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Location</div>
           <div className="flex items-center gap-2">
             <span className="text-white font-mono">
-              ({treasure.coordinates.x}, {treasure.coordinates.y})
+              ({treasure.hiddenLocation.x}, {treasure.hiddenLocation.y})
             </span>
             <span className="text-gray-500">📍</span>
           </div>
@@ -311,9 +311,9 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
 
         {/* Dates */}
         <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Deposit Date</div>
-          <div className="text-white text-sm">{new Date(treasure.depositDate).toLocaleDateString()}</div>
-          <div className="text-xs text-gray-500">{new Date(treasure.depositDate).toLocaleTimeString()}</div>
+          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Hidden At</div>
+          <div className="text-white text-sm">{new Date(treasure.hiddenAt).toLocaleDateString()}</div>
+          <div className="text-xs text-gray-500">{new Date(treasure.hiddenAt).toLocaleTimeString()}</div>
         </div>
 
         {treasure.claimDate && (
@@ -340,7 +340,7 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
         <div className="p-6 pt-0">
           <Button
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold"
-            onClick={() => alert(`Navigate to treasure at (${treasure.coordinates.x}, ${treasure.coordinates.y})`)}
+            onClick={() => alert(`Navigate to treasure at (${treasure.hiddenLocation.x}, ${treasure.hiddenLocation.y})`)}
           >
             🗺️ Find This Treasure
           </Button>

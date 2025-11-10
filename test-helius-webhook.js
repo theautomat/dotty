@@ -3,7 +3,7 @@
 /**
  * Helius Webhook Testing Utility
  *
- * This script simulates a Helius webhook call to test your treasure deposit endpoint locally.
+ * This script simulates a Helius webhook call to test your treasure hiding endpoint locally.
  *
  * Usage:
  *   node test-helius-webhook.js
@@ -79,12 +79,12 @@ const mockHeliusPayload = [
     ],
 
     // Description
-    description: `Treasure deposit of ${AMOUNT} ${TOKEN}`,
+    description: `Treasure hidden: ${AMOUNT} ${TOKEN}`,
 
     // Events (program-specific)
     events: [
       {
-        type: 'DEPOSIT',
+        type: 'HIDE_TREASURE',
         programId: process.env.SOLANA_PROGRAM_ID || 'YourGameProgramId123456789',
         data: {
           wallet: WALLET,
@@ -176,7 +176,7 @@ Usage:
 Options:
   --host <host>       Server host (default: localhost)
   --port <port>       Server port (default: 3000)
-  --amount <amount>   Deposit amount (default: 2.5)
+  --amount <amount>   Treasure amount (default: 2.5)
   --token <token>     Token type (default: SOL)
   --wallet <address>  Wallet address (default: mock address)
   --help, -h          Show this help message
