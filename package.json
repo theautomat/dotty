@@ -26,7 +26,8 @@
     "solana:analyze": "./scripts/analyze-blockchain.sh",
     "solana:test-ui": "echo 'Open http://localhost:3000/hide-treasure-test.html in your browser' && npm run server:prod",
     "firebase:emulator": "firebase emulators:start --only firestore --project demo-project",
-    "test:webhook": "node test-helius-webhook.js"
+    "test:webhook": "node test-helius-webhook.js",
+    "dev:monitor": "NODE_ENV=development npx ts-node local-transaction-monitor.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
