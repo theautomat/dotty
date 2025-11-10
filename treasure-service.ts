@@ -4,7 +4,7 @@ import type { Firestore } from 'firebase-admin/firestore';
 /**
  * Treasure Transaction Service
  *
- * Handles storage and retrieval of treasure deposits triggered by Helius webhooks.
+ * Handles storage and retrieval of hidden treasure transactions triggered by Helius webhooks.
  * Stores treasure transactions in Firestore with complete transaction metadata.
  */
 
@@ -13,21 +13,22 @@ export interface TreasureDepositData {
   walletAddress: string;
   amount: number;
   tokenType?: string;
-  metadata?: Record<string, any>;
-  coordinates?: { x: number; y: number };
-  blockTime?: number;
-  slot?: number;
-  fee?: number;
-  programId?: string;
+  metadata?: {
+    blockTime?: number;
+    slot?: number;
+    fee?: number;
+    programId?: string;
+    treasureRecordPda?: string;
+    [key: string]: any;
+  };
 }
 
 export interface TreasureDeposit {
   // Transaction identifiers
   txSignature: string;
-  depositedBy: string;
   walletAddress: string;
 
-  // Deposit details
+  // Treasure details
   amount: number;
   tokenType: string;
 
@@ -35,24 +36,19 @@ export interface TreasureDeposit {
   status: 'active' | 'claimed' | 'expired';
 
   // Timestamps
-  depositDate: string;
+  hiddenAt: string;
   createdAt: string;
   updatedAt: string;
-  claimDate?: string;
+  claimedAt?: string;
   claimedBy?: string;
 
-  // Game coordinates
-  coordinates: { x: number; y: number };
-
-  // Monster type based on amount
-  monsterType: string;
-
-  // Additional metadata from Helius
-  metadata?: {
-    blockTime?: number | null;
-    slot?: number | null;
-    fee?: number | null;
-    programId?: string | null;
+  // Blockchain metadata
+  metadata: {
+    blockTime: number | null;
+    slot: number | null;
+    fee: number | null;
+    programId: string | null;
+    treasureRecordPda: string;
     [key: string]: any;
   };
 }
@@ -69,7 +65,7 @@ export interface TreasureUpdateData {
 }
 
 class TreasureService {
-  private readonly collectionName = 'treasure-deposits';
+  private readonly collectionName = 'treasureDeposits';
 
   /**
    * Get Firestore instance
@@ -108,14 +104,13 @@ class TreasureService {
         throw new Error('Amount is required');
       }
 
-      // Prepare treasure deposit document
+      // Prepare treasure document
       const treasureDeposit: TreasureDeposit = {
         // Transaction identifiers
         txSignature: transactionData.signature,
-        depositedBy: transactionData.walletAddress,
         walletAddress: transactionData.walletAddress,
 
-        // Deposit details
+        // Treasure details
         amount: transactionData.amount,
         tokenType: transactionData.tokenType || 'SOL',
 
@@ -123,22 +118,17 @@ class TreasureService {
         status: 'active',
 
         // Timestamps
-        depositDate: new Date().toISOString(),
+        hiddenAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
 
-        // Game coordinates (will be assigned by game logic)
-        coordinates: transactionData.coordinates || { x: 0, y: 0 },
-
-        // Monster type based on amount (game logic can override)
-        monsterType: this._determineMonsterType(transactionData.amount),
-
-        // Additional metadata from Helius
+        // Blockchain metadata
         metadata: {
-          blockTime: transactionData.blockTime || null,
-          slot: transactionData.slot || null,
-          fee: transactionData.fee || null,
-          programId: transactionData.programId || null,
+          blockTime: transactionData.metadata?.blockTime || null,
+          slot: transactionData.metadata?.slot || null,
+          fee: transactionData.metadata?.fee || null,
+          programId: transactionData.metadata?.programId || null,
+          treasureRecordPda: transactionData.metadata?.treasureRecordPda || '',
           ...transactionData.metadata
         }
       };
@@ -149,7 +139,7 @@ class TreasureService {
         .doc(transactionData.signature) // Use signature as document ID for idempotency
         .set(treasureDeposit, { merge: true }); // Merge to handle duplicate webhooks
 
-      console.log(`✅ Treasure deposit saved: ${transactionData.signature}`);
+      console.log(`✅ Hidden treasure saved: ${transactionData.signature}`);
 
       return {
         success: true,
@@ -191,7 +181,7 @@ class TreasureService {
 
       // If claimed, add claim timestamp and claimer
       if (status === 'claimed') {
-        updates.claimDate = new Date().toISOString();
+        updates.claimedAt = new Date().toISOString();
         if (updateData.claimedBy) {
           updates.claimedBy = updateData.claimedBy;
         }
@@ -202,7 +192,7 @@ class TreasureService {
         .doc(signature)
         .update(updates);
 
-      console.log(`✅ Treasure deposit updated: ${signature} -> ${status}`);
+      console.log(`✅ Hidden treasure updated: ${signature} -> ${status}`);
 
       return {
         success: true,
@@ -264,7 +254,7 @@ class TreasureService {
       let query: FirebaseFirestore.Query = db
         .collection(this.collectionName)
         .where('status', '==', status)
-        .orderBy('depositDate', 'desc')
+        .orderBy('hiddenAt', 'desc')
         .limit(limit);
 
       // Add token type filter if specified
@@ -308,7 +298,7 @@ class TreasureService {
       const snapshot = await db
         .collection(this.collectionName)
         .where('walletAddress', '==', walletAddress)
-        .orderBy('depositDate', 'desc')
+        .orderBy('hiddenAt', 'desc')
         .limit(limit)
         .get();
 
@@ -326,19 +316,6 @@ class TreasureService {
       console.error('❌ Error getting treasures by wallet:', error);
       throw error;
     }
-  }
-
-  /**
-   * Determine monster type based on deposit amount
-   * @private
-   * @param amount - Deposit amount
-   * @returns Monster type string
-   */
-  private _determineMonsterType(amount: number): string {
-    if (amount >= 10) return 'dragon';
-    if (amount >= 5) return 'ogre';
-    if (amount >= 1) return 'goblin';
-    return 'slime';
   }
 
   /**

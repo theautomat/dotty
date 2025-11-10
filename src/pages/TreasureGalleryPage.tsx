@@ -1,25 +1,97 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import {
-  mockTreasureDeposits,
-  getTreasureStats,
-  type TreasureDeposit,
-  type TreasureStatus,
-  type TokenType,
-} from '@/data/mockTreasureData';
+import { collection, query, where, orderBy, limit, getDocs, type QueryConstraint } from 'firebase/firestore';
+import { db } from '@/config/firebase';
 import { Button } from '@/components/ui/button';
+
+// Type definitions
+type TreasureStatus = 'active' | 'claimed' | 'expired';
+type TokenType = string;
+
+interface TreasureDeposit {
+  id: string;
+  txSignature: string;
+  walletAddress: string;
+  amount: number;
+  tokenType: string;
+  status: TreasureStatus;
+  hiddenAt: string;
+  createdAt: string;
+  updatedAt: string;
+  claimedAt?: string;
+  claimedBy?: string;
+  metadata?: {
+    blockTime?: number | null;
+    slot?: number | null;
+    fee?: number | null;
+    programId?: string | null;
+    treasureRecordPda?: string;
+  };
+}
+
+interface TreasureStats {
+  total: number;
+  active: number;
+  claimed: number;
+  expired: number;
+}
 
 export function TreasureGalleryPage() {
   const [selectedStatus, setSelectedStatus] = useState<TreasureStatus | 'all'>('all');
   const [selectedToken, setSelectedToken] = useState<TokenType | 'all'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [searchTerm, setSearchTerm] = useState('');
+  const [treasures, setTreasures] = useState<TreasureDeposit[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const stats = getTreasureStats();
+  // Fetch treasures from Firebase
+  useEffect(() => {
+    async function fetchTreasures() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const treasuresRef = collection(db, 'treasureDeposits');
+        const constraints: QueryConstraint[] = [
+          orderBy('hiddenAt', 'desc'),
+          limit(1000)
+        ];
+
+        const q = query(treasuresRef, ...constraints);
+        const snapshot = await getDocs(q);
+
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as TreasureDeposit[];
+
+        setTreasures(data);
+        console.log(`✅ Fetched ${data.length} treasures from Firebase`);
+      } catch (err) {
+        console.error('❌ Error fetching treasures:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch treasures');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTreasures();
+  }, []);
+
+  // Calculate stats from fetched treasures
+  const stats: TreasureStats = useMemo(() => {
+    return {
+      total: treasures.length,
+      active: treasures.filter(t => t.status === 'active').length,
+      claimed: treasures.filter(t => t.status === 'claimed').length,
+      expired: treasures.filter(t => t.status === 'expired').length,
+    };
+  }, [treasures]);
 
   // Filter and sort treasures
   const filteredTreasures = useMemo(() => {
-    let filtered = [...mockTreasureDeposits];
+    let filtered = [...treasures];
 
     // Filter by status
     if (selectedStatus !== 'all') {
@@ -31,28 +103,25 @@ export function TreasureGalleryPage() {
       filtered = filtered.filter(t => t.tokenType === selectedToken);
     }
 
-    // Filter by search term
+    // Filter by search term (wallet address only)
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
-        t =>
-          t.depositedBy.toLowerCase().includes(term) ||
-          t.walletAddress.toLowerCase().includes(term) ||
-          t.monsterType.toLowerCase().includes(term)
+        t => t.walletAddress.toLowerCase().includes(term)
       );
     }
 
     // Sort
     filtered.sort((a, b) => {
       if (sortBy === 'date') {
-        return new Date(b.depositDate).getTime() - new Date(a.depositDate).getTime();
+        return new Date(b.hiddenAt).getTime() - new Date(a.hiddenAt).getTime();
       } else {
         return b.amount - a.amount;
       }
     });
 
     return filtered;
-  }, [selectedStatus, selectedToken, sortBy, searchTerm]);
+  }, [treasures, selectedStatus, selectedToken, sortBy, searchTerm]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
@@ -116,7 +185,7 @@ export function TreasureGalleryPage() {
               <label className="block text-sm font-semibold text-gray-300 mb-2">Search</label>
               <input
                 type="text"
-                placeholder="Search by name, wallet, or monster..."
+                placeholder="Search by wallet address..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -207,22 +276,49 @@ export function TreasureGalleryPage() {
 
       {/* Treasure Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="mb-4 text-gray-400">
-          Showing {filteredTreasures.length} of {stats.total} treasures
-        </div>
-
-        {filteredTreasures.length === 0 ? (
+        {/* Loading State */}
+        {loading && (
           <div className="bg-black/30 backdrop-blur-md rounded-lg p-12 border border-purple-500/20 text-center">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-300 mb-2">No treasures found</h3>
-            <p className="text-gray-500">Try adjusting your filters</p>
+            <div className="text-6xl mb-4">⏳</div>
+            <h3 className="text-xl font-semibold text-gray-300 mb-2">Loading treasures...</h3>
+            <p className="text-gray-500">Fetching data from Firebase</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTreasures.map(treasure => (
-              <TreasureCard key={treasure.id} treasure={treasure} />
-            ))}
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="bg-red-500/10 backdrop-blur-md rounded-lg p-12 border border-red-500/30 text-center">
+            <div className="text-6xl mb-4">❌</div>
+            <h3 className="text-xl font-semibold text-red-300 mb-2">Error loading treasures</h3>
+            <p className="text-gray-400">{error}</p>
           </div>
+        )}
+
+        {/* Treasure Data */}
+        {!loading && !error && (
+          <>
+            <div className="mb-4 text-gray-400">
+              Showing {filteredTreasures.length} of {stats.total} treasures
+            </div>
+
+            {filteredTreasures.length === 0 ? (
+              <div className="bg-black/30 backdrop-blur-md rounded-lg p-12 border border-purple-500/20 text-center">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-gray-300 mb-2">No treasures found</h3>
+                <p className="text-gray-500">
+                  {stats.total === 0
+                    ? 'No treasures have been hidden yet. Be the first to hide some treasure!'
+                    : 'Try adjusting your filters'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTreasures.map(treasure => (
+                  <TreasureCard key={treasure.id} treasure={treasure} />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -237,18 +333,21 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
       borderColor: 'border-green-500/40',
       badgeColor: 'bg-green-500/20 text-green-300 border-green-500/40',
       label: 'Active',
+      emoji: '💎',
     },
     claimed: {
       color: 'from-blue-500/20 to-cyan-500/20',
       borderColor: 'border-blue-500/40',
       badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
       label: 'Claimed',
+      emoji: '✅',
     },
     expired: {
       color: 'from-gray-500/20 to-gray-600/20',
       borderColor: 'border-gray-500/40',
       badgeColor: 'bg-gray-500/20 text-gray-300 border-gray-500/40',
       label: 'Expired',
+      emoji: '⏰',
     },
   };
 
@@ -266,10 +365,10 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-4xl">{treasure.monsterEmoji}</span>
+            <span className="text-4xl">{config.emoji}</span>
             <div>
-              <div className="text-sm text-gray-400">Monster</div>
-              <div className="font-semibold text-white">{treasure.monsterType}</div>
+              <div className="text-sm text-gray-400">Status</div>
+              <div className="font-semibold text-white">{config.label}</div>
             </div>
           </div>
           <span className={cn('px-3 py-1 rounded-full text-sm font-semibold border', config.badgeColor)}>
@@ -289,39 +388,29 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
 
       {/* Card Body */}
       <div className="p-6 space-y-3">
-        {/* Deposited By */}
+        {/* Hidden By */}
         <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Deposited By</div>
-          <div className="text-white font-medium">{treasure.depositedBy}</div>
-          <div className="text-xs text-gray-500 font-mono mt-0.5">
+          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Hidden By</div>
+          <div className="text-xs text-gray-500 font-mono">
             {treasure.walletAddress.slice(0, 8)}...{treasure.walletAddress.slice(-6)}
-          </div>
-        </div>
-
-        {/* Coordinates */}
-        <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Location</div>
-          <div className="flex items-center gap-2">
-            <span className="text-white font-mono">
-              ({treasure.coordinates.x}, {treasure.coordinates.y})
-            </span>
-            <span className="text-gray-500">📍</span>
           </div>
         </div>
 
         {/* Dates */}
         <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Deposit Date</div>
-          <div className="text-white text-sm">{new Date(treasure.depositDate).toLocaleDateString()}</div>
-          <div className="text-xs text-gray-500">{new Date(treasure.depositDate).toLocaleTimeString()}</div>
+          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Hidden At</div>
+          <div className="text-white text-sm">{new Date(treasure.hiddenAt).toLocaleDateString()}</div>
+          <div className="text-xs text-gray-500">{new Date(treasure.hiddenAt).toLocaleTimeString()}</div>
         </div>
 
-        {treasure.claimDate && (
+        {treasure.claimedAt && (
           <div>
-            <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Claimed Date</div>
-            <div className="text-white text-sm">{new Date(treasure.claimDate).toLocaleDateString()}</div>
+            <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Claimed At</div>
+            <div className="text-white text-sm">{new Date(treasure.claimedAt).toLocaleDateString()}</div>
             {treasure.claimedBy && (
-              <div className="text-xs text-blue-400 mt-1">by {treasure.claimedBy}</div>
+              <div className="text-xs text-blue-400 mt-1">
+                by {treasure.claimedBy.slice(0, 8)}...{treasure.claimedBy.slice(-6)}
+              </div>
             )}
           </div>
         )}
@@ -330,7 +419,22 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
         {treasure.txSignature && (
           <div>
             <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Transaction</div>
-            <div className="text-xs text-purple-400 font-mono">{treasure.txSignature}</div>
+            <a
+              href={`https://solscan.io/tx/${treasure.txSignature}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-purple-400 hover:text-purple-300 font-mono break-all"
+            >
+              {treasure.txSignature.slice(0, 20)}...
+            </a>
+          </div>
+        )}
+
+        {/* Blockchain Info */}
+        {treasure.metadata?.slot && (
+          <div>
+            <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Blockchain</div>
+            <div className="text-xs text-gray-500">Slot: {treasure.metadata.slot.toLocaleString()}</div>
           </div>
         )}
       </div>
@@ -340,9 +444,9 @@ function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
         <div className="p-6 pt-0">
           <Button
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold"
-            onClick={() => alert(`Navigate to treasure at (${treasure.coordinates.x}, ${treasure.coordinates.y})`)}
+            onClick={() => alert('Claiming treasures coming soon!')}
           >
-            🗺️ Find This Treasure
+            🎁 Claim This Treasure
           </Button>
         </div>
       )}

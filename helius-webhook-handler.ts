@@ -50,8 +50,15 @@ export interface HeliusTransaction {
 /**
  * Middleware to verify Helius webhook authorization header
  *
- * Helius sends the authorization header you configured when creating the webhook.
- * This middleware checks if the incoming request has the correct auth header.
+ * Helius webhooks support authentication via an authorization header.
+ * When creating a webhook in the Helius dashboard or via API, you can set an `authHeader`.
+ * Helius will send this value in the `Authorization` header with each webhook request.
+ *
+ * Setup:
+ * 1. Create webhook in Helius dashboard or via API
+ * 2. Set an authHeader value (e.g., "Bearer your-secret-key")
+ * 3. Store this value in HELIUS_WEBHOOK_AUTH_HEADER environment variable
+ * 4. This middleware will verify incoming requests match your configured auth header
  *
  * @param expectedAuthHeader - The auth header you set when creating the webhook
  * @returns Express middleware function
@@ -70,6 +77,8 @@ export function verifyHeliusAuth(expectedAuthHeader: string | undefined) {
     // Verify authorization header matches
     if (authHeader !== expectedAuthHeader) {
       console.error('❌ Invalid Helius webhook authorization header');
+      console.error(`Expected: ${expectedAuthHeader}`);
+      console.error(`Received: ${authHeader}`);
       res.status(401).json({
         success: false,
         error: 'Unauthorized - invalid authorization header'
@@ -82,80 +91,105 @@ export function verifyHeliusAuth(expectedAuthHeader: string | undefined) {
 }
 
 /**
- * Parse Helius webhook payload and extract treasure deposit information
+ * Parse Helius webhook payload and extract hidden treasure information
  *
  * @param heliusPayload - Raw payload from Helius webhook
- * @returns Parsed transaction data or null if not a treasure deposit
+ * @returns Parsed transaction data or null if not a hideTreasure transaction
  */
 export function parseHeliusTransaction(heliusPayload: HeliusTransaction[]): TreasureDepositData | null {
   try {
-    // Helius webhook payload structure varies by webhook type
-    // Common fields: signature, type, timestamp, events, nativeTransfers, tokenTransfers
+    const GAME_PROGRAM_ID = '7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh';
 
-    const { signature, type, timestamp, description, events } = heliusPayload[0] || heliusPayload;
+    for (const transaction of heliusPayload) {
+      const { signature, timestamp, slot, fee, accountData, tokenTransfers } = transaction;
 
-    // Check if this is a transaction we care about
-    // You may need to adjust this logic based on your program structure
-    if (!signature) {
-      console.warn('⚠️  Webhook payload missing signature');
-      return null;
-    }
+      if (!signature) {
+        console.warn('⚠️  Transaction missing signature');
+        continue;
+      }
 
-    // Extract transaction details
-    // This is a simplified parser - adjust based on your actual program instructions
-    const transactionData: TreasureDepositData = {
-      signature,
-      walletAddress: '',
-      amount: 0,
-      tokenType: 'SOL',
+      // Check if this transaction involves our game program
+      const isGameProgram = accountData?.some(
+        account => account.account === GAME_PROGRAM_ID || account.nativeBalanceChange !== undefined
+      ) || transaction.type?.includes('UNKNOWN'); // Helius might not recognize our custom program
 
-      // Metadata
-      blockTime: heliusPayload[0]?.timestamp,
-      slot: heliusPayload[0]?.slot,
-      fee: heliusPayload[0]?.fee,
-      programId: undefined
-    };
+      if (!isGameProgram && accountData) {
+        // Double check token transfers for our program involvement
+        const hasGameProgramTransfer = tokenTransfers?.some(transfer =>
+          transfer.fromUserAccount || transfer.toUserAccount
+        );
 
-    // Parse native SOL transfers
-    if (heliusPayload[0]?.nativeTransfers && heliusPayload[0].nativeTransfers.length > 0) {
-      const transfer = heliusPayload[0].nativeTransfers[0];
-      transactionData.walletAddress = transfer.fromUserAccount || transfer.toUserAccount;
-      transactionData.amount = transfer.amount / 1e9; // Convert lamports to SOL
-      transactionData.tokenType = 'SOL';
-    }
-
-    // Parse SPL token transfers
-    if (heliusPayload[0]?.tokenTransfers && heliusPayload[0].tokenTransfers.length > 0) {
-      const transfer = heliusPayload[0].tokenTransfers[0];
-      transactionData.walletAddress = transfer.fromUserAccount || transfer.toUserAccount;
-      transactionData.amount = transfer.tokenAmount;
-      transactionData.tokenType = transfer.mint || transfer.tokenSymbol || 'UNKNOWN';
-    }
-
-    // Parse program-specific events if available
-    if (events && events.length > 0) {
-      // Look for your game program's deposit events
-      const depositEvent = events.find(e =>
-        e.type === 'DEPOSIT' || e.type === 'deposit_for_nft'
-      );
-
-      if (depositEvent) {
-        transactionData.programId = depositEvent.programId;
-        // Extract event-specific data
-        if (depositEvent.data) {
-          transactionData.amount = depositEvent.data.amount || transactionData.amount;
-          transactionData.walletAddress = depositEvent.data.wallet || transactionData.walletAddress;
+        if (!hasGameProgramTransfer) {
+          console.log(`⏭️  Transaction ${signature} does not involve game program`);
+          continue;
         }
       }
+
+      // Extract token transfer information (hideTreasure always involves a token transfer)
+      let walletAddress = '';
+      let amount = 0;
+      let tokenMint = 'SOL';
+
+      if (tokenTransfers && tokenTransfers.length > 0) {
+        // Find the transfer FROM the player TO the vault
+        const treasureTransfer = tokenTransfers[0];
+        walletAddress = treasureTransfer.fromUserAccount;
+        amount = treasureTransfer.tokenAmount;
+        tokenMint = treasureTransfer.mint || treasureTransfer.tokenSymbol || 'UNKNOWN';
+
+        console.log(`📦 Found token transfer: ${amount} ${tokenMint} from ${walletAddress}`);
+      } else {
+        console.warn('⚠️  No token transfers found in transaction');
+        continue;
+      }
+
+      // Try to find the TreasureRecord PDA in account data
+      let treasureRecordPda = '';
+
+      if (accountData && Array.isArray(accountData)) {
+        // Look for accounts that were created/modified (TreasureRecord PDA)
+        // The TreasureRecord will be one of the accounts in the transaction
+        for (const account of accountData) {
+          // Check if this looks like a TreasureRecord account
+          // We can identify it by looking for newly created accounts or checking account structure
+          if (account.account && account.account !== GAME_PROGRAM_ID) {
+            // This could be the TreasureRecord PDA or other accounts
+            // For now, we'll try to extract it from the instruction accounts
+            treasureRecordPda = account.account;
+          }
+        }
+      }
+
+      // Validate we have minimum required data
+      if (!walletAddress || !amount) {
+        console.warn('⚠️  Could not extract wallet address or amount from transaction');
+        continue;
+      }
+
+      console.log(`✅ Parsed hideTreasure transaction:`);
+      console.log(`   Signature: ${signature}`);
+      console.log(`   Player: ${walletAddress}`);
+      console.log(`   Amount: ${amount}`);
+      console.log(`   Token: ${tokenMint}`);
+
+      // Return parsed transaction data
+      return {
+        signature,
+        walletAddress,
+        amount,
+        tokenType: tokenMint,
+        metadata: {
+          blockTime: timestamp,
+          slot: slot || null,
+          fee: fee || null,
+          programId: GAME_PROGRAM_ID,
+          treasureRecordPda: treasureRecordPda || 'unknown',
+        }
+      };
     }
 
-    // Validate that we have the minimum required data
-    if (!transactionData.walletAddress || !transactionData.amount) {
-      console.warn('⚠️  Could not extract wallet address or amount from webhook');
-      return null;
-    }
-
-    return transactionData;
+    console.log('⏭️  No hideTreasure transactions found in payload');
+    return null;
 
   } catch (error) {
     console.error('❌ Error parsing Helius transaction:', error);
@@ -188,7 +222,7 @@ export async function handleHeliusWebhook(req: Request, res: Response): Promise<
       const parsedTx = parseHeliusTransaction([transaction]);
 
       if (!parsedTx) {
-        console.log('⏭️  Skipping transaction (not a treasure deposit)');
+        console.log('⏭️  Skipping transaction (not a hideTreasure transaction)');
         continue;
       }
 
@@ -202,11 +236,11 @@ export async function handleHeliusWebhook(req: Request, res: Response): Promise<
         return;
       }
 
-      // Save treasure deposit
+      // Save hidden treasure
       const result = await treasureService.saveTreasureDeposit(parsedTx);
       results.push(result);
 
-      console.log(`✅ Processed treasure deposit: ${parsedTx.signature}`);
+      console.log(`✅ Processed hidden treasure: ${parsedTx.signature}`);
     }
 
     // Respond to Helius
