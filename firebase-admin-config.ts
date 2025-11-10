@@ -39,6 +39,19 @@ class FirebaseAdmin {
 
       if (isEmulator) {
         console.log(`🔧 Using Firebase Emulator at ${process.env.FIRESTORE_EMULATOR_HOST}`);
+        // For emulator, we can use a dummy project ID
+        this.app = admin.initializeApp({
+          projectId: 'demo-project'
+        });
+        console.log('✅ Firebase Admin initialized for emulator (no credentials needed)');
+
+        // Get Firestore instance
+        this.db = admin.firestore();
+        this.db.settings({
+          ignoreUndefinedProperties: true
+        });
+        this.initialized = true;
+        return true;
       }
 
       // Method 1: Service Account Key File (preferred for local dev)
