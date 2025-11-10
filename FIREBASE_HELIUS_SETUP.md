@@ -217,7 +217,30 @@ ngrok http 3000
 
 ## Local Testing with Firebase Emulator
 
-### 1. Install Firebase Emulator
+### Quick Start (4 Terminals)
+
+For complete local development with real blockchain transactions:
+
+```bash
+# Terminal 1 - Solana Validator
+npm run solana:validator
+
+# Terminal 2 - Firebase Emulator
+npm run firebase:emulator
+
+# Terminal 3 - Server with Firestore
+FIRESTORE_EMULATOR_HOST=localhost:8080 npm run server:dev
+
+# Terminal 4 - Transaction Monitor (watches for hide_treasure transactions)
+npm run dev:monitor
+```
+
+Then perform hide_treasure transactions via the UI, and the complete flow works:
+**Transaction → Monitor → Webhook → Firestore**
+
+### Detailed Setup
+
+#### 1. Install Firebase Emulator
 
 ```bash
 # Login to Firebase
@@ -238,10 +261,10 @@ The project includes `firebase.json` with emulator configuration:
 - Firestore: `localhost:8080`
 - UI: `http://localhost:4000`
 
-### 2. Start Firebase Emulator
+#### 2. Start Firebase Emulator
 
 ```bash
-firebase emulators:start
+npm run firebase:emulator
 ```
 
 You should see:
@@ -250,25 +273,43 @@ You should see:
 ✔  All emulators ready!
 ```
 
-### 3. Configure Server to Use Emulator
-
-Add to `.env`:
-```bash
-FIRESTORE_EMULATOR_HOST=localhost:8080
-```
-
-### 4. Start Your Server
+#### 3. Start Your Server
 
 ```bash
-npm run server
+FIRESTORE_EMULATOR_HOST=localhost:8080 npm run server:dev
 ```
 
 You should see:
 ```
 🔧 Using Firebase Emulator at localhost:8080
-✅ Firebase Admin initialized (Project: your-project)
+✅ Firebase Admin initialized for emulator (no credentials needed)
 Server running at http://localhost:3000/
 ```
+
+#### 4. Start Transaction Monitor (Optional - For Testing Real Transactions)
+
+The transaction monitor watches your local Solana validator for hide_treasure transactions and automatically forwards them to your webhook handler:
+
+```bash
+npm run dev:monitor
+```
+
+You should see:
+```
+🔍 Local Transaction Monitor
+=============================
+   Validator: http://localhost:8899
+   Webhook: http://localhost:3000/api/webhooks/helius
+   Program: 7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh
+   Poll Interval: 2000ms
+
+✅ Connected to validator
+✅ Webhook endpoint is accessible
+
+👀 Monitoring for hide_treasure transactions...
+```
+
+**Note**: The transaction monitor is only for local development. In production, Helius handles transaction monitoring automatically.
 
 ---
 

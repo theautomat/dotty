@@ -41,7 +41,8 @@
       "Bash(firebase:*)",
       "Read(//Users/beau/Projects/chirp/**)",
       "Read(//Users/beau/.cargo/bin/**)",
-      "Read(//Users/beau/.config/solana/**)"
+      "Read(//Users/beau/.config/solana/**)",
+      "Bash(npm run dev:monitor:*)"
     ],
     "deny": [],
     "ask": []

@@ -26,8 +26,11 @@
  * - Firebase emulator: npm run firebase:emulator
  */
 
-import { Connection, PublicKey, ParsedTransactionWithMeta } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import http from "http";
+
+// Type for parsed transaction (inlined to avoid import issues)
+type ParsedTransactionWithMeta = any;
 
 // Configuration
 const VALIDATOR_URL = "http://localhost:8899";
@@ -246,7 +249,7 @@ class LocalTransactionMonitor {
     // Match pre and post balances to find transfers
     for (const post of postBalances) {
       const pre = preBalances.find(
-        (p) =>
+        (p: any) =>
           p.accountIndex === post.accountIndex &&
           p.mint === post.mint
       );
@@ -260,9 +263,9 @@ class LocalTransactionMonitor {
       if (diff > 0) {
         // This account received tokens
         // Find who sent them (account with negative diff for same mint)
-        const sender = postBalances.find((p) => {
+        const sender = postBalances.find((p: any) => {
           const senderPre = preBalances.find(
-            (sp) => sp.accountIndex === p.accountIndex && sp.mint === p.mint
+            (sp: any) => sp.accountIndex === p.accountIndex && sp.mint === p.mint
           );
           if (!senderPre) return false;
           const senderDiff =
