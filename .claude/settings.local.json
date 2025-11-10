@@ -37,7 +37,8 @@
       "Bash(solana confirm:*)",
       "Bash(git push:*)",
       "Bash(git fetch:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(firebase:*)"
     ],
     "deny": [],
     "ask": []
