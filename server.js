@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
-// WebRTC signaling implementation is inline below (removed unused import)
 const { nftService } = require('./nft-service');
 
 // Import TypeScript modules (tsx/ts-node will handle .ts files)
@@ -22,7 +21,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Create HTTP server (needed for socket.io)
+// Create HTTP server
 const server = http.createServer(app);
 
 // Development-only setup with LiveReload
@@ -405,100 +404,6 @@ if (isDev) {
 console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`isDev: ${isDev}`);
 
-// Initialize WebRTC signaling on the same server
-const ENABLE_MULTIPLAYER = true; // Enabled for multiplayer testing
-
-if (ENABLE_MULTIPLAYER) {
-  // Initialize Socket.IO on the same server with debug
-  console.log('Creating Socket.IO server with debug enabled');
-  const socketIO = require('socket.io');
-  
-  const io = socketIO(server, {
-    path: '/socket.io',
-    cors: {
-      origin: '*',
-      methods: ['GET', 'POST']
-    },
-    // Enable debug for Socket.IO
-    debug: true,
-    connectTimeout: 30000
-  });
-  
-  console.log('WebRTC Socket.IO server initialized');
-  
-  // Handle socket connections
-  io.on('connection', (socket) => {
-    console.log(`New WebRTC connection: ${socket.id}`);
-    
-    // Handle room join
-    socket.on('join-room', (data) => {
-      const { roomId, requestPrimary } = data;
-      console.log(`Socket ${socket.id} joining room ${roomId}, requesting primary: ${requestPrimary}`);
-      
-      socket.join(roomId);
-      
-      // For simplicity in testing, always grant primary to first connection in room
-      const room = io.sockets.adapter.rooms.get(roomId);
-      const isFirstInRoom = room && room.size === 1;
-      
-      socket.emit('role-assigned', {
-        isPrimary: isFirstInRoom ? true : false,
-        roomId,
-        peers: [...io.sockets.adapter.rooms.get(roomId) || []].filter(id => id !== socket.id)
-      });
-      
-      // If not first in room, notify existing members
-      if (!isFirstInRoom) {
-        socket.to(roomId).emit('new-peer', {
-          peerId: socket.id,
-          roomId
-        });
-      }
-    });
-    
-    // Handle WebRTC signaling
-    socket.on('offer', (data) => {
-      console.log(`Socket ${socket.id} sending offer to ${data.targetId}`);
-      socket.to(data.targetId).emit('offer', {
-        offer: data.offer,
-        offererId: socket.id
-      });
-    });
-    
-    socket.on('answer', (data) => {
-      console.log(`Socket ${socket.id} sending answer to ${data.targetId}`);
-      socket.to(data.targetId).emit('answer', {
-        answer: data.answer,
-        answererId: socket.id
-      });
-    });
-    
-    socket.on('ice-candidate', (data) => {
-      socket.to(data.targetId).emit('ice-candidate', {
-        candidate: data.candidate,
-        senderId: socket.id
-      });
-    });
-    
-    // Handle disconnection
-    socket.on('disconnect', () => {
-      console.log(`WebRTC connection closed: ${socket.id}`);
-      // Notify all rooms this socket was in
-      socket.rooms.forEach(room => {
-        if (room !== socket.id) {
-          socket.to(room).emit('peer-disconnected', {
-            peerId: socket.id
-          });
-        }
-      });
-    });
-  });
-  
-  console.log('Multiplayer mode enabled');
-} else {
-  console.log('Multiplayer mode disabled');
-}
-
 // Initialize Firebase Admin
 const firebaseInitialized = firebaseAdmin.initialize();
 if (firebaseInitialized) {
@@ -525,11 +430,6 @@ server.listen(PORT, () => {
     console.log(`Open your browser to http://localhost:${PORT}/index.html to play the game`);
   } else {
     console.log(`PRODUCTION MODE: LiveReload is disabled`);
-  }
-
-  if (ENABLE_MULTIPLAYER) {
-    console.log(`WebRTC signaling server running (multiplayer enabled)`);
-    console.log(`To test multiplayer: open one browser normally, then open another with "?join=true" added to URL`);
   }
 
   console.log(`Press Ctrl+C to stop the server`);
