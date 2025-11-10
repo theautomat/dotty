@@ -1,7 +1,7 @@
 {
   "indexes": [
     {
-      "collectionGroup": "treasure-deposits",
+      "collectionGroup": "hidden-treasures",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -9,13 +9,13 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "depositDate",
+          "fieldPath": "hiddenAt",
           "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "treasure-deposits",
+      "collectionGroup": "hidden-treasures",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -23,13 +23,13 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "depositDate",
+          "fieldPath": "hiddenAt",
           "order": "DESCENDING"
         }
       ]
     },
     {
-      "collectionGroup": "treasure-deposits",
+      "collectionGroup": "hidden-treasures",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -41,7 +41,7 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "depositDate",
+          "fieldPath": "hiddenAt",
           "order": "DESCENDING"
         }
       ]

@@ -143,7 +143,7 @@ app.get('/api/nft-status', (req, res) => {
  * Helius Webhook Endpoint
  *
  * This endpoint receives transaction notifications from Helius when:
- * - A user deposits treasure in your Solana program
+ * - A user hides treasure in your Solana program
  * - Any transaction matches your webhook configuration
  *
  * Configuration Steps:
@@ -162,7 +162,7 @@ app.post('/api/webhooks/helius',
 // Webhook health check endpoint
 app.get('/api/webhooks/helius/health', webhookHealthCheck);
 
-// Get active treasure deposits
+// Get active hidden treasures
 app.get('/api/treasures', async (req, res) => {
   try {
     const { limit, tokenType, status } = req.query;
@@ -239,7 +239,7 @@ app.get('/api/treasures/:signature', async (req, res) => {
       });
     }
 
-    const treasure = await treasureService.getTreasureDeposit(signature);
+    const treasure = await treasureService.getHiddenTreasure(signature);
 
     if (!treasure) {
       return res.status(404).json({

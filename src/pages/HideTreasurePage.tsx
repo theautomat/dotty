@@ -1,19 +1,19 @@
 /**
- * Treasure Deposit Page
+ * Hide Treasure Page
  * Example page showing how to use the Solana components
  *
  * To use this page in your app:
  * 1. Import it in your main app file
  * 2. Wrap your app with <WalletProvider>
- * 3. Render this page when user navigates to treasure deposit
+ * 3. Render this page when user navigates to hide treasure
  */
 
 import React from 'react';
 import { WalletProvider } from '../components/solana/WalletProvider';
 import { WalletButton } from '../components/solana/WalletButton';
-import { TreasureDeposit } from '../components/solana/TreasureDeposit';
+import { HideTreasure } from '../components/solana/HideTreasure';
 
-export function TreasureDepositPage() {
+export function HideTreasurePage() {
   // Example token mint address (replace with actual PEPE, BONK, etc.)
   const EXAMPLE_TOKEN_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'; // USDC devnet
 
@@ -27,16 +27,16 @@ export function TreasureDepositPage() {
           <p style={styles.tagline}>Explore • Collect • Mint</p>
         </header>
 
-        <TreasureDeposit tokenMint={EXAMPLE_TOKEN_MINT} />
+        <HideTreasure tokenMint={EXAMPLE_TOKEN_MINT} />
 
         <footer style={styles.footer}>
           <div style={styles.infoCard}>
             <h3 style={styles.infoTitle}>How It Works</h3>
             <ol style={styles.infoList}>
               <li>Connect your Solana wallet (Phantom, Solflare, etc.)</li>
-              <li>Deposit memecoins (PEPE, BONK, or whitelisted tokens)</li>
-              <li>Receive a random monster NFT based on deposit amount</li>
-              <li>Claim your monster and use it in the game!</li>
+              <li>Hide treasure with memecoins (PEPE, BONK, or whitelisted tokens)</li>
+              <li>Other players can find your hidden treasure on the game board</li>
+              <li>Earn premium NFTs and $BOOTY tokens!</li>
             </ol>
           </div>
 

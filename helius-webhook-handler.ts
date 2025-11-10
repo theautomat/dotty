@@ -1,12 +1,12 @@
 import type { Request, Response, NextFunction } from 'express';
 import { treasureService } from './treasure-service';
-import type { TreasureDepositData } from './treasure-service';
+import type { HiddenTreasureData } from './treasure-service';
 
 /**
  * Helius Webhook Handler
  *
  * Handles incoming webhooks from Helius for Solana transaction monitoring.
- * Verifies webhook authenticity and processes treasure deposit transactions.
+ * Verifies webhook authenticity and processes treasure hiding transactions.
  *
  * Helius Webhook Documentation:
  * https://docs.helius.dev/webhooks-and-websockets/webhooks
@@ -82,12 +82,12 @@ export function verifyHeliusAuth(expectedAuthHeader: string | undefined) {
 }
 
 /**
- * Parse Helius webhook payload and extract treasure deposit information
+ * Parse Helius webhook payload and extract hidden treasure information
  *
  * @param heliusPayload - Raw payload from Helius webhook
- * @returns Parsed transaction data or null if not a treasure deposit
+ * @returns Parsed transaction data or null if not a treasure hiding transaction
  */
-export function parseHeliusTransaction(heliusPayload: HeliusTransaction[]): TreasureDepositData | null {
+export function parseHeliusTransaction(heliusPayload: HeliusTransaction[]): HiddenTreasureData | null {
   try {
     // Helius webhook payload structure varies by webhook type
     // Common fields: signature, type, timestamp, events, nativeTransfers, tokenTransfers
@@ -103,7 +103,7 @@ export function parseHeliusTransaction(heliusPayload: HeliusTransaction[]): Trea
 
     // Extract transaction details
     // This is a simplified parser - adjust based on your actual program instructions
-    const transactionData: TreasureDepositData = {
+    const transactionData: HiddenTreasureData = {
       signature,
       walletAddress: '',
       amount: 0,
@@ -134,17 +134,17 @@ export function parseHeliusTransaction(heliusPayload: HeliusTransaction[]): Trea
 
     // Parse program-specific events if available
     if (events && events.length > 0) {
-      // Look for your game program's deposit events
-      const depositEvent = events.find(e =>
-        e.type === 'DEPOSIT' || e.type === 'deposit_for_nft'
+      // Look for your game program's hide treasure events
+      const hideTreasureEvent = events.find(e =>
+        e.type === 'HIDE_TREASURE' || e.type === 'hide_treasure'
       );
 
-      if (depositEvent) {
-        transactionData.programId = depositEvent.programId;
+      if (hideTreasureEvent) {
+        transactionData.programId = hideTreasureEvent.programId;
         // Extract event-specific data
-        if (depositEvent.data) {
-          transactionData.amount = depositEvent.data.amount || transactionData.amount;
-          transactionData.walletAddress = depositEvent.data.wallet || transactionData.walletAddress;
+        if (hideTreasureEvent.data) {
+          transactionData.amount = hideTreasureEvent.data.amount || transactionData.amount;
+          transactionData.walletAddress = hideTreasureEvent.data.wallet || transactionData.walletAddress;
         }
       }
     }
@@ -188,7 +188,7 @@ export async function handleHeliusWebhook(req: Request, res: Response): Promise<
       const parsedTx = parseHeliusTransaction([transaction]);
 
       if (!parsedTx) {
-        console.log('⏭️  Skipping transaction (not a treasure deposit)');
+        console.log('⏭️  Skipping transaction (not a treasure hiding transaction)');
         continue;
       }
 
@@ -202,11 +202,11 @@ export async function handleHeliusWebhook(req: Request, res: Response): Promise<
         return;
       }
 
-      // Save treasure deposit
-      const result = await treasureService.saveTreasureDeposit(parsedTx);
+      // Save hidden treasure
+      const result = await treasureService.saveHiddenTreasure(parsedTx);
       results.push(result);
 
-      console.log(`✅ Processed treasure deposit: ${parsedTx.signature}`);
+      console.log(`✅ Processed hidden treasure: ${parsedTx.signature}`);
     }
 
     // Respond to Helius

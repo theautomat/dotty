@@ -1,9 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read access to all treasure deposits
-    match /treasure-deposits/{signature} {
-      // Anyone can read treasure deposits
+    // Allow read access to all hidden treasures
+    match /hidden-treasures/{signature} {
+      // Anyone can read hidden treasures
       allow read: if true;
 
       // Only server (via Firebase Admin SDK) can write

@@ -1,6 +1,6 @@
 /**
  * Treasure Hiding Component
- * UI for hiding treasure (depositing tokens into the vault)
+ * UI for hiding treasure on the game board for other players to find
  */
 
 import React, { useState, useEffect } from 'react';
@@ -209,7 +209,7 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>🏴‍☠️ Hide Treasure</h2>
-      <p style={styles.subtitle}>Hide treasure by depositing tokens into the vault</p>
+      <p style={styles.subtitle}>Hide treasure on the game board - other players can find it!</p>
 
       {/* Balance Display */}
       <div style={styles.balanceCard}>
@@ -218,7 +218,7 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
       </div>
 
       {/* Hide Treasure Form */}
-      <div style={styles.depositCard}>
+      <div style={styles.treasureCard}>
         <label style={styles.label}>
           Amount to Hide (min. 100 tokens)
           <input
@@ -235,7 +235,7 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
           onClick={handleHideTreasure}
           disabled={isHiding || amount < 100}
           style={{
-            ...styles.depositButton,
+            ...styles.hideButton,
             opacity: (isHiding || amount < 100) ? 0.6 : 1,
             cursor: (isHiding || amount < 100) ? 'not-allowed' : 'pointer',
           }}
@@ -290,7 +290,7 @@ const styles = {
     fontWeight: 'bold',
   } as React.CSSProperties,
 
-  depositCard: {
+  treasureCard: {
     background: '#fff',
     border: '2px solid #e0e0e0',
     borderRadius: '12px',
@@ -349,7 +349,7 @@ const styles = {
     fontStyle: 'italic' as const,
   } as React.CSSProperties,
 
-  depositButton: {
+  hideButton: {
     width: '100%',
     padding: '16px',
     fontSize: '18px',
@@ -383,7 +383,7 @@ const styles = {
     fontStyle: 'italic' as const,
   } as React.CSSProperties,
 
-  depositRecord: {
+  treasureRecord: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
