@@ -1,0 +1,15 @@
+{
+  "ignore": [
+    "test-ledger/**",
+    "test-validator.log",
+    "node_modules/**",
+    "dist/**",
+    ".git/**"
+  ],
+  "watch": [
+    "server.js",
+    "src/**/*.ts",
+    "src/**/*.js"
+  ],
+  "ext": "js,ts,json"
+}
