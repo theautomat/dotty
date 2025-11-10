@@ -11,6 +11,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Allow read access to treasures collection (used by TreasureGalleryPage)
+    match /treasures/{signature} {
+      // Anyone can read hidden treasures
+      allow read: if true;
+
+      // Only server (via Firebase Admin SDK) can write
+      // Admin SDK bypasses these rules
+      allow write: if false;
+    }
+
     // Allow read access to game stats
     match /games/{gameId} {
       // Anyone can read game stats

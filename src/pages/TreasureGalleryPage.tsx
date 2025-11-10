@@ -44,6 +44,7 @@ export function TreasureGalleryPage() {
   const [treasures, setTreasures] = useState<Treasure[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Fetch treasures from Firebase
   useEffect(() => {
@@ -51,6 +52,13 @@ export function TreasureGalleryPage() {
       try {
         setLoading(true);
         setError(null);
+
+        // Check if Firebase is properly initialized
+        if (!db) {
+          throw new Error('Firebase is not initialized. Please check your .env file and ensure all VITE_FIREBASE_* variables are set.');
+        }
+
+        console.log('📡 Fetching treasures from Firebase...');
 
         const treasuresRef = collection(db, 'treasures');
         const constraints: QueryConstraint[] = [
@@ -68,16 +76,37 @@ export function TreasureGalleryPage() {
 
         setTreasures(data);
         console.log(`✅ Fetched ${data.length} treasures from Firebase`);
+
+        if (data.length === 0) {
+          console.log('ℹ️ No treasures found in Firebase. Try hiding some treasures first!');
+        }
       } catch (err) {
         console.error('❌ Error fetching treasures:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch treasures');
+
+        // Provide more helpful error messages
+        let errorMessage = 'Failed to fetch treasures';
+
+        if (err instanceof Error) {
+          errorMessage = err.message;
+
+          // Check for common Firebase errors
+          if (err.message.includes('Missing or insufficient permissions')) {
+            errorMessage = 'Firebase permission error. Please check your Firestore security rules.';
+          } else if (err.message.includes('PERMISSION_DENIED')) {
+            errorMessage = 'Permission denied. Please check your Firebase configuration and security rules.';
+          } else if (err.message.includes('not initialized')) {
+            errorMessage = 'Firebase not configured. Please set up your .env file with Firebase credentials.';
+          }
+        }
+
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
     }
 
     fetchTreasures();
-  }, []);
+  }, [retryCount]);
 
   // Calculate stats from fetched treasures
   const stats: TreasureStats = useMemo(() => {
@@ -287,10 +316,75 @@ export function TreasureGalleryPage() {
 
         {/* Error State */}
         {error && !loading && (
-          <div className="bg-red-500/10 backdrop-blur-md rounded-lg p-12 border border-red-500/30 text-center">
-            <div className="text-6xl mb-4">❌</div>
-            <h3 className="text-xl font-semibold text-red-300 mb-2">Error loading treasures</h3>
-            <p className="text-gray-400">{error}</p>
+          <div className="bg-red-500/10 backdrop-blur-md rounded-lg p-12 border border-red-500/30">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4">❌</div>
+              <h3 className="text-xl font-semibold text-red-300 mb-2">Error loading treasures</h3>
+              <p className="text-gray-400 mb-4">{error}</p>
+            </div>
+
+            {/* Show helpful instructions for common errors */}
+            {error.includes('not initialized') || error.includes('not configured') ? (
+              <div className="bg-black/30 rounded-lg p-6 text-left max-w-2xl mx-auto">
+                <h4 className="text-lg font-semibold text-purple-300 mb-3">
+                  🛠️ Setup Instructions
+                </h4>
+                <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+                  <li>
+                    Copy <code className="bg-gray-800 px-2 py-1 rounded">.env.example</code> to{' '}
+                    <code className="bg-gray-800 px-2 py-1 rounded">.env</code>
+                  </li>
+                  <li>Fill in your Firebase credentials from the Firebase Console</li>
+                  <li>Make sure all VITE_FIREBASE_* variables are set</li>
+                  <li>Restart the development server</li>
+                </ol>
+                <div className="mt-4 p-3 bg-purple-500/10 rounded border border-purple-500/30">
+                  <p className="text-xs text-purple-200">
+                    💡 Tip: Get your Firebase credentials from{' '}
+                    <a
+                      href="https://console.firebase.google.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-purple-400 hover:text-purple-300 underline"
+                    >
+                      Firebase Console
+                    </a>{' '}
+                    → Project Settings → General
+                  </p>
+                </div>
+              </div>
+            ) : error.includes('permission') || error.includes('PERMISSION_DENIED') ? (
+              <div className="bg-black/30 rounded-lg p-6 text-left max-w-2xl mx-auto">
+                <h4 className="text-lg font-semibold text-purple-300 mb-3">
+                  🔒 Firestore Security Rules
+                </h4>
+                <p className="text-gray-300 text-sm mb-3">
+                  Your Firestore security rules may be blocking read access. Update your rules to allow reading
+                  the treasures collection:
+                </p>
+                <pre className="bg-gray-900 p-4 rounded text-xs text-green-400 overflow-x-auto">
+                  {`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /treasures/{treasure} {
+      allow read: if true;  // Allow public read access
+      allow write: if false; // Restrict writes
+    }
+  }
+}`}
+                </pre>
+              </div>
+            ) : null}
+
+            {/* Retry Button */}
+            <div className="text-center mt-6">
+              <Button
+                onClick={() => setRetryCount(c => c + 1)}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold"
+              >
+                🔄 Retry
+              </Button>
+            </div>
           </div>
         )}
 
@@ -326,7 +420,7 @@ export function TreasureGalleryPage() {
 }
 
 // Treasure Card Component
-function TreasureCard({ treasure }: { treasure: TreasureDeposit }) {
+function TreasureCard({ treasure }: { treasure: Treasure }) {
   const statusConfig = {
     active: {
       color: 'from-green-500/20 to-emerald-500/20',
