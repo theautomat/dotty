@@ -832,8 +832,20 @@ npm start           # Serve production build
 ### Run Backend
 
 ```bash
-npm run dev         # Express server with nodemon
+npm run server  # Express server with nodemon
 ```
+
+For testing Helius webhooks locally, you'll need ngrok:
+
+```bash
+# Terminal 1: Start server
+npm run server
+
+# Terminal 2: Expose localhost
+ngrok http 3001
+```
+
+Then configure Helius webhook with the ngrok HTTPS URL.
 
 ## NFT Types
 

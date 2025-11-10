@@ -33,7 +33,11 @@
       "Bash(cargo uninstall:*)",
       "Bash(cargo generate-lockfile:*)",
       "Bash(npm run dev:local:*)",
-      "Bash(npx ts-node:*)"
+      "Bash(npx ts-node:*)",
+      "Bash(solana confirm:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
