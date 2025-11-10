@@ -235,7 +235,7 @@ pub mod game {
     }
 
     /// Mine (mint) $BOOTY tokens for a player
-    /// Called when a player buries treasure - rewards them with BOOTY based on deposit amount
+    /// Called when a player buries treasure - rewards them with BOOTY based on hidden treasure amount
     pub fn mine_booty(
         ctx: Context<MineBooty>,
         amount: u64,

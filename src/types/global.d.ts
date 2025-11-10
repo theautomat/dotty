@@ -10,8 +10,6 @@ declare global {
   interface Window {
     THREE: typeof THREE;
     game?: Game;
-    io?: any; // Socket.IO client
-    ENABLE_MULTIPLAYER?: boolean;
     GAME_INITIALIZING?: boolean;
     LEADERBOARD_PAGE?: boolean;
     solana?: {
