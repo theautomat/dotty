@@ -14,7 +14,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "NODE_ENV=development nodemon --exec tsx server.js",
-    "server:dev": "NODE_ENV=development tsx watch --clear-screen=false --exclude 'test-ledger/**' --exclude '*.log' server.js",
+    "server:dev": "NODE_ENV=development tsx watch --clear-screen=false server.js 2>&1 | grep -v 'Saw change' | grep -v 'test-ledger'",
     "server:prod": "NODE_ENV=production tsx server.js",
     "heroku-postbuild": "npm run build",
     "test:solana": "cd solana && anchor test",
