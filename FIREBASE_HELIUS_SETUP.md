@@ -217,9 +217,20 @@ ngrok http 3000
 
 ## Local Testing with Firebase Emulator
 
-### Quick Start (4 Terminals)
+### Quick Start - Automated (Recommended)
 
-For complete local development with real blockchain transactions:
+Run everything with one command:
+```bash
+npm run dev:all YOUR_PHANTOM_WALLET_ADDRESS
+```
+
+This starts all 6 services (validator, setup, Firebase emulator, server, vite, monitor) automatically. Press Ctrl+C to stop all services.
+
+See `LOCAL-DEV-SETUP.md` for full details.
+
+### Quick Start - Manual (4 Terminals)
+
+If you prefer to run services manually, for complete local development with real blockchain transactions:
 
 ```bash
 # Terminal 1 - Solana Validator

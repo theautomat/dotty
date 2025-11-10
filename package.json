@@ -21,6 +21,7 @@
     "test:solana:local": "cd solana && anchor test --skip-deploy",
     "test:solana:devnet": "cd solana && anchor test --provider.cluster devnet",
     "dev:local": "./scripts/dev-local.sh",
+    "dev:all": "./scripts/dev-all.sh",
     "solana:validator": "./scripts/start-local-validator.sh",
     "solana:setup": "./scripts/setup-local-test.sh",
     "solana:analyze": "./scripts/analyze-blockchain.sh",

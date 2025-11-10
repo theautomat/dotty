@@ -2,7 +2,26 @@
 
 ## Overview
 
-Currently, local development requires running **6 separate services** in different terminals. This document explains what each one does and the order to start them.
+Local development requires running **6 separate services**. You have two options:
+
+### Option 1: Automated (Recommended)
+Run everything with a single command:
+```bash
+npm run dev:all YOUR_PHANTOM_WALLET_ADDRESS
+```
+
+This automatically:
+- Starts Solana validator (if not running)
+- Runs dev:local setup
+- Starts Firebase emulator
+- Starts Express server
+- Starts Vite dev server
+- Starts transaction monitor
+
+Press Ctrl+C to stop all services.
+
+### Option 2: Manual (6 Terminals)
+If you need fine-grained control or want to see individual service logs, you can run each service separately. See below for details.
 
 ---
 
