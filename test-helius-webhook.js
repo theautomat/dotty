@@ -22,7 +22,7 @@ const getArg = (name, defaultValue) => {
 
 // Configuration
 const SERVER_HOST = getArg('host', 'localhost');
-const SERVER_PORT = getArg('port', '3001');
+const SERVER_PORT = getArg('port', '3000');
 const AMOUNT = parseFloat(getArg('amount', '100'));
 const TOKEN = getArg('token', 'TEST');
 const WALLET = getArg('wallet', 'DemoWallet123456789ABCDEFGHIJK');
