@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 type TreasureStatus = 'active' | 'claimed' | 'expired';
 type TokenType = string;
 
-interface TreasureDeposit {
+interface Treasure {
   id: string;
   txSignature: string;
   walletAddress: string;
@@ -41,7 +41,7 @@ export function TreasureGalleryPage() {
   const [selectedToken, setSelectedToken] = useState<TokenType | 'all'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [searchTerm, setSearchTerm] = useState('');
-  const [treasures, setTreasures] = useState<TreasureDeposit[]>([]);
+  const [treasures, setTreasures] = useState<Treasure[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +52,7 @@ export function TreasureGalleryPage() {
         setLoading(true);
         setError(null);
 
-        const treasuresRef = collection(db, 'treasureDeposits');
+        const treasuresRef = collection(db, 'treasures');
         const constraints: QueryConstraint[] = [
           orderBy('hiddenAt', 'desc'),
           limit(1000)
@@ -64,7 +64,7 @@ export function TreasureGalleryPage() {
         const data = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        })) as TreasureDeposit[];
+        })) as Treasure[];
 
         setTreasures(data);
         console.log(`✅ Fetched ${data.length} treasures from Firebase`);

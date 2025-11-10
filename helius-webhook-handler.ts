@@ -1,12 +1,12 @@
 import type { Request, Response, NextFunction } from 'express';
 import { treasureService } from './treasure-service';
-import type { TreasureDepositData } from './treasure-service';
+import type { TreasureData } from './treasure-service';
 
 /**
  * Helius Webhook Handler
  *
  * Handles incoming webhooks from Helius for Solana transaction monitoring.
- * Verifies webhook authenticity and processes treasure deposit transactions.
+ * Verifies webhook authenticity and processes hidden treasure transactions.
  *
  * Helius Webhook Documentation:
  * https://docs.helius.dev/webhooks-and-websockets/webhooks
@@ -96,7 +96,7 @@ export function verifyHeliusAuth(expectedAuthHeader: string | undefined) {
  * @param heliusPayload - Raw payload from Helius webhook
  * @returns Parsed transaction data or null if not a hideTreasure transaction
  */
-export function parseHeliusTransaction(heliusPayload: HeliusTransaction[]): TreasureDepositData | null {
+export function parseHeliusTransaction(heliusPayload: HeliusTransaction[]): TreasureData | null {
   try {
     const GAME_PROGRAM_ID = '7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh';
 
@@ -237,7 +237,7 @@ export async function handleHeliusWebhook(req: Request, res: Response): Promise<
       }
 
       // Save hidden treasure
-      const result = await treasureService.saveTreasureDeposit(parsedTx);
+      const result = await treasureService.saveTreasure(parsedTx);
       results.push(result);
 
       console.log(`✅ Processed hidden treasure: ${parsedTx.signature}`);

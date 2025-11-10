@@ -8,7 +8,7 @@ import type { Firestore } from 'firebase-admin/firestore';
  * Stores treasure transactions in Firestore with complete transaction metadata.
  */
 
-export interface TreasureDepositData {
+export interface TreasureData {
   signature: string;
   walletAddress: string;
   amount: number;
@@ -23,7 +23,7 @@ export interface TreasureDepositData {
   };
 }
 
-export interface TreasureDeposit {
+export interface Treasure {
   // Transaction identifiers
   txSignature: string;
   walletAddress: string;
@@ -65,7 +65,7 @@ export interface TreasureUpdateData {
 }
 
 class TreasureService {
-  private readonly collectionName = 'treasureDeposits';
+  private readonly collectionName = 'treasures';
 
   /**
    * Get Firestore instance
@@ -80,15 +80,15 @@ class TreasureService {
   }
 
   /**
-   * Save a treasure deposit transaction from Helius webhook
+   * Save a hidden treasure from Helius webhook
    *
    * @param transactionData - Transaction data from Helius webhook
    * @returns Saved document reference
    */
-  async saveTreasureDeposit(transactionData: TreasureDepositData): Promise<{
+  async saveTreasure(transactionData: TreasureData): Promise<{
     success: boolean;
     id: string;
-    treasureDeposit: TreasureDeposit;
+    treasure: Treasure;
   }> {
     try {
       const db = this._getDb();
@@ -105,7 +105,7 @@ class TreasureService {
       }
 
       // Prepare treasure document
-      const treasureDeposit: TreasureDeposit = {
+      const treasure: Treasure = {
         // Transaction identifiers
         txSignature: transactionData.signature,
         walletAddress: transactionData.walletAddress,
@@ -137,24 +137,24 @@ class TreasureService {
       await db
         .collection(this.collectionName)
         .doc(transactionData.signature) // Use signature as document ID for idempotency
-        .set(treasureDeposit, { merge: true }); // Merge to handle duplicate webhooks
+        .set(treasure, { merge: true }); // Merge to handle duplicate webhooks
 
       console.log(`✅ Hidden treasure saved: ${transactionData.signature}`);
 
       return {
         success: true,
         id: transactionData.signature,
-        treasureDeposit
+        treasure
       };
 
     } catch (error) {
-      console.error('❌ Error saving treasure deposit:', error);
+      console.error('❌ Error saving treasure:', error);
       throw error;
     }
   }
 
   /**
-   * Update treasure deposit status
+   * Update treasure status
    *
    * @param signature - Transaction signature
    * @param status - New status (active, claimed, expired)
@@ -192,7 +192,7 @@ class TreasureService {
         .doc(signature)
         .update(updates);
 
-      console.log(`✅ Hidden treasure updated: ${signature} -> ${status}`);
+      console.log(`✅ Treasure updated: ${signature} -> ${status}`);
 
       return {
         success: true,
@@ -201,18 +201,18 @@ class TreasureService {
       };
 
     } catch (error) {
-      console.error('❌ Error updating treasure deposit:', error);
+      console.error('❌ Error updating treasure:', error);
       throw error;
     }
   }
 
   /**
-   * Get treasure deposit by transaction signature
+   * Get treasure by transaction signature
    *
    * @param signature - Transaction signature
-   * @returns Treasure deposit or null
+   * @returns Treasure or null
    */
-  async getTreasureDeposit(signature: string): Promise<(TreasureDeposit & { id: string }) | null> {
+  async getTreasure(signature: string): Promise<(Treasure & { id: string }) | null> {
     try {
       const db = this._getDb();
 
@@ -227,22 +227,22 @@ class TreasureService {
 
       return {
         id: doc.id,
-        ...doc.data() as TreasureDeposit
+        ...doc.data() as Treasure
       };
 
     } catch (error) {
-      console.error('❌ Error getting treasure deposit:', error);
+      console.error('❌ Error getting treasure:', error);
       throw error;
     }
   }
 
   /**
-   * Get all active treasure deposits
+   * Get all active treasures
    *
    * @param filters - Optional filters
-   * @returns Array of treasure deposits
+   * @returns Array of treasures
    */
-  async getActiveTreasures(filters: TreasureFilters = {}): Promise<Array<TreasureDeposit & { id: string }>> {
+  async getActiveTreasures(filters: TreasureFilters = {}): Promise<Array<Treasure & { id: string }>> {
     try {
       const db = this._getDb();
       const {
@@ -264,11 +264,11 @@ class TreasureService {
 
       const snapshot = await query.get();
 
-      const treasures: Array<TreasureDeposit & { id: string }> = [];
+      const treasures: Array<Treasure & { id: string }> = [];
       snapshot.forEach(doc => {
         treasures.push({
           id: doc.id,
-          ...doc.data() as TreasureDeposit
+          ...doc.data() as Treasure
         });
       });
 
@@ -285,12 +285,12 @@ class TreasureService {
    *
    * @param walletAddress - Wallet address
    * @param filters - Optional filters
-   * @returns Array of treasure deposits
+   * @returns Array of treasures
    */
   async getTreasuresByWallet(
     walletAddress: string,
     filters: Omit<TreasureFilters, 'status'> = {}
-  ): Promise<Array<TreasureDeposit & { id: string }>> {
+  ): Promise<Array<Treasure & { id: string }>> {
     try {
       const db = this._getDb();
       const { limit = 100 } = filters;
@@ -302,11 +302,11 @@ class TreasureService {
         .limit(limit)
         .get();
 
-      const treasures: Array<TreasureDeposit & { id: string }> = [];
+      const treasures: Array<Treasure & { id: string }> = [];
       snapshot.forEach(doc => {
         treasures.push({
           id: doc.id,
-          ...doc.data() as TreasureDeposit
+          ...doc.data() as Treasure
         });
       });
 
