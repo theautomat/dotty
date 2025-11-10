@@ -4,30 +4,31 @@ import type { Firestore } from 'firebase-admin/firestore';
 /**
  * Treasure Transaction Service
  *
- * Handles storage and retrieval of hidden treasure triggered by Helius webhooks.
+ * Handles storage and retrieval of hidden treasure transactions triggered by Helius webhooks.
  * Stores treasure transactions in Firestore with complete transaction metadata.
  */
 
-export interface HiddenTreasureData {
+export interface TreasureData {
   signature: string;
   walletAddress: string;
   amount: number;
   tokenType?: string;
-  metadata?: Record<string, any>;
-  coordinates?: { x: number; y: number };
-  blockTime?: number;
-  slot?: number;
-  fee?: number;
-  programId?: string;
+  metadata?: {
+    blockTime?: number;
+    slot?: number;
+    fee?: number;
+    programId?: string;
+    treasureRecordPda?: string;
+    [key: string]: any;
+  };
 }
 
-export interface HiddenTreasure {
+export interface Treasure {
   // Transaction identifiers
   txSignature: string;
-  hiddenBy: string;
   walletAddress: string;
 
-  // Hidden treasure details
+  // Treasure details
   amount: number;
   tokenType: string;
 
@@ -38,21 +39,16 @@ export interface HiddenTreasure {
   hiddenAt: string;
   createdAt: string;
   updatedAt: string;
-  claimDate?: string;
+  claimedAt?: string;
   claimedBy?: string;
 
-  // Game coordinates (secret location hash in real game)
-  hiddenLocation: { x: number; y: number };
-
-  // Monster type based on amount
-  monsterType: string;
-
-  // Additional metadata from Helius
-  metadata?: {
-    blockTime?: number | null;
-    slot?: number | null;
-    fee?: number | null;
-    programId?: string | null;
+  // Blockchain metadata
+  metadata: {
+    blockTime: number | null;
+    slot: number | null;
+    fee: number | null;
+    programId: string | null;
+    treasureRecordPda: string;
     [key: string]: any;
   };
 }
@@ -69,7 +65,7 @@ export interface TreasureUpdateData {
 }
 
 class TreasureService {
-  private readonly collectionName = 'hidden-treasures';
+  private readonly collectionName = 'treasures';
 
   /**
    * Get Firestore instance
@@ -84,15 +80,15 @@ class TreasureService {
   }
 
   /**
-   * Save a hidden treasure transaction from Helius webhook
+   * Save a hidden treasure from Helius webhook
    *
    * @param transactionData - Transaction data from Helius webhook
    * @returns Saved document reference
    */
-  async saveHiddenTreasure(transactionData: HiddenTreasureData): Promise<{
+  async saveTreasure(transactionData: TreasureData): Promise<{
     success: boolean;
     id: string;
-    hiddenTreasure: HiddenTreasure;
+    treasure: Treasure;
   }> {
     try {
       const db = this._getDb();
@@ -108,14 +104,13 @@ class TreasureService {
         throw new Error('Amount is required');
       }
 
-      // Prepare hidden treasure document
-      const hiddenTreasure: HiddenTreasure = {
+      // Prepare treasure document
+      const treasure: Treasure = {
         // Transaction identifiers
         txSignature: transactionData.signature,
-        hiddenBy: transactionData.walletAddress,
         walletAddress: transactionData.walletAddress,
 
-        // Hidden treasure details
+        // Treasure details
         amount: transactionData.amount,
         tokenType: transactionData.tokenType || 'SOL',
 
@@ -127,18 +122,13 @@ class TreasureService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
 
-        // Game coordinates (secret location hash - will be assigned by game logic)
-        hiddenLocation: transactionData.coordinates || { x: 0, y: 0 },
-
-        // Monster type based on amount (game logic can override)
-        monsterType: this._determineMonsterType(transactionData.amount),
-
-        // Additional metadata from Helius
+        // Blockchain metadata
         metadata: {
-          blockTime: transactionData.blockTime || null,
-          slot: transactionData.slot || null,
-          fee: transactionData.fee || null,
-          programId: transactionData.programId || null,
+          blockTime: transactionData.metadata?.blockTime || null,
+          slot: transactionData.metadata?.slot || null,
+          fee: transactionData.metadata?.fee || null,
+          programId: transactionData.metadata?.programId || null,
+          treasureRecordPda: transactionData.metadata?.treasureRecordPda || '',
           ...transactionData.metadata
         }
       };
@@ -147,18 +137,18 @@ class TreasureService {
       await db
         .collection(this.collectionName)
         .doc(transactionData.signature) // Use signature as document ID for idempotency
-        .set(hiddenTreasure, { merge: true }); // Merge to handle duplicate webhooks
+        .set(treasure, { merge: true }); // Merge to handle duplicate webhooks
 
       console.log(`✅ Hidden treasure saved: ${transactionData.signature}`);
 
       return {
         success: true,
         id: transactionData.signature,
-        hiddenTreasure
+        treasure
       };
 
     } catch (error) {
-      console.error('❌ Error saving hidden treasure:', error);
+      console.error('❌ Error saving treasure:', error);
       throw error;
     }
   }
@@ -191,7 +181,7 @@ class TreasureService {
 
       // If claimed, add claim timestamp and claimer
       if (status === 'claimed') {
-        updates.claimDate = new Date().toISOString();
+        updates.claimedAt = new Date().toISOString();
         if (updateData.claimedBy) {
           updates.claimedBy = updateData.claimedBy;
         }
@@ -217,12 +207,12 @@ class TreasureService {
   }
 
   /**
-   * Get hidden treasure by transaction signature
+   * Get treasure by transaction signature
    *
    * @param signature - Transaction signature
-   * @returns Hidden treasure or null
+   * @returns Treasure or null
    */
-  async getHiddenTreasure(signature: string): Promise<(HiddenTreasure & { id: string }) | null> {
+  async getTreasure(signature: string): Promise<(Treasure & { id: string }) | null> {
     try {
       const db = this._getDb();
 
@@ -237,22 +227,22 @@ class TreasureService {
 
       return {
         id: doc.id,
-        ...doc.data() as HiddenTreasure
+        ...doc.data() as Treasure
       };
 
     } catch (error) {
-      console.error('❌ Error getting hidden treasure:', error);
+      console.error('❌ Error getting treasure:', error);
       throw error;
     }
   }
 
   /**
-   * Get all active hidden treasures
+   * Get all active treasures
    *
    * @param filters - Optional filters
-   * @returns Array of hidden treasures
+   * @returns Array of treasures
    */
-  async getActiveTreasures(filters: TreasureFilters = {}): Promise<Array<HiddenTreasure & { id: string }>> {
+  async getActiveTreasures(filters: TreasureFilters = {}): Promise<Array<Treasure & { id: string }>> {
     try {
       const db = this._getDb();
       const {
@@ -274,11 +264,11 @@ class TreasureService {
 
       const snapshot = await query.get();
 
-      const treasures: Array<HiddenTreasure & { id: string }> = [];
+      const treasures: Array<Treasure & { id: string }> = [];
       snapshot.forEach(doc => {
         treasures.push({
           id: doc.id,
-          ...doc.data() as HiddenTreasure
+          ...doc.data() as Treasure
         });
       });
 
@@ -295,12 +285,12 @@ class TreasureService {
    *
    * @param walletAddress - Wallet address
    * @param filters - Optional filters
-   * @returns Array of hidden treasures
+   * @returns Array of treasures
    */
   async getTreasuresByWallet(
     walletAddress: string,
     filters: Omit<TreasureFilters, 'status'> = {}
-  ): Promise<Array<HiddenTreasure & { id: string }>> {
+  ): Promise<Array<Treasure & { id: string }>> {
     try {
       const db = this._getDb();
       const { limit = 100 } = filters;
@@ -312,11 +302,11 @@ class TreasureService {
         .limit(limit)
         .get();
 
-      const treasures: Array<HiddenTreasure & { id: string }> = [];
+      const treasures: Array<Treasure & { id: string }> = [];
       snapshot.forEach(doc => {
         treasures.push({
           id: doc.id,
-          ...doc.data() as HiddenTreasure
+          ...doc.data() as Treasure
         });
       });
 
@@ -326,19 +316,6 @@ class TreasureService {
       console.error('❌ Error getting treasures by wallet:', error);
       throw error;
     }
-  }
-
-  /**
-   * Determine monster type based on treasure amount
-   * @private
-   * @param amount - Treasure amount
-   * @returns Monster type string
-   */
-  private _determineMonsterType(amount: number): string {
-    if (amount >= 10) return 'dragon';
-    if (amount >= 5) return 'ogre';
-    if (amount >= 1) return 'goblin';
-    return 'slime';
   }
 
   /**

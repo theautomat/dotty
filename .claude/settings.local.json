@@ -34,7 +34,14 @@
       "Bash(cargo generate-lockfile:*)",
       "Bash(npm run dev:local:*)",
       "Bash(npx ts-node:*)",
-      "Bash(git merge:*)"
+      "Bash(solana confirm:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(firebase:*)",
+      "Read(//Users/beau/Projects/chirp/**)",
+      "Read(//Users/beau/.cargo/bin/**)",
+      "Read(//Users/beau/.config/solana/**)"
     ],
     "deny": [],
     "ask": []

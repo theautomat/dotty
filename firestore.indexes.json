@@ -1,7 +1,7 @@
 {
   "indexes": [
     {
-      "collectionGroup": "hidden-treasures",
+      "collectionGroup": "treasureDeposits",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "collectionGroup": "hidden-treasures",
+      "collectionGroup": "treasureDeposits",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "collectionGroup": "hidden-treasures",
+      "collectionGroup": "treasureDeposits",
       "queryScope": "COLLECTION",
       "fields": [
         {

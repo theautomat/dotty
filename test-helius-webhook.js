@@ -23,8 +23,8 @@ const getArg = (name, defaultValue) => {
 // Configuration
 const SERVER_HOST = getArg('host', 'localhost');
 const SERVER_PORT = getArg('port', '3000');
-const AMOUNT = parseFloat(getArg('amount', '2.5'));
-const TOKEN = getArg('token', 'SOL');
+const AMOUNT = parseFloat(getArg('amount', '100'));
+const TOKEN = getArg('token', 'TEST');
 const WALLET = getArg('wallet', 'DemoWallet123456789ABCDEFGHIJK');
 const AUTH_HEADER = process.env.HELIUS_WEBHOOK_AUTH_HEADER || 'test-auth-secret';
 

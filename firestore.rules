@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Allow read access to all hidden treasures
-    match /hidden-treasures/{signature} {
+    match /treasureDeposits/{signature} {
       // Anyone can read hidden treasures
       allow read: if true;
 

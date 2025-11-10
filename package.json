@@ -14,6 +14,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "NODE_ENV=development nodemon --exec tsx server.js",
+    "server:dev": "NODE_ENV=development tsx watch server.js",
     "server:prod": "NODE_ENV=production tsx server.js",
     "heroku-postbuild": "npm run build",
     "test:solana": "cd solana && anchor test",
@@ -23,7 +24,9 @@
     "solana:validator": "./scripts/start-local-validator.sh",
     "solana:setup": "./scripts/setup-local-test.sh",
     "solana:analyze": "./scripts/analyze-blockchain.sh",
-    "solana:test-ui": "echo 'Open http://localhost:3000/hide-treasure-test.html in your browser' && npm run server:prod"
+    "solana:test-ui": "echo 'Open http://localhost:3000/hide-treasure-test.html in your browser' && npm run server:prod",
+    "firebase:emulator": "firebase emulators:start --only firestore --project demo-project",
+    "test:webhook": "node test-helius-webhook.js"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
