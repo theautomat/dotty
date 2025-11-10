@@ -70,12 +70,6 @@ class Game {
     isMobile?: boolean;
     timerDisplay?: any;
 
-    // WebRTC (disabled but keep properties for compatibility)
-    webRTCEnabled?: boolean;
-    lastStateSync?: number;
-    stateSyncInterval?: number;
-    webRTCClient?: any;
-
     constructor() {
         // Game variables
         this.scene = null;
@@ -142,11 +136,6 @@ class Game {
      * Initialize the game
      */
     async init(): Promise<void> {
-        // WebRTC disabled - multiplayer removed
-        this.webRTCEnabled = false;
-        this.lastStateSync = 0;
-        this.stateSyncInterval = 33;
-
         // Initialize Preact help menu
         initHelpMenu();
 

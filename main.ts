@@ -1,7 +1,6 @@
 // main.ts - Entry point for Vite
 import * as THREE from 'three';
 import { Game } from './src/game/index';
-import { io } from 'socket.io-client';
 import './src/styles/globals.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -11,8 +10,6 @@ import { MetadataPanel } from './src/components/MetadataPanel';
 declare global {
   interface Window {
     THREE: typeof THREE;
-    ENABLE_MULTIPLAYER: boolean;
-    io: typeof io;
     LEADERBOARD_PAGE?: boolean;
     GAME_INITIALIZING?: boolean;
     game?: Game;
@@ -20,12 +17,6 @@ declare global {
 }
 
 window.THREE = THREE;
-
-// Enable WebRTC multiplayer
-window.ENABLE_MULTIPLAYER = true;
-
-// Make Socket.IO available for WebRTC
-window.io = io;
 
 // Initialize game on DOM load
 document.addEventListener('DOMContentLoaded', async () => {
