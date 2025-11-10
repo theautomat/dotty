@@ -176,7 +176,11 @@ class Game {
         this.scene.background = new THREE.Color(0x000000);
 
         // DOTTY: Top-down orthographic camera looking down at the world
-        const aspect = window.innerWidth / window.innerHeight;
+        // Account for right panel width if it's open at initialization
+        const PANEL_WIDTH = 320;
+        const isPanelOpenAtInit = gameStore.getState().isRightPanelOpen;
+        const initialWidth = isPanelOpenAtInit ? window.innerWidth - PANEL_WIDTH : window.innerWidth;
+        const aspect = initialWidth / window.innerHeight;
         const viewSize = 50;
         this.camera = new THREE.OrthographicCamera(
             -viewSize * aspect,
@@ -432,9 +436,16 @@ class Game {
             width = isPanelOpen ? tempWidth - PANEL_WIDTH : tempWidth;
         }
 
-        // Update camera aspect ratio based on available viewport
+        // Update OrthographicCamera frustum to maintain square aspect ratio
         if (this.camera) {
-            (this.camera as any).aspect = width / height;
+            const aspect = width / height;
+            const viewSize = this.camera.top; // Get current viewSize from camera frustum
+
+            // Recalculate frustum bounds with new aspect ratio to keep squares square
+            this.camera.left = -viewSize * aspect;
+            this.camera.right = viewSize * aspect;
+            // top and bottom stay the same (maintain vertical viewSize)
+
             this.camera.updateProjectionMatrix();
         }
 
