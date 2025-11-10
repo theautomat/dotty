@@ -34,6 +34,9 @@ import enemyManager from '../managers/EnemyManager';
 import ASCIIEffect from '../effects/ASCIIEffect.js';
 
 class Game {
+    // Constants
+    private static readonly PANEL_WIDTH = 320; // w-80 in Tailwind = 20rem = 320px
+
     scene: THREE.Scene | null;
     camera: THREE.OrthographicCamera | null;
     renderer: THREE.WebGLRenderer | null;
@@ -177,9 +180,8 @@ class Game {
 
         // DOTTY: Top-down orthographic camera looking down at the world
         // Account for right panel width if it's open at initialization
-        const PANEL_WIDTH = 320;
         const isPanelOpenAtInit = gameStore.getState().isRightPanelOpen;
-        const initialWidth = isPanelOpenAtInit ? window.innerWidth - PANEL_WIDTH : window.innerWidth;
+        const initialWidth = isPanelOpenAtInit ? window.innerWidth - Game.PANEL_WIDTH : window.innerWidth;
         const aspect = initialWidth / window.innerHeight;
         const viewSize = 50;
         this.camera = new THREE.OrthographicCamera(
@@ -228,9 +230,8 @@ class Game {
 
         // Initial size will be set by onWindowResize() call below
         // This ensures consistent sizing logic between init and resize
-        const PANEL_WIDTH = 320;
         const isPanelOpen = gameStore.getState().isRightPanelOpen;
-        const initialWidth = isPanelOpen ? window.innerWidth - PANEL_WIDTH : window.innerWidth;
+        const initialWidth = isPanelOpen ? window.innerWidth - Game.PANEL_WIDTH : window.innerWidth;
         this.renderer.setSize(initialWidth, window.innerHeight);
 
         document.body.appendChild(this.renderer.domElement);
@@ -419,7 +420,6 @@ class Game {
      * Handle window resizing
      */
     onWindowResize(): void {
-        const PANEL_WIDTH = 320; // w-80 in Tailwind = 20rem = 320px
         const isPanelOpen = gameStore.getState().isRightPanelOpen;
 
         let width = window.innerWidth;
@@ -427,7 +427,7 @@ class Game {
 
         // Subtract panel width from available space when panel is open
         if (isPanelOpen) {
-            width -= PANEL_WIDTH;
+            width -= Game.PANEL_WIDTH;
         }
 
         if (this.isMobile && window.innerHeight > window.innerWidth) {
