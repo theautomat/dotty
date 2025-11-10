@@ -48,7 +48,53 @@ fi
 echo ""
 
 # ============================================================================
-# 2. BUILD PROGRAM
+# 2. CHECK ANCHOR VERSION
+# ============================================================================
+echo "🔧 Checking Anchor version..."
+
+# Get installed anchor version
+ANCHOR_VERSION=$(anchor --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+REQUIRED_VERSION="0.28.0"
+
+if [ -z "$ANCHOR_VERSION" ]; then
+    echo -e "${RED}✗${NC} Anchor CLI not found"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Please install Anchor CLI version $REQUIRED_VERSION"
+    echo ""
+    echo "Option 1 - Using cargo (requires Rust 1.75.0):"
+    echo "  rustup install 1.75.0"
+    echo "  rustup override set 1.75.0"
+    echo "  cargo install --git https://github.com/coral-xyz/anchor --tag v0.28.0 anchor-cli --locked --force"
+    echo ""
+    echo "Option 2 - Using avm (Anchor Version Manager):"
+    echo "  avm install 0.28.0"
+    echo "  avm use 0.28.0"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    exit 1
+elif [ "$ANCHOR_VERSION" != "$REQUIRED_VERSION" ]; then
+    echo -e "${RED}✗${NC} Anchor version mismatch"
+    echo "  Current version: $ANCHOR_VERSION"
+    echo "  Required version: $REQUIRED_VERSION"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "This project requires Anchor $REQUIRED_VERSION"
+    echo ""
+    echo "To install the correct version:"
+    echo "  cargo install --git https://github.com/coral-xyz/anchor --tag v0.28.0 anchor-cli --locked --force"
+    echo ""
+    echo "Or with avm:"
+    echo "  avm install 0.28.0 && avm use 0.28.0"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    exit 1
+else
+    echo -e "${GREEN}✓${NC} Anchor $ANCHOR_VERSION installed"
+fi
+
+echo ""
+
+# ============================================================================
+# 3. BUILD PROGRAM
 # ============================================================================
 echo "🔨 Building game program (Solana smart contract)..."
 
@@ -70,132 +116,51 @@ cp programs/game/target/deploy/game.so target/deploy/
 echo ""
 
 # ============================================================================
-# 3. GENERATE IDL
+# 4. GENERATE IDL
 # ============================================================================
 echo "📝 Generating IDL file (interface definition for frontend)..."
 
 # Create IDL directory if it doesn't exist
 mkdir -p target/idl
 
-# Try to generate IDL with anchor
-if anchor idl build -p game 2>/dev/null; then
+# Remove old IDL file to avoid version conflicts
+rm -f target/idl/game.json
+
+# Generate IDL with anchor - fail if it doesn't work
+# Anchor 0.28.0 uses 'parse' instead of 'build'
+if anchor idl parse -f programs/game/src/lib.rs -o target/idl/game.json; then
     echo -e "${GREEN}✓${NC} IDL generated with anchor → solana/target/idl/game.json"
 else
-    echo -e "${YELLOW}⚠${NC} anchor idl build failed, creating IDL manually..."
-
-    # Create a basic IDL from the program
-    # This is a minimal IDL that matches the game program
-    cat > target/idl/game.json << 'EOF'
-{
-  "version": "0.1.0",
-  "name": "game",
-  "instructions": [
-    {
-      "name": "hideTreasure",
-      "accounts": [
-        {
-          "name": "depositor",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "depositorTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vaultTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "amount",
-          "type": "u64"
-        }
-      ]
-    },
-    {
-      "name": "initializeVault",
-      "accounts": [
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": []
-    }
-  ],
-  "accounts": [
-    {
-      "name": "TreasureVault",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "totalDeposits",
-            "type": "u64"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          }
-        ]
-      }
-    }
-  ]
-}
-EOF
-    echo -e "${GREEN}✓${NC} IDL created manually → solana/target/idl/game.json"
+    echo -e "${RED}✗${NC} IDL generation failed!"
+    echo ""
+    echo "This usually means:"
+    echo "  - The Rust code has compilation errors"
+    echo "  - Anchor version is incompatible"
+    echo "  - Missing dependencies"
+    echo ""
+    echo "Try running 'cd solana && anchor build' to see the actual error"
+    exit 1
 fi
 
 echo ""
 
 # ============================================================================
-# 4. DEPLOY PROGRAM
+# 5. DEPLOY PROGRAM
 # ============================================================================
 echo "🚀 Deploying game program to local validator..."
 
 solana config set --url http://localhost:8899 > /dev/null 2>&1
 
-# Deploy program and suppress verbose output
-if solana program deploy target/deploy/game.so --url http://localhost:8899 > /dev/null 2>&1; then
-    PROGRAM_ID=$(solana address -k programs/game/target/deploy/game-keypair.json)
+# Deploy program with specific keypair to ensure consistent program ID
+if solana program deploy target/deploy/game.so --url http://localhost:8899 --program-id programs/game/target/deploy/game-keypair.json > deploy_output.txt 2>&1; then
+    # Extract the actual program ID from deployment output
+    PROGRAM_ID=$(grep "Program Id:" deploy_output.txt | awk '{print $3}')
+    rm deploy_output.txt
     echo -e "${GREEN}✓${NC} Game program deployed to blockchain address: $PROGRAM_ID"
 else
     echo -e "${RED}✗${NC} Deployment failed, showing errors:"
-    solana program deploy target/deploy/game.so --url http://localhost:8899
+    cat deploy_output.txt
+    rm deploy_output.txt
     exit 1
 fi
 
@@ -216,7 +181,22 @@ fi
 echo ""
 
 # ============================================================================
-# 5. CREATE TEST TOKEN
+# 6. INITIALIZE VAULT
+# ============================================================================
+echo "🏦 Initializing treasure vault (admin setup)..."
+
+# Save token mint to temp file for vault initialization
+if [ ! -z "$1" ]; then
+    # We'll initialize vault after creating token, but prepare now
+    echo "  → Will initialize vault after token creation"
+else
+    echo -e "${YELLOW}⚠${NC} Skipping vault initialization (no wallet address provided)"
+fi
+
+echo ""
+
+# ============================================================================
+# 7. CREATE TEST TOKEN
 # ============================================================================
 echo "🪙 Creating test SPL token (TREASURE token for game testing)..."
 
@@ -239,6 +219,36 @@ else
     if [ -f ".test-token-mint" ]; then
         TOKEN_MINT=$(cat .test-token-mint)
         echo -e "${GREEN}✓${NC} Test token mint address (used by frontend): $TOKEN_MINT"
+        echo ""
+
+        # Fund wallet with SOL for transaction fees
+        echo "💰 Funding wallet with SOL (for transaction fees)..."
+        echo "  → Target wallet: $WALLET_ADDRESS"
+        echo "  → Checking current balance..."
+
+        # Check balance before airdrop
+        BALANCE_BEFORE=$(solana balance "$WALLET_ADDRESS" --url http://localhost:8899 2>/dev/null || echo "0")
+        echo "  → Current balance: $BALANCE_BEFORE"
+
+        # Perform airdrop with error handling
+        echo "  → Requesting 10 SOL airdrop..."
+        if solana airdrop 10 "$WALLET_ADDRESS" --url http://localhost:8899; then
+            sleep 2  # Wait for transaction to process
+
+            # Verify the airdrop succeeded
+            BALANCE_AFTER=$(solana balance "$WALLET_ADDRESS" --url http://localhost:8899 2>/dev/null || echo "0")
+            echo -e "${GREEN}✓${NC} Wallet funded with 10 SOL"
+            echo "  → New balance: $BALANCE_AFTER"
+            echo ""
+            echo -e "${YELLOW}⚠${NC}  IMPORTANT: Make sure Phantom is connected to 'Localhost' network"
+            echo "     In Phantom: Settings → Developer Settings → Change Network → Localhost"
+        else
+            echo -e "${RED}✗${NC} Airdrop failed!"
+            echo "  This might be normal if the wallet already has SOL"
+            BALANCE_AFTER=$(solana balance "$WALLET_ADDRESS" --url http://localhost:8899 2>/dev/null || echo "unknown")
+            echo "  Current balance: $BALANCE_AFTER"
+        fi
+        echo ""
 
         # Update config file with program ID and token mint
         cd ..
@@ -257,29 +267,24 @@ export const SOLANA_CONFIG = {
 };
 EOL
         echo -e "${GREEN}✓${NC} Config updated with program ID and token mint"
-        cd solana  # Go back to solana directory to maintain consistency
+
+        # Initialize vault now that we have a token
+        echo ""
+        echo "🏦 Initializing treasure vault with token..."
+        # We're already at project root from line 254
+
+        # Run vault initialization (suppress stderr warnings but keep important output)
+        if npx ts-node scripts/initialize-vault.ts "$TOKEN_MINT" 2>&1 | grep -v "bigint:" | grep -v "MODULE_TYPELESS_PACKAGE_JSON" | grep -v "Use \`node" | grep -v "Reparsing as ES"; then
+            echo -e "${GREEN}✓${NC} Vault initialized and ready for treasure hiding"
+        else
+            echo -e "${RED}✗${NC} Vault initialization failed (run manually if needed)"
+        fi
     else
         echo -e "${RED}✗${NC} Token creation failed"
         TOKEN_MINT="(creation failed)"
     fi
 fi
 
-echo ""
-
-# ============================================================================
-# 6. CHECK VITE SETUP
-# ============================================================================
-echo "🔍 Checking Vite setup..."
-
-# Go back to root directory to check vite config
-cd ..
-
-if [ ! -f "vite.config.mts" ]; then
-    echo -e "${RED}✗${NC} vite.config.mts not found"
-    exit 1
-fi
-
-echo -e "${GREEN}✓${NC} Vite config found"
 echo ""
 
 # ============================================================================

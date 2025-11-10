@@ -8,7 +8,7 @@ use anchor_spl::{
     token::{self, mint_to, Mint, MintTo, Token, TokenAccount, Transfer, Burn, burn},
 };
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh");
 
 #[program]
 pub mod game {

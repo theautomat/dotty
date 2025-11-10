@@ -26,7 +26,7 @@
     "solana:test-ui": "echo 'Open http://localhost:3000/hide-treasure-test.html in your browser' && npm run server:prod"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.30.1",
+    "@coral-xyz/anchor": "^0.28.0",
     "@fingerprintjs/fingerprintjs-pro": "^3.8.1",
     "@solana/spl-token": "^0.4.8",
     "@solana/wallet-adapter-base": "^0.9.23",

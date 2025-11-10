@@ -4,15 +4,18 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useConnection, useWallet, useAnchorWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import * as anchor from '@coral-xyz/anchor';
 import { Program, AnchorProvider, Idl } from '@coral-xyz/anchor';
 import { TOKEN_PROGRAM_ID, getAccount, getAssociatedTokenAddress } from '@solana/spl-token';
 
 // Import IDL and config
-import gameIdl from '../../../solana/target/idl/game.json';
+import gameIdlJson from '../../../solana/target/idl/game.json';
 import { SOLANA_CONFIG } from '../../config/solana';
+
+// Parse IDL to ensure it's a plain object
+const gameIdl = JSON.parse(JSON.stringify(gameIdlJson));
 
 interface HideTreasureProps {
   tokenMint?: string; // Token mint address (PEPE, BONK, etc.)
@@ -20,7 +23,8 @@ interface HideTreasureProps {
 
 export function HideTreasure({ tokenMint }: HideTreasureProps) {
   const { connection } = useConnection();
-  const { publicKey, sendTransaction, wallet } = useWallet();
+  const { publicKey } = useWallet();
+  const anchorWallet = useAnchorWallet();
 
   const [amount, setAmount] = useState<number>(100);
   const [tokenBalance, setTokenBalance] = useState<number>(0);
@@ -49,7 +53,7 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
 
 
   const handleHideTreasure = async () => {
-    if (!publicKey || !wallet || !tokenMint) {
+    if (!publicKey || !anchorWallet || !tokenMint) {
       alert('Please connect your wallet first!');
       return;
     }
@@ -62,8 +66,7 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
     // DEBUG: Log wallet connection status
     console.log('=== DEBUG: Wallet Connection ===');
     console.log('publicKey:', publicKey?.toString());
-    console.log('wallet:', wallet);
-    console.log('wallet.adapter:', wallet?.adapter);
+    console.log('anchorWallet:', anchorWallet);
     console.log('tokenMint:', tokenMint);
 
     // DEBUG: Log config values
@@ -77,55 +80,105 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
     console.log('gameIdl:', gameIdl);
     console.log('gameIdl type:', typeof gameIdl);
     console.log('gameIdl has metadata?:', 'metadata' in gameIdl);
+    console.log('gameIdl.metadata:', (gameIdl as any).metadata);
+    console.log('gameIdl.metadata.address:', (gameIdl as any).metadata?.address);
+    console.log('gameIdl.metadata.address type:', typeof (gameIdl as any).metadata?.address);
 
     setIsHiding(true);
 
     try {
-      // Create Anchor provider
+      // Create Anchor provider with useAnchorWallet hook (proper Anchor interface)
       console.log('=== DEBUG: Creating Provider ===');
+      console.log('Connection endpoint:', connection.rpcEndpoint);
+      console.log('Anchor wallet publicKey:', anchorWallet.publicKey.toString());
+
       const provider = new AnchorProvider(
         connection,
-        wallet.adapter as any,
+        anchorWallet,
         { commitment: 'confirmed' }
       );
       console.log('Provider created:', provider);
+      console.log('Provider.connection.rpcEndpoint:', provider.connection.rpcEndpoint);
+      console.log('Provider.wallet.publicKey:', provider.wallet.publicKey.toString());
 
-      // Get program ID first
-      console.log('=== DEBUG: Creating Program ID ===');
-      const programId = new PublicKey(SOLANA_CONFIG.PROGRAM_ID);
-      console.log('programId:', programId.toString());
-      console.log('programId type:', typeof programId);
-      console.log('programId._bn:', programId.toBuffer());
-
-      // Load program with IDL and explicit program ID
+      // Load program with IDL - extract programId from metadata first
       console.log('=== DEBUG: Creating Program ===');
-      console.log('About to call: new Program(gameIdl, programId, provider)');
-      console.log('  - gameIdl:', typeof gameIdl, gameIdl);
-      console.log('  - programId:', programId.toString());
-      console.log('  - provider:', provider);
+      console.log('About to extract programId from IDL metadata...');
 
-      const program = new Program(gameIdl as Idl, programId, provider);
-      console.log('Program created successfully:', program);
+      // Extract programId explicitly
+      const programIdString = (gameIdl as any).metadata?.address;
+      console.log('  - programId from IDL:', programIdString);
+
+      if (!programIdString) {
+        throw new Error('Program ID not found in IDL metadata');
+      }
+
+      const programIdPubkey = new PublicKey(programIdString);
+      console.log('  - programId as PublicKey:', programIdPubkey.toString());
+
+      // Create Program with ONLY idl and provider (programId is in IDL metadata)
+      let program: Program<Idl>;
+      try {
+        console.log('  - Attempting to create Program with 2 params (IDL has programId in metadata)...');
+        console.log('  - Parameters:');
+        console.log('    - IDL name:', (gameIdl as any).name);
+        console.log('    - IDL programId from metadata:', programIdString);
+
+        // Create program with explicit programId (Anchor 0.28.0 doesn't read from metadata)
+        program = new Program(gameIdl as any, programIdPubkey, provider);
+
+        console.log('  - ✓ Program created successfully!');
+        console.log('  - Program.programId:', program.programId.toString());
+      } catch (e: any) {
+        console.error('  - ✗ Failed to create Program:', e.message);
+        console.error('  - Error stack:', e.stack);
+        throw e;
+      }
 
       // Derive PDAs
+      console.log('=== DEBUG: Deriving PDAs ===');
       const [vaultPda] = PublicKey.findProgramAddressSync(
         [Buffer.from('vault')],
-        programId
+        program.programId
       );
+      console.log('  - Vault PDA:', vaultPda.toString());
+
+      // Generate unique treasure ID using timestamp
+      const treasureId = new anchor.BN(Date.now());
+      console.log('  - Treasure ID:', treasureId.toString());
+
+      // Derive treasure_record PDA
+      const [treasureRecordPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('treasure'),
+          publicKey.toBuffer(),
+          treasureId.toArrayLike(Buffer, 'le', 8)
+        ],
+        program.programId
+      );
+      console.log('  - Treasure Record PDA:', treasureRecordPda.toString());
 
       // Get token accounts
       const mint = new PublicKey(tokenMint);
-      const depositorTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
+      const playerTokenAccount = await getAssociatedTokenAddress(mint, publicKey);
       const vaultTokenAccount = await getAssociatedTokenAddress(mint, vaultPda, true);
+
+      console.log('=== DEBUG: Token Accounts ===');
+      console.log('  - Player token account:', playerTokenAccount.toString());
+      console.log('  - Vault token account:', vaultTokenAccount.toString());
 
       // Call hideTreasure instruction using Anchor
       const tx = await program.methods
-        .hideTreasure(new anchor.BN(amount * 1_000_000))
+        .hideTreasure(
+          new anchor.BN(amount * 1_000_000),
+          treasureId
+        )
         .accounts({
-          depositor: publicKey,
-          vault: vaultPda,
-          depositorTokenAccount,
+          player: publicKey,
+          playerTokenAccount,
           vaultTokenAccount,
+          vault: vaultPda,
+          treasureRecord: treasureRecordPda,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: anchor.web3.SystemProgram.programId,
         })

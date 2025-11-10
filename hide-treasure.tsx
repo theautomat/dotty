@@ -15,6 +15,10 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 const network = WalletAdapterNetwork.Devnet;
 const endpoint = 'http://localhost:8899'; // Local validator
 
+console.log('=== APP CONFIG ===');
+console.log('Network:', network);
+console.log('Endpoint:', endpoint);
+
 const wallets = [new PhantomWalletAdapter()];
 
 function App() {
