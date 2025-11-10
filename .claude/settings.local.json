@@ -42,7 +42,10 @@
       "Read(//Users/beau/Projects/chirp/**)",
       "Read(//Users/beau/.cargo/bin/**)",
       "Read(//Users/beau/.config/solana/**)",
-      "Bash(npm run dev:monitor:*)"
+      "Bash(npm run dev:monitor:*)",
+      "Bash(npx tsx watch:*)",
+      "Bash(NODE_ENV=development timeout 10 npx tsx:*)",
+      "Bash(npm run dev:all:*)"
     ],
     "deny": [],
     "ask": []

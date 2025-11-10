@@ -8,5 +8,5 @@ export const SOLANA_CONFIG = {
   PROGRAM_ID: '7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh',
 
   // Test token mint - updated by dev:local script
-  TEST_TOKEN_MINT: 'BGaUS185TbJ3qfPuDFAtKXg2RDGeTRC3NEnPJuB44Ee8',
+  TEST_TOKEN_MINT: 'AwY6h4Cw2L7wrNyEGeUmRq4pgzUBxvXQEfpDtxubskUF',
 };
