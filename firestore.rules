@@ -3,8 +3,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Allow read access to all hidden treasures
     match /treasureDeposits/{signature} {
-      // Anyone can read hidden treasures
-      allow read: if true;
+      // Anyone can read hidden treasures (get single doc, list collection)
+      allow get, list: if true;
 
       // Only server (via Firebase Admin SDK) can write
       // Admin SDK bypasses these rules
@@ -13,8 +13,8 @@ service cloud.firestore {
 
     // Allow read access to treasures collection (used by TreasureGalleryPage)
     match /treasures/{signature} {
-      // Anyone can read hidden treasures
-      allow read: if true;
+      // Anyone can read hidden treasures (get single doc, list collection)
+      allow get, list: if true;
 
       // Only server (via Firebase Admin SDK) can write
       // Admin SDK bypasses these rules
@@ -23,8 +23,8 @@ service cloud.firestore {
 
     // Allow read access to game stats
     match /games/{gameId} {
-      // Anyone can read game stats
-      allow read: if true;
+      // Anyone can read game stats (get single doc, list collection)
+      allow get, list: if true;
 
       // Only authenticated users can write their own game stats
       allow write: if request.auth != null;
