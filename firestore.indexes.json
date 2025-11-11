@@ -45,6 +45,52 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "treasures",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "hiddenAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "treasures",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "walletAddress",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "hiddenAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "treasures",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "tokenType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "hiddenAt",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []
