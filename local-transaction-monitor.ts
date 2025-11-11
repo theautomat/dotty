@@ -3,8 +3,11 @@
 /**
  * Local Transaction Monitor (Development Only)
  *
- * This service monitors the local Solana validator for hide_treasure transactions
- * and forwards them to the webhook handler in Helius format.
+ * Also known as "Helius Simulator" - simulates Helius webhook behavior locally
+ *
+ * This service monitors the local Solana validator for game program transactions
+ * (hide_treasure and search_treasure) and forwards them to the webhook handler
+ * in Helius format.
  *
  * ⚠️  LOCAL DEVELOPMENT ONLY ⚠️
  * In production, Helius handles transaction monitoring and webhook delivery.
@@ -12,10 +15,12 @@
  *
  * How it works:
  * 1. Polls localhost:8899 every 2 seconds for new transactions
- * 2. Filters for hide_treasure instruction calls on the game program
+ * 2. Filters for game program instruction calls (hide_treasure, search_treasure)
  * 3. Fetches full transaction details
  * 4. Formats as Helius-style webhook payload
- * 5. POSTs to http://localhost:3000/api/webhooks/helius
+ * 5. POSTs to appropriate webhook endpoint
+ *    - Hide transactions → http://localhost:3000/api/webhooks/helius
+ *    - Search transactions → http://localhost:3000/api/webhooks/search
  *
  * Usage:
  *   npm run dev:monitor
@@ -34,10 +39,16 @@ type ParsedTransactionWithMeta = any;
 
 // Configuration
 const VALIDATOR_URL = "http://localhost:8899";
-const WEBHOOK_URL = "http://localhost:3000/api/webhooks/helius";
+const HIDE_WEBHOOK_URL = "http://localhost:3000/api/webhooks/helius";
+const SEARCH_WEBHOOK_URL = "http://localhost:3000/api/webhooks/search";
 const PROGRAM_ID = new PublicKey("7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh");
 const POLL_INTERVAL = 2000; // 2 seconds
 const AUTH_HEADER = process.env.HELIUS_WEBHOOK_AUTH_HEADER || "test-auth-secret";
+
+enum TransactionType {
+  HIDE_TREASURE = "HIDE_TREASURE",
+  SEARCH_TREASURE = "SEARCH_TREASURE",
+}
 
 interface TokenTransfer {
   fromUserAccount: string;
@@ -60,10 +71,11 @@ class LocalTransactionMonitor {
    * Start monitoring the local validator
    */
   async start() {
-    console.log("🔍 Local Transaction Monitor");
-    console.log("=============================");
+    console.log("🔍 Local Transaction Monitor (Helius Simulator)");
+    console.log("================================================");
     console.log(`   Validator: ${VALIDATOR_URL}`);
-    console.log(`   Webhook: ${WEBHOOK_URL}`);
+    console.log(`   Hide Webhook: ${HIDE_WEBHOOK_URL}`);
+    console.log(`   Search Webhook: ${SEARCH_WEBHOOK_URL}`);
     console.log(`   Program: ${PROGRAM_ID.toString()}`);
     console.log(`   Poll Interval: ${POLL_INTERVAL}ms`);
     console.log("");
@@ -88,7 +100,7 @@ class LocalTransactionMonitor {
     }
 
     this.isRunning = true;
-    console.log("👀 Monitoring for hide_treasure transactions...\n");
+    console.log("👀 Monitoring for game program transactions (hide_treasure, search_treasure)...\n");
 
     // Start polling loop
     this.pollLoop();
@@ -173,7 +185,7 @@ class LocalTransactionMonitor {
   }
 
   /**
-   * Process a transaction and send to webhook if it's hide_treasure
+   * Process a transaction and send to webhook if it's a game program transaction
    */
   private async processTransaction(signature: string) {
     try {
@@ -188,49 +200,117 @@ class LocalTransactionMonitor {
         return;
       }
 
-      // Check if this is a hide_treasure transaction
-      if (!this.isHideTreasureTransaction(tx)) {
-        return;
+      // Determine transaction type
+      const txType = this.getTransactionType(tx);
+
+      if (!txType) {
+        return; // Not a game program transaction
       }
 
-      console.log(`💎 Found hide_treasure transaction: ${signature}`);
+      if (txType === TransactionType.HIDE_TREASURE) {
+        console.log(`💎 Found hide_treasure transaction: ${signature}`);
 
-      // Extract token transfers
-      const tokenTransfers = this.extractTokenTransfers(tx);
+        // Extract token transfers
+        const tokenTransfers = this.extractTokenTransfers(tx);
 
-      if (tokenTransfers.length === 0) {
-        console.log(`   ⚠️  No token transfers found`);
-        return;
+        if (tokenTransfers.length === 0) {
+          console.log(`   ⚠️  No token transfers found`);
+          return;
+        }
+
+        // Create Helius-style webhook payload
+        const payload = this.createHideWebhookPayload(tx, signature, tokenTransfers);
+
+        // Send to hide webhook
+        await this.sendToWebhook(payload, HIDE_WEBHOOK_URL);
+
+        console.log(`   ✅ Forwarded to hide webhook handler`);
+
+      } else if (txType === TransactionType.SEARCH_TREASURE) {
+        console.log(`🔍 Found search_treasure transaction: ${signature}`);
+
+        // Extract coordinates from logs
+        const coordinates = this.extractSearchCoordinates(tx);
+
+        if (!coordinates) {
+          console.log(`   ⚠️  Could not extract coordinates`);
+          return;
+        }
+
+        console.log(`   📍 Coordinates: (${coordinates.x}, ${coordinates.y})`);
+
+        // Create search webhook payload
+        const payload = this.createSearchWebhookPayload(tx, signature, coordinates);
+
+        // Send to search webhook
+        await this.sendToWebhook(payload, SEARCH_WEBHOOK_URL);
+
+        console.log(`   ✅ Forwarded to search webhook handler`);
       }
-
-      // Create Helius-style webhook payload
-      const payload = this.createWebhookPayload(tx, signature, tokenTransfers);
-
-      // Send to webhook
-      await this.sendToWebhook(payload);
-
-      console.log(`   ✅ Forwarded to webhook handler`);
     } catch (error) {
       console.error(`   ❌ Error processing transaction ${signature}:`, error);
     }
   }
 
   /**
-   * Check if transaction is a hide_treasure call
+   * Determine transaction type (hide or search)
    */
-  private isHideTreasureTransaction(tx: ParsedTransactionWithMeta): boolean {
+  private getTransactionType(tx: ParsedTransactionWithMeta): TransactionType | null {
     const instructions = tx.transaction.message.instructions;
 
     for (const ix of instructions) {
       // Check if instruction is from our program
       if ("programId" in ix && ix.programId.equals(PROGRAM_ID)) {
-        // For parsed instructions, check if it includes "hideTreasure" pattern
-        // For unparsed, we just know it's our program
-        return true;
+        // Check logs to determine instruction type
+        const logs = tx.meta?.logMessages || [];
+
+        for (const log of logs) {
+          if (log.includes("Player hiding") || log.includes("Treasure hidden")) {
+            return TransactionType.HIDE_TREASURE;
+          }
+          if (log.includes("Player searching") || log.includes("Search recorded")) {
+            return TransactionType.SEARCH_TREASURE;
+          }
+        }
+
+        // If we can't determine from logs, check if there are token transfers
+        // (hide transactions always have token transfers, search transactions don't)
+        if (tx.meta?.preTokenBalances && tx.meta?.postTokenBalances) {
+          const hasTokenTransfers = tx.meta.preTokenBalances.length > 0 ||
+                                   tx.meta.postTokenBalances.length > 0;
+          if (hasTokenTransfers) {
+            return TransactionType.HIDE_TREASURE;
+          } else {
+            return TransactionType.SEARCH_TREASURE;
+          }
+        }
+
+        // Default to hide if we can't determine
+        return TransactionType.HIDE_TREASURE;
       }
     }
 
-    return false;
+    return null;
+  }
+
+  /**
+   * Extract search coordinates from transaction logs
+   */
+  private extractSearchCoordinates(tx: ParsedTransactionWithMeta): { x: number; y: number } | null {
+    const logs = tx.meta?.logMessages || [];
+
+    for (const log of logs) {
+      // Look for log message like: "Player searching for treasure at coordinates (10, 20)"
+      const match = log.match(/coordinates \((-?\d+),\s*(-?\d+)\)/);
+      if (match) {
+        return {
+          x: parseInt(match[1], 10),
+          y: parseInt(match[2], 10),
+        };
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -290,9 +370,9 @@ class LocalTransactionMonitor {
   }
 
   /**
-   * Create Helius-style webhook payload
+   * Create Helius-style webhook payload for hide transactions
    */
-  private createWebhookPayload(
+  private createHideWebhookPayload(
     tx: ParsedTransactionWithMeta,
     signature: string,
     tokenTransfers: TokenTransfer[]
@@ -343,16 +423,72 @@ class LocalTransactionMonitor {
   }
 
   /**
+   * Create Helius-style webhook payload for search transactions
+   */
+  private createSearchWebhookPayload(
+    tx: ParsedTransactionWithMeta,
+    signature: string,
+    coordinates: { x: number; y: number }
+  ) {
+    const feePayer = tx.transaction.message.accountKeys[0].pubkey.toString();
+
+    return [
+      {
+        signature,
+        type: "UNKNOWN",
+        timestamp: tx.blockTime || Math.floor(Date.now() / 1000),
+        slot: tx.slot,
+        fee: tx.meta?.fee || 5000,
+        feePayer,
+
+        // Native transfers (empty for search)
+        nativeTransfers: [],
+
+        // Token transfers (none for search)
+        tokenTransfers: [],
+
+        // Account data
+        accountData: [
+          {
+            account: feePayer,
+            nativeBalanceChange: -(tx.meta?.fee || 5000),
+            tokenBalanceChanges: [],
+          },
+        ],
+
+        // Description
+        description: `Treasure search at (${coordinates.x}, ${coordinates.y})`,
+
+        // Events (program-specific)
+        events: [
+          {
+            type: "SEARCH_TREASURE",
+            programId: PROGRAM_ID.toString(),
+            data: {
+              wallet: feePayer,
+              x: coordinates.x,
+              y: coordinates.y,
+            },
+          },
+        ],
+      },
+    ];
+  }
+
+  /**
    * Send payload to webhook endpoint
    */
-  private async sendToWebhook(payload: any): Promise<void> {
+  private async sendToWebhook(payload: any, webhookUrl: string): Promise<void> {
     return new Promise((resolve, reject) => {
       const payloadStr = JSON.stringify(payload);
 
+      // Parse the webhook URL to get path
+      const url = new URL(webhookUrl);
+
       const options = {
-        hostname: "localhost",
-        port: 3000,
-        path: "/api/webhooks/helius",
+        hostname: url.hostname,
+        port: parseInt(url.port) || 3000,
+        path: url.pathname,
         method: "POST",
         headers: {
           "Content-Type": "application/json",

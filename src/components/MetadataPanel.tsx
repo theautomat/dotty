@@ -3,6 +3,8 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { getPlotMetadata, type PlotMetadata } from '@/data/mockPlotData';
 import { useGameStore } from '@/store/gameStore';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useSearchTreasure } from '@/hooks/useSearchTreasure';
 
 interface MetadataPanelProps {
   plotNumber?: number;
@@ -15,6 +17,12 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) 
   const gridPosition = useGameStore((state) => state.gridPosition);
   const setRightPanelOpen = useGameStore((state) => state.setRightPanelOpen);
   const { x, y } = gridPosition;
+
+  // Wallet connection
+  const { connected } = useWallet();
+
+  // Search treasure hook
+  const { searchTreasure, isSearching, error } = useSearchTreasure();
 
   // Sync panel state with store and trigger canvas resize
   useEffect(() => {
@@ -100,6 +108,27 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) 
                 <p className="text-xl font-bold text-white">
                   ({x}, {y})
                 </p>
+              </div>
+
+              {/* Search Button */}
+              <div>
+                <Button
+                  onClick={() => searchTreasure(x, y)}
+                  disabled={!connected || isSearching}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSearching ? 'Searching...' : 'Search Here'}
+                </Button>
+                {!connected && (
+                  <p className="text-xs text-gray-400 mt-2">
+                    Connect your wallet to search
+                  </p>
+                )}
+                {error && (
+                  <p className="text-xs text-red-400 mt-2">
+                    {error}
+                  </p>
+                )}
               </div>
 
               {/* Plot Number */}

@@ -21,6 +21,16 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Allow read access to map searches collection
+    match /map_searches/{signature} {
+      // Anyone can read map searches (get single doc, list collection)
+      allow get, list: if true;
+
+      // Only server (via Firebase Admin SDK) can write
+      // Admin SDK bypasses these rules
+      allow write: if false;
+    }
+
     // Allow read access to game stats
     match /games/{gameId} {
       // Anyone can read game stats (get single doc, list collection)

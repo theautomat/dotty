@@ -7,11 +7,16 @@ const { nftService } = require('./nft-service');
 // Import TypeScript modules (tsx/ts-node will handle .ts files)
 const { firebaseAdmin } = require('./firebase-admin-config.ts');
 const { treasureService } = require('./treasure-service.ts');
+const { searchService } = require('./search-service.ts');
 const {
   verifyHeliusAuth,
   handleHeliusWebhook,
   webhookHealthCheck
 } = require('./helius-webhook-handler.ts');
+const {
+  handleSearchWebhook,
+  searchWebhookHealthCheck
+} = require('./search-webhook-handler.ts');
 
 // Create Express app
 const app = express();
@@ -161,6 +166,31 @@ app.post('/api/webhooks/helius',
 // Webhook health check endpoint
 app.get('/api/webhooks/helius/health', webhookHealthCheck);
 
+// ============================================================================
+// SEARCH WEBHOOK ENDPOINTS
+// ============================================================================
+
+/**
+ * Search Webhook Endpoint
+ *
+ * This endpoint receives search transaction notifications from the local
+ * transaction monitor (Helius simulator) when:
+ * - A user searches for treasure at specific coordinates
+ *
+ * For local development only - simulates Helius webhook behavior
+ */
+app.post('/api/webhooks/search',
+  verifyHeliusAuth(process.env.HELIUS_WEBHOOK_AUTH_HEADER),
+  handleSearchWebhook
+);
+
+// Search webhook health check endpoint
+app.get('/api/webhooks/search/health', searchWebhookHealthCheck);
+
+// ============================================================================
+// TREASURE API ENDPOINTS
+// ============================================================================
+
 // Get active hidden treasures
 app.get('/api/treasures', async (req, res) => {
   try {
@@ -302,6 +332,181 @@ app.patch('/api/treasures/:signature', async (req, res) => {
     });
   }
 });
+
+// ============================================================================
+// SEARCH API ENDPOINTS
+// ============================================================================
+
+// Get map searches
+app.get('/api/searches', async (req, res) => {
+  try {
+    const { limit, walletAddress, found } = req.query;
+
+    if (!searchService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const searches = await searchService.getSearches({
+      limit: limit ? parseInt(limit) : 100,
+      walletAddress,
+      found: found !== undefined ? found === 'true' : undefined
+    });
+
+    res.json({
+      success: true,
+      count: searches.length,
+      searches
+    });
+
+  } catch (error) {
+    console.error('Error fetching searches:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch searches'
+    });
+  }
+});
+
+// Get searches by wallet address
+app.get('/api/searches/wallet/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const { limit } = req.query;
+
+    if (!searchService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const searches = await searchService.getSearchesByWallet(address, {
+      limit: limit ? parseInt(limit) : 100
+    });
+
+    res.json({
+      success: true,
+      count: searches.length,
+      searches
+    });
+
+  } catch (error) {
+    console.error('Error fetching searches by wallet:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch searches'
+    });
+  }
+});
+
+// Get searches at specific coordinates
+app.get('/api/searches/coordinates/:x/:y', async (req, res) => {
+  try {
+    const { x, y } = req.params;
+    const { limit } = req.query;
+
+    if (!searchService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const searches = await searchService.getSearchesAtCoordinates(
+      parseInt(x),
+      parseInt(y),
+      limit ? parseInt(limit) : 100
+    );
+
+    res.json({
+      success: true,
+      count: searches.length,
+      searches
+    });
+
+  } catch (error) {
+    console.error('Error fetching searches at coordinates:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch searches'
+    });
+  }
+});
+
+// Get specific search by transaction signature
+app.get('/api/searches/:signature', async (req, res) => {
+  try {
+    const { signature } = req.params;
+
+    if (!searchService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const search = await searchService.getSearch(signature);
+
+    if (!search) {
+      return res.status(404).json({
+        success: false,
+        error: 'Search not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      search
+    });
+
+  } catch (error) {
+    console.error('Error fetching search:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch search'
+    });
+  }
+});
+
+// Update search result (mark as found)
+app.patch('/api/searches/:signature', async (req, res) => {
+  try {
+    const { signature } = req.params;
+    const { found, treasureId } = req.body;
+
+    if (found === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: 'found field is required'
+      });
+    }
+
+    if (!searchService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const result = await searchService.updateSearchResult(signature, found, treasureId);
+
+    res.json(result);
+
+  } catch (error) {
+    console.error('Error updating search:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to update search'
+    });
+  }
+});
+
+// ============================================================================
+// PAGE ROUTES
+// ============================================================================
 
 // Simplified leaderboard URL route
 app.get('/leaderboard', (req, res) => {
