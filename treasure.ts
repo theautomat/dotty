@@ -3,10 +3,22 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './src/styles/globals.css';
 import { TreasureGalleryPage } from './src/pages/TreasureGalleryPage';
+import { Navigation } from './src/components/Navigation';
 
 // Initialize the treasure gallery on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Loading Treasure Gallery...');
+
+  // Initialize navigation
+  const navContainer = document.createElement('div');
+  navContainer.id = 'navigation-root';
+  document.body.appendChild(navContainer);
+  const navRoot = ReactDOM.createRoot(navContainer);
+  navRoot.render(
+    React.createElement(React.StrictMode, null,
+      React.createElement(Navigation)
+    )
+  );
 
   const appContainer = document.getElementById('treasure-app');
   if (!appContainer) {

@@ -5,6 +5,7 @@ import './src/styles/globals.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { MetadataPanel } from './src/components/MetadataPanel';
+import { Navigation } from './src/components/Navigation';
 
 // Make THREE globally available for legacy code
 declare global {
@@ -20,6 +21,8 @@ window.THREE = THREE;
 
 // Initialize game on DOM load
 document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize navigation on all pages
+  initNavigation();
   // Check if we're on the leaderboard page
   // Keep both detection methods for backward compatibility
   const isLeaderboard =
@@ -59,6 +62,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialize the metadata panel
   initMetadataPanel();
 });
+
+/**
+ * Initialize the navigation bar for development
+ */
+function initNavigation(): void {
+  // Create a container for the navigation
+  const navContainer = document.createElement('div');
+  navContainer.id = 'navigation-root';
+  document.body.appendChild(navContainer);
+
+  // Create the root
+  const root = ReactDOM.createRoot(navContainer);
+
+  // Render the navigation
+  root.render(
+    React.createElement(React.StrictMode, null,
+      React.createElement(Navigation)
+    )
+  );
+}
 
 /**
  * Initialize the React metadata panel

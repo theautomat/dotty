@@ -7,6 +7,7 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { HideTreasure } from './src/components/solana/HideTreasure';
 import { SOLANA_CONFIG } from './src/config/solana';
+import { Navigation } from './src/components/Navigation';
 
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css';
@@ -26,8 +27,10 @@ function App() {
   const TEST_TOKEN_MINT = SOLANA_CONFIG.TEST_TOKEN_MINT;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>🏴‍☠️ Hide Treasure Test</h1>
+    <>
+      <Navigation />
+      <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', paddingTop: '80px' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>🏴‍☠️ Hide Treasure Test</h1>
 
       {!TEST_TOKEN_MINT && (
         <div style={{
@@ -61,7 +64,8 @@ function App() {
           </WalletModalProvider>
         </WalletProvider>
       </ConnectionProvider>
-    </div>
+      </div>
+    </>
   );
 }
 
