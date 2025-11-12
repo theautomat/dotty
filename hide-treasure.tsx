@@ -9,6 +9,9 @@ import { HideTreasure } from './src/components/solana/HideTreasure';
 import { SOLANA_CONFIG } from './src/config/solana';
 import { Navigation } from './src/components/Navigation';
 
+// Import shared styles
+import './src/styles/globals.css';
+
 // Import wallet adapter CSS
 import '@solana/wallet-adapter-react-ui/styles.css';
 
