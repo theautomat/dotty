@@ -46,7 +46,11 @@
       "Bash(npx tsx watch:*)",
       "Bash(NODE_ENV=development timeout 10 npx tsx:*)",
       "Bash(npm run dev:all:*)",
-      "Bash(NODE_ENV=development npx ts-node:*)"
+      "Bash(NODE_ENV=development npx ts-node:*)",
+      "Bash(git log:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr merge:*)"
     ],
     "deny": [],
     "ask": []
