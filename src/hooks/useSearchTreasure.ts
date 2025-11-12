@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useConnection, useWallet, useAnchorWallet } from '@solana/wallet-adapter-react';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
+import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import gameIdl from '../../solana/target/idl/game.json';
+import { SOLANA_CONFIG } from '../config/solana';
 
 export const useSearchTreasure = () => {
   const { connection } = useConnection();
@@ -39,6 +41,29 @@ export const useSearchTreasure = () => {
       // Generate unique search ID using timestamp
       const searchId = new BN(Date.now());
 
+      // Get BOOTY token mint
+      if (!SOLANA_CONFIG.BOOTY_TOKEN_MINT) {
+        throw new Error('BOOTY token mint not configured. Please run dev:local setup.');
+      }
+      const bootyMint = new PublicKey(SOLANA_CONFIG.BOOTY_TOKEN_MINT);
+
+      // Derive player's BOOTY token account
+      const playerBootyAccount = await getAssociatedTokenAddress(
+        bootyMint,
+        publicKey
+      );
+
+      // Derive vault's BOOTY token account (vault PDA is the owner)
+      const [vaultPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vault')],
+        program.programId
+      );
+      const vaultBootyAccount = await getAssociatedTokenAddress(
+        bootyMint,
+        vaultPda,
+        true // allowOwnerOffCurve = true for PDAs
+      );
+
       // Derive search_record PDA
       const [searchRecordPda] = PublicKey.findProgramAddressSync(
         [
@@ -51,6 +76,9 @@ export const useSearchTreasure = () => {
 
       console.log('Searching treasure at coordinates:', x, y);
       console.log('Search ID:', searchId.toString());
+      console.log('BOOTY Token Mint:', bootyMint.toString());
+      console.log('Player BOOTY Account:', playerBootyAccount.toString());
+      console.log('Vault BOOTY Account:', vaultBootyAccount.toString());
       console.log('Search Record PDA:', searchRecordPda.toString());
 
       // Call searchTreasure instruction using Anchor
@@ -58,7 +86,10 @@ export const useSearchTreasure = () => {
         .searchTreasure(x, y, searchId)
         .accounts({
           player: publicKey,
+          playerBootyAccount: playerBootyAccount,
+          vaultBootyAccount: vaultBootyAccount,
           searchRecord: searchRecordPda,
+          tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
         .rpc();
