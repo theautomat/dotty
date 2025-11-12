@@ -45,7 +45,8 @@
       "Bash(npm run dev:monitor:*)",
       "Bash(npx tsx watch:*)",
       "Bash(NODE_ENV=development timeout 10 npx tsx:*)",
-      "Bash(npm run dev:all:*)"
+      "Bash(npm run dev:all:*)",
+      "Bash(NODE_ENV=development npx ts-node:*)"
     ],
     "deny": [],
     "ask": []

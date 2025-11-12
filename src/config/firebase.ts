@@ -69,7 +69,12 @@ try {
   console.log(`🌍 Environment detected: ${environment}`);
   console.log(`🔧 Using Firebase ${useEmulator ? 'Emulator' : 'Cloud'}`);
 
-  app = initializeApp(firebaseConfig);
+  // Override project ID for emulator
+  const config = useEmulator
+    ? { ...firebaseConfig, projectId: 'demo-project' }
+    : firebaseConfig;
+
+  app = initializeApp(config);
   db = getFirestore(app);
 
   // Connect to emulator if needed
