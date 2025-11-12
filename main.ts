@@ -6,6 +6,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { MetadataPanel } from './src/components/MetadataPanel';
 import { Navigation } from './src/components/Navigation';
+import { WalletProvider } from './src/components/solana/WalletProvider';
+import { WalletButton } from './src/components/solana/WalletButton';
 
 // Make THREE globally available for legacy code
 declare global {
@@ -98,10 +100,13 @@ function initMetadataPanel(): void {
   // Create the root
   const root = ReactDOM.createRoot(panelContainer);
 
-  // Simply render the panel - it will subscribe to the store internally
+  // Render the panel with WalletProvider and WalletButton
   root.render(
     React.createElement(React.StrictMode, null,
-      React.createElement(MetadataPanel, { plotNumber: 1 })
+      React.createElement(WalletProvider, null,
+        React.createElement(WalletButton),
+        React.createElement(MetadataPanel, { plotNumber: 1 })
+      )
     )
   );
 }
