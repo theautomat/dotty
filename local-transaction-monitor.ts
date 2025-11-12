@@ -45,10 +45,12 @@ const PROGRAM_ID = new PublicKey("7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh")
 const POLL_INTERVAL = 2000; // 2 seconds
 const AUTH_HEADER = process.env.HELIUS_WEBHOOK_AUTH_HEADER || "test-auth-secret";
 
-enum TransactionType {
-  HIDE_TREASURE = "HIDE_TREASURE",
-  SEARCH_TREASURE = "SEARCH_TREASURE",
-}
+const TransactionType = {
+  HIDE_TREASURE: "HIDE_TREASURE",
+  SEARCH_TREASURE: "SEARCH_TREASURE",
+} as const;
+
+type TransactionType = typeof TransactionType[keyof typeof TransactionType];
 
 interface TokenTransfer {
   fromUserAccount: string;
