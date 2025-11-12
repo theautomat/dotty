@@ -171,6 +171,36 @@ pub mod game {
         Ok(())
     }
 
+    // ====================================================================
+    // TREASURE SEARCH SYSTEM
+    // ====================================================================
+
+    /// Search for treasure at specific map coordinates
+    /// Player submits a search transaction with x,y coordinates
+    /// This creates a searchable record that the monitoring service can detect
+    pub fn search_treasure(
+        ctx: Context<SearchTreasure>,
+        x: i32,
+        y: i32,
+        search_id: i64,
+    ) -> Result<()> {
+        msg!("Player searching for treasure at coordinates ({}, {})", x, y);
+
+        // Record the search in player's PDA
+        let search_record = &mut ctx.accounts.search_record;
+        search_record.player = ctx.accounts.player.key();
+        search_record.x = x;
+        search_record.y = y;
+        search_record.timestamp = search_id;
+        search_record.found = false;
+        search_record.bump = ctx.bumps.search_record;
+
+        msg!("Search recorded at ({}, {})", x, y);
+        msg!("Search ID: {}", search_id);
+
+        Ok(())
+    }
+
     /// Admin function to whitelist a token mint
     /// This allows adding new tokens that can be hidden as treasure
     pub fn whitelist_token(
@@ -375,6 +405,21 @@ impl TreasureRecord {
     pub const LEN: usize = 8 + 32 + 8 + 8 + 1 + 1 + 1; // discriminator + fields
 }
 
+/// Player search record (one per player per search attempt)
+#[account]
+pub struct SearchRecord {
+    pub player: Pubkey,    // Player's wallet (32 bytes)
+    pub x: i32,            // X coordinate searched (4 bytes)
+    pub y: i32,            // Y coordinate searched (4 bytes)
+    pub timestamp: i64,    // When searched (8 bytes)
+    pub found: bool,       // Was treasure found? (1 byte)
+    pub bump: u8,          // PDA bump (1 byte)
+}
+
+impl SearchRecord {
+    pub const LEN: usize = 8 + 32 + 4 + 4 + 8 + 1 + 1; // discriminator + fields
+}
+
 /// Token whitelist entry (which tokens can be hidden as treasure)
 #[account]
 pub struct TokenWhitelist {
@@ -531,6 +576,30 @@ pub struct ClaimTreasure<'info> {
         bump = vault.bump
     )]
     pub vault: Account<'info, TreasureVault>,
+}
+
+#[derive(Accounts)]
+#[instruction(x: i32, y: i32, search_id: i64)]
+pub struct SearchTreasure<'info> {
+    /// Player searching for treasure
+    #[account(mut)]
+    pub player: Signer<'info>,
+
+    /// Search record PDA (unique per player, per search)
+    #[account(
+        init,
+        payer = player,
+        space = SearchRecord::LEN,
+        seeds = [
+            b"search",
+            player.key().as_ref(),
+            &search_id.to_le_bytes()
+        ],
+        bump
+    )]
+    pub search_record: Account<'info, SearchRecord>,
+
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
