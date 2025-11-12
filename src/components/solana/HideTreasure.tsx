@@ -73,7 +73,8 @@ export function HideTreasure({ tokenMint }: HideTreasureProps) {
     console.log('=== DEBUG: Config Values ===');
     console.log('SOLANA_CONFIG:', SOLANA_CONFIG);
     console.log('PROGRAM_ID:', SOLANA_CONFIG.PROGRAM_ID);
-    console.log('TEST_TOKEN_MINT:', SOLANA_CONFIG.TEST_TOKEN_MINT);
+    console.log('TREASURE_TOKEN_MINT:', SOLANA_CONFIG.TREASURE_TOKEN_MINT);
+    console.log('BOOTY_TOKEN_MINT:', SOLANA_CONFIG.BOOTY_TOKEN_MINT);
 
     // DEBUG: Log IDL import
     console.log('=== DEBUG: IDL Import ===');

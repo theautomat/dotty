@@ -7,6 +7,9 @@ export const SOLANA_CONFIG = {
   // Program ID - stays constant across deployments
   PROGRAM_ID: '7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh',
 
-  // Test token mint - updated by dev:local script
-  TEST_TOKEN_MINT: 'AVDau7jqGrMFqXWYFVw3FU2qQMiN3v6XSfJ97WRT6dQH',
+  // TREASURE token mint - the meme token that players hide/find - updated by dev:local script
+  TREASURE_TOKEN_MINT: '39NeeQEnjQeT2uCGJyFg8CjiLvknLC3TUrXems9Zeni9',
+
+  // BOOTY token mint - in-game currency for search fees - updated by dev:local script
+  BOOTY_TOKEN_MINT: '',
 };

@@ -186,6 +186,23 @@ pub mod game {
     ) -> Result<()> {
         msg!("Player searching for treasure at coordinates ({}, {})", x, y);
 
+        // Charge 1 BOOTY token for the search (1 token with 6 decimals = 1,000,000)
+        let search_fee = 1_000_000_u64;
+        msg!("Charging {} BOOTY tokens for search", search_fee / 1_000_000);
+
+        // Transfer BOOTY tokens from player to vault
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.player_booty_account.to_account_info(),
+            to: ctx.accounts.vault_booty_account.to_account_info(),
+            authority: ctx.accounts.player.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+
+        token::transfer(cpi_ctx, search_fee)?;
+
+        msg!("Search fee paid successfully");
+
         // Record the search in player's PDA
         let search_record = &mut ctx.accounts.search_record;
         search_record.player = ctx.accounts.player.key();
@@ -585,6 +602,17 @@ pub struct SearchTreasure<'info> {
     #[account(mut)]
     pub player: Signer<'info>,
 
+    /// Player's BOOTY token account (source of search fee payment)
+    #[account(
+        mut,
+        constraint = player_booty_account.owner == player.key() @ ErrorCode::InvalidTokenAccount
+    )]
+    pub player_booty_account: Account<'info, TokenAccount>,
+
+    /// Vault's BOOTY token account (destination for search fees)
+    #[account(mut)]
+    pub vault_booty_account: Account<'info, TokenAccount>,
+
     /// Search record PDA (unique per player, per search)
     #[account(
         init,
@@ -599,6 +627,7 @@ pub struct SearchTreasure<'info> {
     )]
     pub search_record: Account<'info, SearchRecord>,
 
+    pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
 

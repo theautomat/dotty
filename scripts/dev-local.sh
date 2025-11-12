@@ -198,7 +198,7 @@ echo ""
 # ============================================================================
 # 7. CREATE TEST TOKEN
 # ============================================================================
-echo "🪙 Creating test SPL token (TREASURE token for game testing)..."
+echo "🪙 Creating test SPL token (BOOTY token for game testing)..."
 
 # Check if wallet address provided
 if [ -z "$1" ]; then
@@ -210,15 +210,17 @@ if [ -z "$1" ]; then
     TOKEN_MINT="(not created - wallet address required)"
 else
     WALLET_ADDRESS=$1
-    echo "Creating test token and funding wallet $WALLET_ADDRESS with 10,000 tokens..."
+    echo "Creating BOOTY token and funding wallet $WALLET_ADDRESS with 10,000 BOOTY..."
 
     # Run TypeScript script to create token (suppress npx noise, keep script output)
     npx ts-node scripts/create-test-token.ts "$WALLET_ADDRESS" 2>/dev/null
 
-    # Read the token mint address from file
-    if [ -f ".test-token-mint" ]; then
-        TOKEN_MINT=$(cat .test-token-mint)
-        echo -e "${GREEN}✓${NC} Test token mint address (used by frontend): $TOKEN_MINT"
+    # Read the token mint addresses from files
+    if [ -f ".test-token-mint" ] && [ -f ".booty-token-mint" ]; then
+        TREASURE_MINT=$(cat .test-token-mint)
+        BOOTY_MINT=$(cat .booty-token-mint)
+        echo -e "${GREEN}✓${NC} TREASURE token mint address: $TREASURE_MINT"
+        echo -e "${GREEN}✓${NC} BOOTY token mint address: $BOOTY_MINT"
         echo ""
 
         # Fund wallet with SOL for transaction fees
@@ -262,11 +264,14 @@ export const SOLANA_CONFIG = {
   // Program ID - stays constant across deployments
   PROGRAM_ID: '$PROGRAM_ID',
 
-  // Test token mint - updated by dev:local script
-  TEST_TOKEN_MINT: '$TOKEN_MINT',
+  // TREASURE token mint - the meme token that players hide/find - updated by dev:local script
+  TREASURE_TOKEN_MINT: '$TREASURE_MINT',
+
+  // BOOTY token mint - in-game currency for search fees - updated by dev:local script
+  BOOTY_TOKEN_MINT: '$BOOTY_MINT',
 };
 EOL
-        echo -e "${GREEN}✓${NC} Config updated with program ID and token mint"
+        echo -e "${GREEN}✓${NC} Config updated with program ID and token mints"
 
         # Initialize vault now that we have a token
         echo ""
@@ -274,7 +279,7 @@ EOL
         # We're already at project root from line 254
 
         # Run vault initialization (suppress stderr warnings but keep important output)
-        if npx ts-node scripts/initialize-vault.ts "$TOKEN_MINT" 2>&1 | grep -v "bigint:" | grep -v "MODULE_TYPELESS_PACKAGE_JSON" | grep -v "Use \`node" | grep -v "Reparsing as ES"; then
+        if npx ts-node scripts/initialize-vault.ts "$TREASURE_MINT" 2>&1 | grep -v "bigint:" | grep -v "MODULE_TYPELESS_PACKAGE_JSON" | grep -v "Use \`node" | grep -v "Reparsing as ES"; then
             echo -e "${GREEN}✓${NC} Vault initialized and ready for treasure hiding"
         else
             echo -e "${RED}✗${NC} Vault initialization failed (run manually if needed)"
