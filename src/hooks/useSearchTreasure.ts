@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useConnection, useWallet, useAnchorWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
-import gameIdl from '../../../solana/target/idl/game.json';
+import gameIdl from '../../solana/target/idl/game.json';
 
 export const useSearchTreasure = () => {
   const { connection } = useConnection();
