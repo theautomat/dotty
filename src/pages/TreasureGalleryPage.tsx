@@ -153,21 +153,20 @@ export function TreasureGalleryPage() {
   }, [treasures, selectedStatus, selectedToken, sortBy, searchTerm]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 pt-14">
+    <div className="min-h-screen bg-white pt-14">
       {/* Header */}
-      <header className="bg-black/30 backdrop-blur-md border-b border-purple-500/20">
+      <header className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold text-gray-900">
                 💎 Hidden Treasure Gallery
               </h1>
-              <p className="text-gray-400 mt-2">Discover treasures hidden across the land</p>
+              <p className="text-gray-600 mt-2">Discover treasures hidden across the land</p>
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => (window.location.href = '/')}
-              className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
             >
               ← Back to Game
             </Button>
@@ -178,56 +177,56 @@ export function TreasureGalleryPage() {
       {/* Stats Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-lg p-6 border border-purple-500/30">
-            <div className="text-purple-300 text-sm font-semibold uppercase tracking-wide mb-1">
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="text-gray-600 text-sm font-medium uppercase tracking-wide mb-1">
               Total Treasures
             </div>
-            <div className="text-3xl font-bold text-white">{stats.total}</div>
+            <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
           </div>
-          <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-lg p-6 border border-green-500/30">
-            <div className="text-green-300 text-sm font-semibold uppercase tracking-wide mb-1">
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="text-gray-600 text-sm font-medium uppercase tracking-wide mb-1">
               Active
             </div>
-            <div className="text-3xl font-bold text-white">{stats.active}</div>
+            <div className="text-3xl font-bold text-green-600">{stats.active}</div>
           </div>
-          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-sm rounded-lg p-6 border border-blue-500/30">
-            <div className="text-blue-300 text-sm font-semibold uppercase tracking-wide mb-1">
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="text-gray-600 text-sm font-medium uppercase tracking-wide mb-1">
               Claimed
             </div>
-            <div className="text-3xl font-bold text-white">{stats.claimed}</div>
+            <div className="text-3xl font-bold text-blue-600">{stats.claimed}</div>
           </div>
-          <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm rounded-lg p-6 border border-orange-500/30">
-            <div className="text-orange-300 text-sm font-semibold uppercase tracking-wide mb-1">
+          <div className="bg-white rounded-lg p-6 border shadow-sm">
+            <div className="text-gray-600 text-sm font-medium uppercase tracking-wide mb-1">
               Expired
             </div>
-            <div className="text-3xl font-bold text-white">{stats.expired}</div>
+            <div className="text-3xl font-bold text-gray-500">{stats.expired}</div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-        <div className="bg-black/30 backdrop-blur-md rounded-lg p-6 border border-purple-500/20">
+        <div className="bg-white rounded-lg p-6 border shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-2">Search</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
               <input
                 type="text"
                 placeholder="Search by wallet address..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               />
             </div>
 
             {/* Status Filter */}
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-2">Status</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
                 value={selectedStatus}
                 onChange={e => setSelectedStatus(e.target.value as TreasureStatus | 'all')}
-                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -238,11 +237,11 @@ export function TreasureGalleryPage() {
 
             {/* Token Filter */}
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-2">Token Type</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Token Type</label>
               <select
                 value={selectedToken}
                 onChange={e => setSelectedToken(e.target.value as TokenType | 'all')}
-                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               >
                 <option value="all">All Tokens</option>
                 <option value="PEPE">PEPE</option>
@@ -255,11 +254,11 @@ export function TreasureGalleryPage() {
 
             {/* Sort By */}
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-2">Sort By</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as 'date' | 'amount')}
-                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               >
                 <option value="date">Latest First</option>
                 <option value="amount">Highest Amount</option>
@@ -271,19 +270,19 @@ export function TreasureGalleryPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             {(selectedStatus !== 'all' || selectedToken !== 'all' || searchTerm) && (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-400">Active filters:</span>
+                <span className="text-sm text-gray-600">Active filters:</span>
                 {selectedStatus !== 'all' && (
-                  <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm border border-purple-500/30">
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border">
                     Status: {selectedStatus}
                   </span>
                 )}
                 {selectedToken !== 'all' && (
-                  <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm border border-purple-500/30">
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border">
                     Token: {selectedToken}
                   </span>
                 )}
                 {searchTerm && (
-                  <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm border border-purple-500/30">
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border">
                     Search: "{searchTerm}"
                   </span>
                 )}
@@ -293,7 +292,7 @@ export function TreasureGalleryPage() {
                     setSelectedToken('all');
                     setSearchTerm('');
                   }}
-                  className="px-3 py-1 bg-red-500/20 text-red-300 rounded-full text-sm border border-red-500/30 hover:bg-red-500/30 transition-colors"
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border hover:bg-gray-200 transition-colors"
                 >
                   Clear All
                 </button>
@@ -307,45 +306,45 @@ export function TreasureGalleryPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {/* Loading State */}
         {loading && (
-          <div className="bg-black/30 backdrop-blur-md rounded-lg p-12 border border-purple-500/20 text-center">
+          <div className="bg-white rounded-lg p-12 border shadow-sm text-center">
             <div className="text-6xl mb-4">⏳</div>
-            <h3 className="text-xl font-semibold text-gray-300 mb-2">Loading treasures...</h3>
-            <p className="text-gray-500">Fetching data from Firebase</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Loading treasures...</h3>
+            <p className="text-gray-600">Fetching data from Firebase</p>
           </div>
         )}
 
         {/* Error State */}
         {error && !loading && (
-          <div className="bg-red-500/10 backdrop-blur-md rounded-lg p-12 border border-red-500/30">
+          <div className="bg-white rounded-lg p-12 border border-red-300 shadow-sm">
             <div className="text-center mb-6">
               <div className="text-6xl mb-4">❌</div>
-              <h3 className="text-xl font-semibold text-red-300 mb-2">Error loading treasures</h3>
-              <p className="text-gray-400 mb-4">{error}</p>
+              <h3 className="text-xl font-semibold text-red-600 mb-2">Error loading treasures</h3>
+              <p className="text-gray-700 mb-4">{error}</p>
             </div>
 
             {/* Show helpful instructions for common errors */}
             {error.includes('not initialized') || error.includes('not configured') ? (
-              <div className="bg-black/30 rounded-lg p-6 text-left max-w-2xl mx-auto">
-                <h4 className="text-lg font-semibold text-purple-300 mb-3">
+              <div className="bg-gray-50 rounded-lg p-6 text-left max-w-2xl mx-auto border">
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">
                   🛠️ Setup Instructions
                 </h4>
-                <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+                <ol className="list-decimal list-inside space-y-2 text-gray-700 text-sm">
                   <li>
-                    Copy <code className="bg-gray-800 px-2 py-1 rounded">.env.example</code> to{' '}
-                    <code className="bg-gray-800 px-2 py-1 rounded">.env</code>
+                    Copy <code className="bg-gray-200 px-2 py-1 rounded">. env.example</code> to{' '}
+                    <code className="bg-gray-200 px-2 py-1 rounded">.env</code>
                   </li>
                   <li>Fill in your Firebase credentials from the Firebase Console</li>
                   <li>Make sure all VITE_FIREBASE_* variables are set</li>
                   <li>Restart the development server</li>
                 </ol>
-                <div className="mt-4 p-3 bg-purple-500/10 rounded border border-purple-500/30">
-                  <p className="text-xs text-purple-200">
+                <div className="mt-4 p-3 bg-blue-50 rounded border border-blue-200">
+                  <p className="text-xs text-gray-700">
                     💡 Tip: Get your Firebase credentials from{' '}
                     <a
                       href="https://console.firebase.google.com"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-purple-400 hover:text-purple-300 underline"
+                      className="text-blue-600 hover:text-blue-700 underline"
                     >
                       Firebase Console
                     </a>{' '}
@@ -354,15 +353,15 @@ export function TreasureGalleryPage() {
                 </div>
               </div>
             ) : error.includes('permission') || error.includes('PERMISSION_DENIED') ? (
-              <div className="bg-black/30 rounded-lg p-6 text-left max-w-2xl mx-auto">
-                <h4 className="text-lg font-semibold text-purple-300 mb-3">
+              <div className="bg-gray-50 rounded-lg p-6 text-left max-w-2xl mx-auto border">
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">
                   🔒 Firestore Security Rules
                 </h4>
-                <p className="text-gray-300 text-sm mb-3">
+                <p className="text-gray-700 text-sm mb-3">
                   Your Firestore security rules may be blocking read access. Update your rules to allow reading
                   the treasures collection:
                 </p>
-                <pre className="bg-gray-900 p-4 rounded text-xs text-green-400 overflow-x-auto">
+                <pre className="bg-gray-900 text-white p-4 rounded text-xs overflow-x-auto">
                   {`rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -380,7 +379,7 @@ service cloud.firestore {
             <div className="text-center mt-6">
               <Button
                 onClick={() => setRetryCount(c => c + 1)}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold"
+                variant="default"
               >
                 🔄 Retry
               </Button>
@@ -391,15 +390,15 @@ service cloud.firestore {
         {/* Treasure Data */}
         {!loading && !error && (
           <>
-            <div className="mb-4 text-gray-400">
+            <div className="mb-4 text-gray-600">
               Showing {filteredTreasures.length} of {stats.total} treasures
             </div>
 
             {filteredTreasures.length === 0 ? (
-              <div className="bg-black/30 backdrop-blur-md rounded-lg p-12 border border-purple-500/20 text-center">
+              <div className="bg-white rounded-lg p-12 border shadow-sm text-center">
                 <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-xl font-semibold text-gray-300 mb-2">No treasures found</h3>
-                <p className="text-gray-500">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No treasures found</h3>
+                <p className="text-gray-600">
                   {stats.total === 0
                     ? 'No treasures have been hidden yet. Be the first to hide some treasure!'
                     : 'Try adjusting your filters'}
@@ -423,23 +422,17 @@ service cloud.firestore {
 function TreasureCard({ treasure }: { treasure: Treasure }) {
   const statusConfig = {
     active: {
-      color: 'from-green-500/20 to-emerald-500/20',
-      borderColor: 'border-green-500/40',
-      badgeColor: 'bg-green-500/20 text-green-300 border-green-500/40',
+      badgeColor: 'bg-green-50 text-green-700 border-green-200',
       label: 'Active',
       emoji: '💎',
     },
     claimed: {
-      color: 'from-blue-500/20 to-cyan-500/20',
-      borderColor: 'border-blue-500/40',
-      badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+      badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
       label: 'Claimed',
       emoji: '✅',
     },
     expired: {
-      color: 'from-gray-500/20 to-gray-600/20',
-      borderColor: 'border-gray-500/40',
-      badgeColor: 'bg-gray-500/20 text-gray-300 border-gray-500/40',
+      badgeColor: 'bg-gray-50 text-gray-700 border-gray-200',
       label: 'Expired',
       emoji: '⏰',
     },
@@ -449,20 +442,16 @@ function TreasureCard({ treasure }: { treasure: Treasure }) {
 
   return (
     <div
-      className={cn(
-        'bg-gradient-to-br backdrop-blur-sm rounded-lg overflow-hidden border hover:scale-105 transition-transform duration-200',
-        config.color,
-        config.borderColor
-      )}
+      className="bg-white rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition-shadow duration-200"
     >
       {/* Card Header */}
-      <div className="p-6 border-b border-white/10">
+      <div className="p-6 border-b">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-4xl">{config.emoji}</span>
             <div>
-              <div className="text-sm text-gray-400">Status</div>
-              <div className="font-semibold text-white">{config.label}</div>
+              <div className="text-sm text-gray-600">Status</div>
+              <div className="font-semibold text-gray-900">{config.label}</div>
             </div>
           </div>
           <span className={cn('px-3 py-1 rounded-full text-sm font-semibold border', config.badgeColor)}>
@@ -471,11 +460,11 @@ function TreasureCard({ treasure }: { treasure: Treasure }) {
         </div>
 
         {/* Amount */}
-        <div className="bg-black/30 rounded-lg p-4 mt-4">
-          <div className="text-sm text-gray-400 mb-1">Treasure Value</div>
+        <div className="bg-gray-50 rounded-lg p-4 mt-4 border">
+          <div className="text-sm text-gray-600 mb-1">Treasure Value</div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-white">{treasure.amount.toLocaleString()}</span>
-            <span className="text-lg font-semibold text-purple-400">{treasure.tokenType}</span>
+            <span className="text-2xl font-bold text-gray-900">{treasure.amount.toLocaleString()}</span>
+            <span className="text-lg font-semibold text-gray-700">{treasure.tokenType}</span>
           </div>
         </div>
       </div>
@@ -484,25 +473,25 @@ function TreasureCard({ treasure }: { treasure: Treasure }) {
       <div className="p-6 space-y-3">
         {/* Hidden By */}
         <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Hidden By</div>
-          <div className="text-xs text-gray-500 font-mono">
+          <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Hidden By</div>
+          <div className="text-xs text-gray-700 font-mono">
             {treasure.walletAddress.slice(0, 8)}...{treasure.walletAddress.slice(-6)}
           </div>
         </div>
 
         {/* Dates */}
         <div>
-          <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Hidden At</div>
-          <div className="text-white text-sm">{new Date(treasure.hiddenAt).toLocaleDateString()}</div>
-          <div className="text-xs text-gray-500">{new Date(treasure.hiddenAt).toLocaleTimeString()}</div>
+          <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Hidden At</div>
+          <div className="text-gray-900 text-sm">{new Date(treasure.hiddenAt).toLocaleDateString()}</div>
+          <div className="text-xs text-gray-600">{new Date(treasure.hiddenAt).toLocaleTimeString()}</div>
         </div>
 
         {treasure.claimedAt && (
           <div>
-            <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Claimed At</div>
-            <div className="text-white text-sm">{new Date(treasure.claimedAt).toLocaleDateString()}</div>
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Claimed At</div>
+            <div className="text-gray-900 text-sm">{new Date(treasure.claimedAt).toLocaleDateString()}</div>
             {treasure.claimedBy && (
-              <div className="text-xs text-blue-400 mt-1">
+              <div className="text-xs text-blue-600 mt-1">
                 by {treasure.claimedBy.slice(0, 8)}...{treasure.claimedBy.slice(-6)}
               </div>
             )}
@@ -512,12 +501,12 @@ function TreasureCard({ treasure }: { treasure: Treasure }) {
         {/* Transaction */}
         {treasure.txSignature && (
           <div>
-            <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Transaction</div>
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Transaction</div>
             <a
               href={`https://solscan.io/tx/${treasure.txSignature}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-purple-400 hover:text-purple-300 font-mono break-all"
+              className="text-xs text-blue-600 hover:text-blue-700 font-mono break-all underline"
             >
               {treasure.txSignature.slice(0, 20)}...
             </a>
@@ -527,8 +516,8 @@ function TreasureCard({ treasure }: { treasure: Treasure }) {
         {/* Blockchain Info */}
         {treasure.metadata?.slot && (
           <div>
-            <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">Blockchain</div>
-            <div className="text-xs text-gray-500">Slot: {treasure.metadata.slot.toLocaleString()}</div>
+            <div className="text-xs text-gray-600 uppercase tracking-wide mb-1">Blockchain</div>
+            <div className="text-xs text-gray-700">Slot: {treasure.metadata.slot.toLocaleString()}</div>
           </div>
         )}
       </div>
@@ -537,7 +526,7 @@ function TreasureCard({ treasure }: { treasure: Treasure }) {
       {treasure.status === 'active' && (
         <div className="p-6 pt-0">
           <Button
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold"
+            className="w-full"
             onClick={() => alert('Claiming treasures coming soon!')}
           >
             🎁 Claim This Treasure
