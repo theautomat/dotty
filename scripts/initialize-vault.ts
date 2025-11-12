@@ -16,11 +16,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Read command line arguments
-const tokenMintAddress = process.argv[2];
+const treasureTokenMintAddress = process.argv[2];
+const bootyTokenMintAddress = process.argv[3];
 
-if (!tokenMintAddress) {
-  console.error('Error: Token mint address required');
-  console.error('Usage: npx ts-node scripts/initialize-vault.ts <TOKEN_MINT_ADDRESS>');
+if (!treasureTokenMintAddress || !bootyTokenMintAddress) {
+  console.error('Error: Both token mint addresses required');
+  console.error('Usage: npx ts-node scripts/initialize-vault.ts <TREASURE_MINT> <BOOTY_MINT>');
   process.exit(1);
 }
 
@@ -96,29 +97,29 @@ async function initializeVault() {
       console.log('✓ Vault initialized! Transaction:', tx);
     }
 
-    // Create vault's token account for the test token
-    const tokenMint = new PublicKey(tokenMintAddress);
-    const vaultTokenAccount = await getAssociatedTokenAddress(tokenMint, vaultPda, true);
+    // Create vault's TREASURE token account
+    const treasureMint = new PublicKey(treasureTokenMintAddress);
+    const vaultTreasureAccount = await getAssociatedTokenAddress(treasureMint, vaultPda, true);
 
-    console.log('\nVault token account:', vaultTokenAccount.toString());
+    console.log('\nVault TREASURE token account:', vaultTreasureAccount.toString());
 
-    // Check if vault token account exists
+    // Check if vault TREASURE token account exists
     try {
-      const accountInfo = await connection.getAccountInfo(vaultTokenAccount);
+      const accountInfo = await connection.getAccountInfo(vaultTreasureAccount);
       if (accountInfo) {
-        console.log('✓ Vault token account already exists');
+        console.log('✓ Vault TREASURE token account already exists');
       } else {
         throw new Error('Account not found');
       }
     } catch (error) {
-      console.log('Creating vault token account...');
+      console.log('Creating vault TREASURE token account...');
 
       // Create vault's associated token account
       const createAtaIx = createAssociatedTokenAccountInstruction(
-        authority.publicKey, // payer
-        vaultTokenAccount,   // ata
-        vaultPda,           // owner (the vault PDA)
-        tokenMint           // mint
+        authority.publicKey,    // payer
+        vaultTreasureAccount,   // ata
+        vaultPda,              // owner (the vault PDA)
+        treasureMint           // mint
       );
 
       const tx = new anchor.web3.Transaction().add(createAtaIx);
@@ -129,12 +130,49 @@ async function initializeVault() {
       const sig = await connection.sendRawTransaction(tx.serialize());
       await connection.confirmTransaction(sig);
 
-      console.log('✓ Vault token account created! Transaction:', sig);
+      console.log('✓ Vault TREASURE token account created! Transaction:', sig);
+    }
+
+    // Create vault's BOOTY token account
+    const bootyMint = new PublicKey(bootyTokenMintAddress);
+    const vaultBootyAccount = await getAssociatedTokenAddress(bootyMint, vaultPda, true);
+
+    console.log('\nVault BOOTY token account:', vaultBootyAccount.toString());
+
+    // Check if vault BOOTY token account exists
+    try {
+      const accountInfo = await connection.getAccountInfo(vaultBootyAccount);
+      if (accountInfo) {
+        console.log('✓ Vault BOOTY token account already exists');
+      } else {
+        throw new Error('Account not found');
+      }
+    } catch (error) {
+      console.log('Creating vault BOOTY token account...');
+
+      // Create vault's associated token account
+      const createAtaIx = createAssociatedTokenAccountInstruction(
+        authority.publicKey, // payer
+        vaultBootyAccount,   // ata
+        vaultPda,           // owner (the vault PDA)
+        bootyMint           // mint
+      );
+
+      const tx = new anchor.web3.Transaction().add(createAtaIx);
+      tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+      tx.feePayer = authority.publicKey;
+      tx.sign(authority);
+
+      const sig = await connection.sendRawTransaction(tx.serialize());
+      await connection.confirmTransaction(sig);
+
+      console.log('✓ Vault BOOTY token account created! Transaction:', sig);
     }
 
     console.log('\n✓ Vault setup complete!');
     console.log('  Vault PDA:', vaultPda.toString());
-    console.log('  Vault token account:', vaultTokenAccount.toString());
+    console.log('  Vault TREASURE token account:', vaultTreasureAccount.toString());
+    console.log('  Vault BOOTY token account:', vaultBootyAccount.toString());
 
   } catch (error) {
     console.error('Error initializing vault:', error);

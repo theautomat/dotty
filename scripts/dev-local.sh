@@ -273,14 +273,14 @@ export const SOLANA_CONFIG = {
 EOL
         echo -e "${GREEN}✓${NC} Config updated with program ID and token mints"
 
-        # Initialize vault now that we have a token
+        # Initialize vault now that we have both tokens
         echo ""
-        echo "🏦 Initializing treasure vault with token..."
+        echo "🏦 Initializing treasure vault with tokens..."
         # We're already at project root from line 254
 
-        # Run vault initialization (suppress stderr warnings but keep important output)
-        if npx ts-node scripts/initialize-vault.ts "$TREASURE_MINT" 2>&1 | grep -v "bigint:" | grep -v "MODULE_TYPELESS_PACKAGE_JSON" | grep -v "Use \`node" | grep -v "Reparsing as ES"; then
-            echo -e "${GREEN}✓${NC} Vault initialized and ready for treasure hiding"
+        # Run vault initialization with both token mints (suppress stderr warnings but keep important output)
+        if npx ts-node scripts/initialize-vault.ts "$TREASURE_MINT" "$BOOTY_MINT" 2>&1 | grep -v "bigint:" | grep -v "MODULE_TYPELESS_PACKAGE_JSON" | grep -v "Use \`node" | grep -v "Reparsing as ES"; then
+            echo -e "${GREEN}✓${NC} Vault initialized and ready for treasure hiding and search fees"
         else
             echo -e "${RED}✗${NC} Vault initialization failed (run manually if needed)"
         fi
