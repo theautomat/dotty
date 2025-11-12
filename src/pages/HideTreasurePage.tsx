@@ -19,49 +19,51 @@ export function HideTreasurePage() {
 
   return (
     <WalletProvider>
-      <div style={styles.page}>
+      <div className="min-h-screen bg-gray-50">
         <WalletButton />
 
-        <header style={styles.header}>
-          <h1 style={styles.gameTitle}>⚔️ Dotty's Treasure Hunt</h1>
-          <p style={styles.tagline}>Explore • Collect • Mint</p>
+        <header className="text-center py-10 bg-white border-b">
+          <h1 className="text-4xl font-bold text-gray-900">⚔️ Dotty's Treasure Hunt</h1>
+          <p className="text-lg text-gray-600 mt-2">Explore • Collect • Mint</p>
         </header>
 
         <HideTreasure tokenMint={EXAMPLE_TOKEN_MINT} />
 
-        <footer style={styles.footer}>
-          <div style={styles.infoCard}>
-            <h3 style={styles.infoTitle}>How It Works</h3>
-            <ol style={styles.infoList}>
-              <li>Connect your Solana wallet (Phantom, Solflare, etc.)</li>
-              <li>Hide treasure with memecoins (PEPE, BONK, or whitelisted tokens)</li>
-              <li>Other players can find your hidden treasure on the game board</li>
-              <li>Earn premium NFTs and $BOOTY tokens!</li>
-            </ol>
-          </div>
+        <footer className="max-w-4xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-6 border shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">How It Works</h3>
+              <ol className="list-decimal list-inside space-y-2 text-gray-700">
+                <li>Connect your Solana wallet (Phantom, Solflare, etc.)</li>
+                <li>Hide treasure with memecoins (PEPE, BONK, or whitelisted tokens)</li>
+                <li>Other players can find your hidden treasure on the game board</li>
+                <li>Earn premium NFTs and $BOOTY tokens!</li>
+              </ol>
+            </div>
 
-          <div style={styles.infoCard}>
-            <h3 style={styles.infoTitle}>Monster Types</h3>
-            <div style={styles.monsterGrid}>
-              <div style={styles.monsterItem}>
-                <span style={styles.monsterIcon}>🐉</span>
-                <span>Dragon</span>
-              </div>
-              <div style={styles.monsterItem}>
-                <span style={styles.monsterIcon}>👺</span>
-                <span>Goblin</span>
-              </div>
-              <div style={styles.monsterItem}>
-                <span style={styles.monsterIcon}>🔥</span>
-                <span>Phoenix</span>
-              </div>
-              <div style={styles.monsterItem}>
-                <span style={styles.monsterIcon}>🦑</span>
-                <span>Kraken</span>
-              </div>
-              <div style={styles.monsterItem}>
-                <span style={styles.monsterIcon}>🦄</span>
-                <span>Unicorn</span>
+            <div className="bg-white rounded-lg p-6 border shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Monster Types</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                  <span className="text-3xl">🐉</span>
+                  <span className="text-sm text-gray-700">Dragon</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                  <span className="text-3xl">👺</span>
+                  <span className="text-sm text-gray-700">Goblin</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                  <span className="text-3xl">🔥</span>
+                  <span className="text-sm text-gray-700">Phoenix</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                  <span className="text-3xl">🦑</span>
+                  <span className="text-sm text-gray-700">Kraken</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                  <span className="text-3xl">🦄</span>
+                  <span className="text-sm text-gray-700">Unicorn</span>
+                </div>
               </div>
             </div>
           </div>
@@ -70,80 +72,3 @@ export function HideTreasurePage() {
     </WalletProvider>
   );
 }
-
-const styles = {
-  page: {
-    minHeight: '100vh',
-    background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
-    color: 'white',
-    padding: '20px',
-  } as React.CSSProperties,
-
-  header: {
-    textAlign: 'center' as const,
-    padding: '40px 20px',
-  } as React.CSSProperties,
-
-  gameTitle: {
-    fontSize: '48px',
-    fontWeight: 'bold',
-    margin: '0 0 10px 0',
-    background: 'linear-gradient(90deg, #9945FF, #14F195)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-  } as React.CSSProperties,
-
-  tagline: {
-    fontSize: '18px',
-    color: '#ccc',
-    margin: 0,
-  } as React.CSSProperties,
-
-  footer: {
-    maxWidth: '800px',
-    margin: '40px auto',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '20px',
-  } as React.CSSProperties,
-
-  infoCard: {
-    background: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(10px)',
-    borderRadius: '12px',
-    padding: '24px',
-  } as React.CSSProperties,
-
-  infoTitle: {
-    fontSize: '20px',
-    fontWeight: 'bold',
-    marginBottom: '16px',
-    color: '#14F195',
-  } as React.CSSProperties,
-
-  infoList: {
-    paddingLeft: '20px',
-    lineHeight: '1.8',
-    color: '#ddd',
-  } as React.CSSProperties,
-
-  monsterGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-    gap: '12px',
-  } as React.CSSProperties,
-
-  monsterItem: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    alignItems: 'center',
-    gap: '8px',
-    padding: '12px',
-    background: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: '8px',
-  } as React.CSSProperties,
-
-  monsterIcon: {
-    fontSize: '32px',
-  } as React.CSSProperties,
-};
