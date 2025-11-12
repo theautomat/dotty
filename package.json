@@ -22,6 +22,7 @@
     "test:solana:devnet": "cd solana && anchor test --provider.cluster devnet",
     "dev:local": "./scripts/dev-local.sh",
     "dev:all": "./scripts/dev-all.sh",
+    "dev:kill": "lsof -ti:8899,5173,3000,8080,4000 | xargs kill -9 2>/dev/null || true; pkill -f 'solana-test-validator' 2>/dev/null || true; pkill -f 'dev:all' 2>/dev/null || true; pkill -f 'firebase' 2>/dev/null || true; pkill -f 'tsx watch' 2>/dev/null || true; pkill -f 'ts-node local-transaction-monitor' 2>/dev/null || true; echo 'All dev processes killed'",
     "solana:validator": "./scripts/start-local-validator.sh",
     "solana:setup": "./scripts/setup-local-test.sh",
     "solana:analyze": "./scripts/analyze-blockchain.sh",
