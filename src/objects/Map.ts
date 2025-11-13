@@ -73,8 +73,24 @@ class Map {
         this.createGrid();
         this.initNavigator();
 
-        // Subscribe to zoom events from the store
+        // Subscribe to direct zoom level changes from zoom controls
         this.unsubscribeZoom = gameStore.subscribe(
+            (state) => state.currentZoom,
+            (newZoom) => {
+                if (newZoom !== this.camera.zoom) {
+                    // Clamp to valid range
+                    this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
+                    this.camera.updateProjectionMatrix();
+                    // Update store with the actual clamped value
+                    if (this.camera.zoom !== newZoom) {
+                        gameStore.getState().setCurrentZoom(this.camera.zoom);
+                    }
+                }
+            }
+        );
+
+        // Also subscribe to zoom delta for wheel/pinch events
+        const unsubscribeZoomDelta = gameStore.subscribe(
             (state) => state.zoomDelta,
             (zoomDelta) => {
                 if (zoomDelta !== 0) {
@@ -84,6 +100,13 @@ class Map {
                 }
             }
         );
+
+        // Combine unsubscribe functions
+        const originalUnsubscribe = this.unsubscribeZoom;
+        this.unsubscribeZoom = () => {
+            originalUnsubscribe();
+            unsubscribeZoomDelta();
+        };
 
         console.log(`Map initialized: ${this.config.gridSize}x${this.config.gridSize} grid, world size: ${this.mapWorldSize}, initial zoom: ${this.camera.zoom}`);
     }

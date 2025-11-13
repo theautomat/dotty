@@ -32,7 +32,7 @@
             background-color: #000;
             color: #fff;
             font-family: Arial, sans-serif;
-            /* Prevent pull-to-refresh and other gestures */
+            /* Prevent all default touch gestures - we handle them in JS */
             touch-action: none;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -40,6 +40,14 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+        }
+
+        /* Ensure canvas doesn't interfere with zoom controls */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            touch-action: none;
         }
         
         /* Entry screen related variables and core styles */
