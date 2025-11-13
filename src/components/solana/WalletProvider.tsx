@@ -18,9 +18,16 @@ interface WalletProviderProps {
 }
 
 export function WalletProvider({ children }: WalletProviderProps) {
-  // Determine network from environment or default to devnet
-  const network = (process.env.SOLANA_NETWORK || 'devnet') as 'devnet' | 'mainnet-beta';
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  // Determine network from environment or default to localhost for local development
+  const endpoint = useMemo(() => {
+    // Check if we're in local development mode
+    if (import.meta.env.DEV || window.location.hostname === 'localhost') {
+      return 'http://localhost:8899';
+    }
+    // Otherwise use configured network or devnet
+    const network = (process.env.SOLANA_NETWORK || 'devnet') as 'devnet' | 'mainnet-beta';
+    return clusterApiUrl(network);
+  }, []);
 
   // Initialize wallet adapters
   const wallets = useMemo(

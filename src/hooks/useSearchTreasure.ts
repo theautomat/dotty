@@ -76,10 +76,6 @@ export const useSearchTreasure = () => {
 
       console.log('Searching treasure at coordinates:', x, y);
       console.log('Search ID:', searchId.toString());
-      console.log('BOOTY Token Mint:', bootyMint.toString());
-      console.log('Player BOOTY Account:', playerBootyAccount.toString());
-      console.log('Vault BOOTY Account:', vaultBootyAccount.toString());
-      console.log('Search Record PDA:', searchRecordPda.toString());
 
       // Call searchTreasure instruction using Anchor
       const tx = await program.methods
