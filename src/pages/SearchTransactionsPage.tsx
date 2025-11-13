@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, query, orderBy, limit, QueryConstraint } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import Navigation from '../components/Navigation';
+import { Navigation } from '../components/Navigation';
 
 interface MapSearch {
   txSignature: string;

@@ -228,6 +228,9 @@ class Game {
         // Create renderer
         this.renderer = new THREE.WebGLRenderer();
 
+        // Configure color space for proper color rendering
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+
         // Initial size will be set by onWindowResize() call below
         // This ensures consistent sizing logic between init and resize
         const isPanelOpen = gameStore.getState().isRightPanelOpen;

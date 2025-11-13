@@ -122,7 +122,11 @@ class Map {
             const texture = await new Promise<THREE.Texture>((resolve, reject) => {
                 textureLoader.load(
                     this.config.backgroundImage!,
-                    (tex) => resolve(tex),
+                    (tex) => {
+                        // Configure texture for sRGB color space (PNG images are sRGB encoded)
+                        tex.colorSpace = THREE.SRGBColorSpace;
+                        resolve(tex);
+                    },
                     undefined,
                     (err) => {
                         console.warn('Failed to load background image, using placeholder:', err);
