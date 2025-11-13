@@ -49,7 +49,8 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         leaderboard: resolve(__dirname, 'leaderboard.html'),
         treasure: resolve(__dirname, 'treasure.html'),
-        hideTreasure: resolve(__dirname, 'hide-treasure.html')
+        hideTreasure: resolve(__dirname, 'hide-treasure.html'),
+        searchTransactions: resolve(__dirname, 'search-transactions.html')
       }
     }
   },
