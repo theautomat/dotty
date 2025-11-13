@@ -51,7 +51,14 @@
       "Bash(gh pr list:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr merge:*)",
-      "Bash(solana balance:*)"
+      "Bash(solana balance:*)",
+      "Bash(spl-token accounts:*)",
+      "Bash(jq:*)",
+      "Bash(solana account:*)",
+      "Bash(spl-token create-account EeuYxVeQa9TSZ8Mg3xBHSRMwAHJvQdg47o78z7tXkWRa --owner 8ibsxzQZfmcwnG8aRMsT9bZDzdvE4YpZMtRU3k1HbEJ6 --url localhost)",
+      "Bash(spl-token create-account:*)",
+      "Bash(spl-token balance:*)",
+      "Bash(spl-token account-info:*)"
     ],
     "deny": [],
     "ask": []
