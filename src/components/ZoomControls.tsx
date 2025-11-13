@@ -25,14 +25,14 @@ export const ZoomControls: React.FC = () => {
 
   const handleZoomIn = () => {
     const newZoom = Math.min(currentZoom + ZOOM_STEP, ZOOM_MAX);
-    const delta = (currentZoom - newZoom) * 100; // Negative delta zooms in
-    gameStore.getState().setZoomDelta(delta);
+    // Set the zoom level directly - Map will apply and clamp it
+    gameStore.getState().setCurrentZoom(newZoom);
   };
 
   const handleZoomOut = () => {
     const newZoom = Math.max(currentZoom - ZOOM_STEP, ZOOM_MIN);
-    const delta = (currentZoom - newZoom) * 100; // Positive delta zooms out
-    gameStore.getState().setZoomDelta(delta);
+    // Set the zoom level directly - Map will apply and clamp it
+    gameStore.getState().setCurrentZoom(newZoom);
   };
 
   const canZoomIn = currentZoom < ZOOM_MAX;

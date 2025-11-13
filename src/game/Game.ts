@@ -234,6 +234,12 @@ class Game {
         const rendererWidth = isPanelOpen ? window.innerWidth - Game.PANEL_WIDTH : window.innerWidth;
         this.renderer.setSize(rendererWidth, window.innerHeight);
 
+        // Style the canvas to ensure it doesn't block UI elements
+        this.renderer.domElement.style.position = 'fixed';
+        this.renderer.domElement.style.top = '0';
+        this.renderer.domElement.style.left = '0';
+        this.renderer.domElement.style.zIndex = '0';
+
         document.body.appendChild(this.renderer.domElement);
 
         // BOOTY: ASCII effect disabled for map view
