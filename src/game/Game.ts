@@ -461,6 +461,11 @@ class Game {
         // Set renderer size to available viewport (not full window)
         this.renderer?.setSize(width, height);
 
+        // Update map grid resolution to match renderer size
+        if (this.map) {
+            this.map.updateResolution(width, height);
+        }
+
         if (this.asciiEffect) {
             this.asciiEffect.setSize(width, height);
         }

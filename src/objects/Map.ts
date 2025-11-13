@@ -289,6 +289,18 @@ class Map {
     }
 
     /**
+     * Update grid material resolution when renderer size changes
+     */
+    updateResolution(width: number, height: number): void {
+        // Update all grid line materials with new resolution
+        this.gridGroup.traverse((child) => {
+            if (child instanceof LineSegments2) {
+                child.material.resolution.set(width, height);
+            }
+        });
+    }
+
+    /**
      * Handle zoom events
      */
     handleZoom(delta: number): void {
