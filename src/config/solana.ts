@@ -8,8 +8,8 @@ export const SOLANA_CONFIG = {
   PROGRAM_ID: '7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh',
 
   // TREASURE token mint - the meme token that players hide/find - updated by dev:local script
-  TREASURE_TOKEN_MINT: '39NeeQEnjQeT2uCGJyFg8CjiLvknLC3TUrXems9Zeni9',
+  TREASURE_TOKEN_MINT: 'AY9dw9XbTwWLYtYaaT24GmdRSXhGDDXyHRFYCdY6F2Ae',
 
   // BOOTY token mint - in-game currency for search fees - updated by dev:local script
-  BOOTY_TOKEN_MINT: '',
+  BOOTY_TOKEN_MINT: '46PfJtzidWBdxmQAR4kFbarjXPZkhUrA1GP82t3eHBFs',
 };

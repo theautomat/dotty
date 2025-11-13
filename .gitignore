@@ -26,6 +26,10 @@ wallets/
 test-ledger/
 test-validator.log
 .test-token-mint
+.booty-token-mint
+
+# Claude Code local settings
+.claude/settings.local.json
 
 # Firebase service account keys - NEVER commit these!
 firebase-service-account.json
