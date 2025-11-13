@@ -13,6 +13,7 @@ export const Navigation: React.FC<NavigationProps> = ({ className }) => {
     { path: '/', label: 'Game', icon: '🎮' },
     { path: '/treasure', label: 'Treasure', icon: '💎' },
     { path: '/hide-treasure', label: 'Hide Treasure', icon: '🗺️' },
+    { path: '/search-transactions', label: 'Searches', icon: '🔍' },
     { path: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
   ];
 
