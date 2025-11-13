@@ -7,30 +7,26 @@ const ZOOM_MAX = 3.0;
 const ZOOM_STEP = (ZOOM_MAX - ZOOM_MIN) / (ZOOM_LEVELS - 1);
 
 export const ZoomControls: React.FC = () => {
-  const [currentZoom, setCurrentZoom] = React.useState(1.0);
+  // In React components, use the hook directly instead of subscribe
+  const currentZoom = gameStore((state) => state.currentZoom);
 
   React.useEffect(() => {
-    // Subscribe to zoom changes to update current zoom level
-    const unsubscribe = gameStore.subscribe(
-      (state) => state.currentZoom,
-      (zoom) => {
-        if (zoom !== undefined) {
-          setCurrentZoom(zoom);
-        }
-      }
-    );
-
-    return unsubscribe;
-  }, []);
+    console.log('ZoomControls: Current zoom from hook:', currentZoom);
+  }, [currentZoom]);
 
   const handleZoomIn = () => {
+    console.log('Zoom In button clicked - Current zoom:', currentZoom);
     const newZoom = Math.min(currentZoom + ZOOM_STEP, ZOOM_MAX);
+    console.log('Setting new zoom to:', newZoom);
     // Set the zoom level directly - Map will apply and clamp it
     gameStore.getState().setCurrentZoom(newZoom);
+    console.log('Store currentZoom after set:', gameStore.getState().currentZoom);
   };
 
   const handleZoomOut = () => {
+    console.log('Zoom Out button clicked - Current zoom:', currentZoom);
     const newZoom = Math.max(currentZoom - ZOOM_STEP, ZOOM_MIN);
+    console.log('Setting new zoom to:', newZoom);
     // Set the zoom level directly - Map will apply and clamp it
     gameStore.getState().setCurrentZoom(newZoom);
   };

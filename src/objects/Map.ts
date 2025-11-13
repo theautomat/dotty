@@ -74,32 +74,34 @@ class Map {
         this.initNavigator();
 
         // Subscribe to direct zoom level changes from zoom controls
-        this.unsubscribeZoom = gameStore.subscribe(
-            (state) => state.currentZoom,
-            (newZoom) => {
-                if (newZoom !== this.camera.zoom) {
-                    // Clamp to valid range
-                    this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
-                    this.camera.updateProjectionMatrix();
-                    // Update store with the actual clamped value
-                    if (this.camera.zoom !== newZoom) {
-                        gameStore.getState().setCurrentZoom(this.camera.zoom);
-                    }
+        // Note: Zustand's subscribe doesn't support selectors, so we need to track previous value
+        let previousZoom = gameStore.getState().currentZoom;
+        this.unsubscribeZoom = gameStore.subscribe((state) => {
+            const newZoom = state.currentZoom;
+            console.log('Map subscription fired - New zoom:', newZoom, 'Previous zoom:', previousZoom, 'Current camera zoom:', this.camera.zoom);
+
+            if (newZoom !== previousZoom && newZoom !== this.camera.zoom) {
+                previousZoom = newZoom;
+                // Clamp to valid range
+                this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
+                console.log('Applied clamped zoom to camera:', this.camera.zoom);
+                this.camera.updateProjectionMatrix();
+                // Update store with the actual clamped value
+                if (this.camera.zoom !== newZoom) {
+                    gameStore.getState().setCurrentZoom(this.camera.zoom);
                 }
             }
-        );
+        });
 
         // Also subscribe to zoom delta for wheel/pinch events
-        const unsubscribeZoomDelta = gameStore.subscribe(
-            (state) => state.zoomDelta,
-            (zoomDelta) => {
-                if (zoomDelta !== 0) {
-                    this.handleZoom(zoomDelta);
-                    // Reset zoom delta after handling
-                    gameStore.getState().setZoomDelta(0);
-                }
+        const unsubscribeZoomDelta = gameStore.subscribe((state) => {
+            const zoomDelta = state.zoomDelta;
+            if (zoomDelta !== 0) {
+                this.handleZoom(zoomDelta);
+                // Reset zoom delta after handling
+                gameStore.getState().setZoomDelta(0);
             }
-        );
+        });
 
         // Combine unsubscribe functions
         const originalUnsubscribe = this.unsubscribeZoom;
