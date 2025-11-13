@@ -34,6 +34,7 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
     "@fingerprintjs/fingerprintjs-pro": "^3.8.1",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@solana/spl-token": "^0.4.8",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",

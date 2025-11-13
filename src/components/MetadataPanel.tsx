@@ -5,6 +5,7 @@ import { getPlotMetadata, type PlotMetadata } from '@/data/mockPlotData';
 import { useGameStore } from '@/store/gameStore';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useSearchTreasure } from '@/hooks/useSearchTreasure';
+import { TransactionSuccessModal } from './TransactionSuccessModal';
 
 interface MetadataPanelProps {
   plotNumber?: number;
@@ -12,6 +13,12 @@ interface MetadataPanelProps {
 
 export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [transactionData, setTransactionData] = useState<{
+    signature: string;
+    coordinates: { x: number; y: number };
+    searchId?: string;
+  } | null>(null);
 
   // Subscribe to grid position and panel state setter from Zustand store
   const gridPosition = useGameStore((state) => state.gridPosition);
@@ -23,6 +30,21 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) 
 
   // Search treasure hook
   const { searchTreasure, isSearching, error } = useSearchTreasure();
+
+  // Handle search transaction
+  const handleSearch = async () => {
+    const result = await searchTreasure(x, y);
+
+    if (result?.success) {
+      // Store transaction data and show success modal
+      setTransactionData({
+        signature: result.signature,
+        coordinates: result.coordinates,
+        searchId: result.searchId,
+      });
+      setShowSuccessModal(true);
+    }
+  };
 
   // Sync panel state with store and trigger canvas resize
   useEffect(() => {
@@ -113,7 +135,7 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) 
               {/* Search Button */}
               <div>
                 <Button
-                  onClick={() => searchTreasure(x, y)}
+                  onClick={handleSearch}
                   disabled={!connected || isSearching}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -206,6 +228,17 @@ export const MetadataPanel: React.FC<MetadataPanelProps> = ({ plotNumber = 1 }) 
           )}
         </div>
       </div>
+
+      {/* Transaction Success Modal */}
+      {transactionData && (
+        <TransactionSuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          signature={transactionData.signature}
+          coordinates={transactionData.coordinates}
+          searchId={transactionData.searchId}
+        />
+      )}
     </>
   );
 };
