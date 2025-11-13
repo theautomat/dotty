@@ -8,6 +8,7 @@ import { MetadataPanel } from './src/components/MetadataPanel';
 import { Navigation } from './src/components/Navigation';
 import { WalletProvider } from './src/components/solana/WalletProvider';
 import { WalletButton } from './src/components/solana/WalletButton';
+import { ZoomControls } from './src/components/ZoomControls';
 
 // Make THREE globally available for legacy code
 declare global {
@@ -63,6 +64,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initialize the metadata panel
   initMetadataPanel();
+
+  // Initialize the zoom controls
+  initZoomControls();
 });
 
 /**
@@ -107,6 +111,26 @@ function initMetadataPanel(): void {
         React.createElement(WalletButton),
         React.createElement(MetadataPanel, { plotNumber: 1 })
       )
+    )
+  );
+}
+
+/**
+ * Initialize the zoom controls
+ */
+function initZoomControls(): void {
+  // Create a container for the zoom controls
+  const zoomControlsContainer = document.createElement('div');
+  zoomControlsContainer.id = 'zoom-controls-root';
+  document.body.appendChild(zoomControlsContainer);
+
+  // Create the root
+  const root = ReactDOM.createRoot(zoomControlsContainer);
+
+  // Render the zoom controls
+  root.render(
+    React.createElement(React.StrictMode, null,
+      React.createElement(ZoomControls)
     )
   );
 }

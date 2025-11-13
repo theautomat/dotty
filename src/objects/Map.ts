@@ -62,9 +62,12 @@ class Map {
      * Initialize the map - create background and grid
      */
     async init(): Promise<void> {
-        // Set initial camera zoom to maximum zoom for best view
-        this.camera.zoom = this.maxZoom;
+        // Set initial camera zoom to default zoom
+        this.camera.zoom = this.defaultZoom;
         this.camera.updateProjectionMatrix();
+
+        // Update the store with the initial zoom level
+        gameStore.getState().setCurrentZoom(this.defaultZoom);
 
         await this.createBackground();
         this.createGrid();
@@ -269,6 +272,9 @@ class Map {
         }
 
         this.camera.updateProjectionMatrix();
+
+        // Update the store with the current zoom level
+        gameStore.getState().setCurrentZoom(this.camera.zoom);
     }
 
     /**
