@@ -4,6 +4,9 @@
  */
 
 import * as THREE from 'three';
+import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import GridNavigator from './GridNavigator';
 import { gameStore } from '../store/gameStore';
 
@@ -12,6 +15,7 @@ interface MapConfig {
     gridSize: number;
     gridColor: number;
     gridOpacity: number;
+    gridLineWidth: number;
     backgroundImage?: string;
     highlightColor?: number;
     highlightOpacity?: number;
@@ -220,23 +224,36 @@ class Map {
             positions.push(halfSize, 0, z);   // End point
         }
 
-        // Create the geometry and material
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        // Create the geometry using LineSegmentsGeometry for thick lines
+        const geometry = new LineSegmentsGeometry();
+        geometry.setPositions(positions);
 
-        const material = new THREE.LineBasicMaterial({
+        // Create the material with line width support
+        const material = new LineMaterial({
             color: this.config.gridColor,
-            opacity: this.config.gridOpacity,
-            transparent: true
+            linewidth: this.config.gridLineWidth, // In pixels
+            worldUnits: false, // Use screen space pixels
+            vertexColors: false,
+            dashed: false,
+            alphaToCoverage: true,
         });
 
-        const grid = new THREE.LineSegments(geometry, material);
+        // Set resolution for the material (required for LineMaterial)
+        material.resolution.set(window.innerWidth, window.innerHeight);
+
+        // Create the LineSegments2 object
+        const grid = new LineSegments2(geometry, material);
         grid.position.set(0, 0.1, 0); // Slightly above the background to prevent z-fighting
 
         this.gridGroup.add(grid);
         this.scene.add(this.gridGroup);
 
-        console.log(`Grid created: ${gridSize}x${gridSize} (${positions.length / 6} lines)`);
+        // Handle window resize to update material resolution
+        window.addEventListener('resize', () => {
+            material.resolution.set(window.innerWidth, window.innerHeight);
+        });
+
+        console.log(`Grid created: ${gridSize}x${gridSize} (${positions.length / 6} lines) with line width ${this.config.gridLineWidth}px`);
     }
 
     /**
@@ -334,7 +351,7 @@ class Map {
         }
 
         this.gridGroup.traverse((child) => {
-            if (child instanceof THREE.LineSegments) {
+            if (child instanceof LineSegments2) {
                 child.geometry.dispose();
                 if (child.material instanceof THREE.Material) {
                     child.material.dispose();
