@@ -41,6 +41,7 @@ interface GameState {
 
   // Zoom state (delta from wheel events)
   zoomDelta: number;
+  currentZoom: number;
 
   // UI state
   isRightPanelOpen: boolean;
@@ -51,6 +52,7 @@ interface GameState {
   setInput: (key: keyof InputState, pressed: boolean) => void;
   resetInputs: () => void;
   setZoomDelta: (delta: number) => void;
+  setCurrentZoom: (zoom: number) => void;
   setRightPanelOpen: (open: boolean) => void;
 }
 
@@ -68,6 +70,7 @@ export const useGameStore = create<GameState>((set) => ({
   mapReady: false,
   gridPosition: { x: 50, y: 50 }, // Start at center of 100x100 grid
   zoomDelta: 0,
+  currentZoom: 1.0,
   isRightPanelOpen: false,
   inputs: {
     up: false,
@@ -107,6 +110,7 @@ export const useGameStore = create<GameState>((set) => ({
       },
     }),
   setZoomDelta: (delta) => set({ zoomDelta: delta }),
+  setCurrentZoom: (zoom) => set({ currentZoom: zoom }),
   setRightPanelOpen: (open) => set({ isRightPanelOpen: open }),
 }));
 
