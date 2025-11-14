@@ -218,6 +218,45 @@ pub mod game {
         Ok(())
     }
 
+    /// Get a clue about a hidden treasure
+    /// Player pays 10 BOOTY tokens to receive a clue about treasure location
+    pub fn get_clue(
+        ctx: Context<GetClue>,
+        treasure_id: String,
+        clue_id: i64,
+    ) -> Result<()> {
+        msg!("Player requesting clue for treasure: {}", treasure_id);
+
+        // Charge 10 BOOTY tokens for the clue (10 tokens with 6 decimals = 10,000,000)
+        let clue_fee = 10_000_000_u64;
+        msg!("Charging {} BOOTY tokens for clue", clue_fee / 1_000_000);
+
+        // Transfer BOOTY tokens from player to vault
+        let cpi_accounts = Transfer {
+            from: ctx.accounts.player_booty_account.to_account_info(),
+            to: ctx.accounts.vault_booty_account.to_account_info(),
+            authority: ctx.accounts.player.to_account_info(),
+        };
+        let cpi_program = ctx.accounts.token_program.to_account_info();
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+
+        token::transfer(cpi_ctx, clue_fee)?;
+
+        msg!("Clue fee paid successfully");
+
+        // Record the clue purchase in player's PDA
+        let clue_record = &mut ctx.accounts.clue_record;
+        clue_record.player = ctx.accounts.player.key();
+        clue_record.treasure_id = treasure_id.clone();
+        clue_record.timestamp = clue_id;
+        clue_record.bump = ctx.bumps.clue_record;
+
+        msg!("Clue purchase recorded for treasure: {}", treasure_id);
+        msg!("Clue ID: {}", clue_id);
+
+        Ok(())
+    }
+
     /// Admin function to whitelist a token mint
     /// This allows adding new tokens that can be hidden as treasure
     pub fn whitelist_token(
@@ -437,6 +476,19 @@ impl SearchRecord {
     pub const LEN: usize = 8 + 32 + 4 + 4 + 8 + 1 + 1; // discriminator + fields
 }
 
+/// Player clue record (one per player per clue purchase)
+#[account]
+pub struct ClueRecord {
+    pub player: Pubkey,       // Player's wallet (32 bytes)
+    pub treasure_id: String,  // Firestore treasure ID (4 + 50 bytes = 54 bytes max)
+    pub timestamp: i64,       // When purchased (8 bytes)
+    pub bump: u8,             // PDA bump (1 byte)
+}
+
+impl ClueRecord {
+    pub const LEN: usize = 8 + 32 + 4 + 50 + 8 + 1; // discriminator + fields
+}
+
 /// Token whitelist entry (which tokens can be hidden as treasure)
 #[account]
 pub struct TokenWhitelist {
@@ -626,6 +678,42 @@ pub struct SearchTreasure<'info> {
         bump
     )]
     pub search_record: Account<'info, SearchRecord>,
+
+    pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+#[instruction(treasure_id: String, clue_id: i64)]
+pub struct GetClue<'info> {
+    /// Player getting the clue
+    #[account(mut)]
+    pub player: Signer<'info>,
+
+    /// Player's BOOTY token account (source of clue fee payment)
+    #[account(
+        mut,
+        constraint = player_booty_account.owner == player.key() @ ErrorCode::InvalidTokenAccount
+    )]
+    pub player_booty_account: Account<'info, TokenAccount>,
+
+    /// Vault's BOOTY token account (destination for clue fees)
+    #[account(mut)]
+    pub vault_booty_account: Account<'info, TokenAccount>,
+
+    /// Clue record PDA (unique per player, per clue)
+    #[account(
+        init,
+        payer = player,
+        space = ClueRecord::LEN,
+        seeds = [
+            b"clue",
+            player.key().as_ref(),
+            &clue_id.to_le_bytes()
+        ],
+        bump
+    )]
+    pub clue_record: Account<'info, ClueRecord>,
 
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,

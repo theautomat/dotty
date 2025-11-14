@@ -8,6 +8,7 @@ const { nftService } = require('./nft-service');
 const { firebaseAdmin } = require('./firebase-admin-config.ts');
 const { treasureService } = require('./treasure-service.ts');
 const { searchService } = require('./search-service.ts');
+const { clueService } = require('./clue-service.ts');
 const {
   verifyHeliusAuth,
   handleHeliusWebhook,
@@ -17,6 +18,10 @@ const {
   handleSearchWebhook,
   searchWebhookHealthCheck
 } = require('./search-webhook-handler.ts');
+const {
+  handleClueWebhook,
+  clueWebhookHealthCheck
+} = require('./clue-webhook-handler.ts');
 
 // Create Express app
 const app = express();
@@ -186,6 +191,30 @@ app.post('/api/webhooks/search',
 
 // Search webhook health check endpoint
 app.get('/api/webhooks/search/health', searchWebhookHealthCheck);
+
+// ============================================================================
+// CLUE WEBHOOK ENDPOINTS
+// ============================================================================
+
+/**
+ * Clue Webhook Endpoint
+ *
+ * This endpoint receives clue purchase transaction notifications from the local
+ * transaction monitor (Helius simulator) when:
+ * - A user purchases a clue for a treasure
+ *
+ * When a clue is purchased, it triggers a Firestore onCreate event that
+ * generates an AI clue using OpenAI API.
+ *
+ * For local development only - simulates Helius webhook behavior
+ */
+app.post('/api/webhooks/clue',
+  verifyHeliusAuth(process.env.HELIUS_WEBHOOK_AUTH_HEADER),
+  handleClueWebhook
+);
+
+// Clue webhook health check endpoint
+app.get('/api/webhooks/clue/health', clueWebhookHealthCheck);
 
 // ============================================================================
 // TREASURE API ENDPOINTS
@@ -500,6 +529,108 @@ app.patch('/api/searches/:signature', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to update search'
+    });
+  }
+});
+
+// ============================================================================
+// CLUE API ENDPOINTS
+// ============================================================================
+
+// Get clues for a specific treasure
+app.get('/api/treasures/:treasureId/clues', async (req, res) => {
+  try {
+    const { treasureId } = req.params;
+    const { limit, walletAddress, status } = req.query;
+
+    if (!clueService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const clues = await clueService.getCluesForTreasure(treasureId, {
+      limit: limit ? parseInt(limit) : 100,
+      walletAddress,
+      status
+    });
+
+    res.json({
+      success: true,
+      count: clues.length,
+      clues
+    });
+
+  } catch (error) {
+    console.error('Error fetching clues for treasure:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch clues'
+    });
+  }
+});
+
+// Get all clues for a wallet across all treasures
+app.get('/api/clues/wallet/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!clueService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const clues = await clueService.getCluesByWallet(address);
+
+    res.json({
+      success: true,
+      count: clues.length,
+      clues
+    });
+
+  } catch (error) {
+    console.error('Error fetching clues by wallet:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch clues'
+    });
+  }
+});
+
+// Get specific clue by transaction signature
+app.get('/api/treasures/:treasureId/clues/:signature', async (req, res) => {
+  try {
+    const { treasureId, signature } = req.params;
+
+    if (!clueService.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Database not ready'
+      });
+    }
+
+    const clue = await clueService.getClue(treasureId, signature);
+
+    if (!clue) {
+      return res.status(404).json({
+        success: false,
+        error: 'Clue not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      clue
+    });
+
+  } catch (error) {
+    console.error('Error fetching clue:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch clue'
     });
   }
 });

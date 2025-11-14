@@ -19,6 +19,16 @@ service cloud.firestore {
       // Only server (via Firebase Admin SDK) can write
       // Admin SDK bypasses these rules
       allow write: if false;
+
+      // Clues subcollection under treasures
+      match /clues/{clueId} {
+        // Anyone can read clues (users can see their own purchased clues)
+        allow get, list: if true;
+
+        // Only server (via Firebase Admin SDK) can write
+        // Admin SDK bypasses these rules
+        allow write: if false;
+      }
     }
 
     // Allow read access to map searches collection
