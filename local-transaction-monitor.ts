@@ -41,6 +41,7 @@ type ParsedTransactionWithMeta = any;
 const VALIDATOR_URL = "http://localhost:8899";
 const HIDE_WEBHOOK_URL = "http://localhost:3000/api/webhooks/helius";
 const SEARCH_WEBHOOK_URL = "http://localhost:3000/api/webhooks/search";
+const CLUE_WEBHOOK_URL = "http://localhost:3000/api/webhooks/clue";
 const PROGRAM_ID = new PublicKey("7fcqEt6ieMEgPNQUbVyxGCpVXFPfRsj7xxHgdwqNB1kh");
 const POLL_INTERVAL = 2000; // 2 seconds
 const AUTH_HEADER = process.env.HELIUS_WEBHOOK_AUTH_HEADER || "test-auth-secret";
@@ -48,6 +49,7 @@ const AUTH_HEADER = process.env.HELIUS_WEBHOOK_AUTH_HEADER || "test-auth-secret"
 const TransactionType = {
   HIDE_TREASURE: "HIDE_TREASURE",
   SEARCH_TREASURE: "SEARCH_TREASURE",
+  GET_CLUE: "GET_CLUE",
 } as const;
 
 type TransactionType = typeof TransactionType[keyof typeof TransactionType];
@@ -78,6 +80,7 @@ class LocalTransactionMonitor {
     console.log(`   Validator: ${VALIDATOR_URL}`);
     console.log(`   Hide Webhook: ${HIDE_WEBHOOK_URL}`);
     console.log(`   Search Webhook: ${SEARCH_WEBHOOK_URL}`);
+    console.log(`   Clue Webhook: ${CLUE_WEBHOOK_URL}`);
     console.log(`   Program: ${PROGRAM_ID.toString()}`);
     console.log(`   Poll Interval: ${POLL_INTERVAL}ms`);
     console.log("");
@@ -102,7 +105,7 @@ class LocalTransactionMonitor {
     }
 
     this.isRunning = true;
-    console.log("👀 Monitoring for game program transactions (hide_treasure, search_treasure)...\n");
+    console.log("👀 Monitoring for game program transactions (hide_treasure, search_treasure, get_clue)...\n");
 
     // Start polling loop
     this.pollLoop();
@@ -248,6 +251,27 @@ class LocalTransactionMonitor {
         await this.sendToWebhook(payload, SEARCH_WEBHOOK_URL);
 
         console.log(`   ✅ Forwarded to search webhook handler`);
+
+      } else if (txType === TransactionType.GET_CLUE) {
+        console.log(`💡 Found get_clue transaction: ${signature}`);
+
+        // Extract treasure ID from logs
+        const treasureId = this.extractTreasureId(tx);
+
+        if (!treasureId) {
+          console.log(`   ⚠️  Could not extract treasure ID`);
+          return;
+        }
+
+        console.log(`   🏴‍☠️ Treasure ID: ${treasureId}`);
+
+        // Create clue webhook payload
+        const payload = this.createClueWebhookPayload(tx, signature, treasureId);
+
+        // Send to clue webhook
+        await this.sendToWebhook(payload, CLUE_WEBHOOK_URL);
+
+        console.log(`   ✅ Forwarded to clue webhook handler`);
       }
     } catch (error) {
       console.error(`   ❌ Error processing transaction ${signature}:`, error);
@@ -255,7 +279,7 @@ class LocalTransactionMonitor {
   }
 
   /**
-   * Determine transaction type (hide or search)
+   * Determine transaction type (hide, search, or clue)
    */
   private getTransactionType(tx: ParsedTransactionWithMeta): TransactionType | null {
     const instructions = tx.transaction.message.instructions;
@@ -272,6 +296,9 @@ class LocalTransactionMonitor {
           }
           if (log.includes("Player searching") || log.includes("Search recorded")) {
             return TransactionType.SEARCH_TREASURE;
+          }
+          if (log.includes("Player requesting clue") || log.includes("Clue purchase recorded")) {
+            return TransactionType.GET_CLUE;
           }
         }
 
@@ -309,6 +336,28 @@ class LocalTransactionMonitor {
           x: parseInt(match[1], 10),
           y: parseInt(match[2], 10),
         };
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Extract treasure ID from clue transaction logs
+   */
+  private extractTreasureId(tx: ParsedTransactionWithMeta): string | null {
+    const logs = tx.meta?.logMessages || [];
+
+    for (const log of logs) {
+      // Look for log message like: "Player requesting clue for treasure: abc123"
+      const match = log.match(/treasure:\s*([a-zA-Z0-9_-]+)/);
+      if (match) {
+        return match[1];
+      }
+      // Alternative format: "Clue purchase recorded for treasure: abc123"
+      const match2 = log.match(/for treasure:\s*([a-zA-Z0-9_-]+)/);
+      if (match2) {
+        return match2[1];
       }
     }
 
@@ -470,6 +519,58 @@ class LocalTransactionMonitor {
               wallet: feePayer,
               x: coordinates.x,
               y: coordinates.y,
+            },
+          },
+        ],
+      },
+    ];
+  }
+
+  /**
+   * Create Helius-style webhook payload for clue transactions
+   */
+  private createClueWebhookPayload(
+    tx: ParsedTransactionWithMeta,
+    signature: string,
+    treasureId: string
+  ) {
+    const feePayer = tx.transaction.message.accountKeys[0].pubkey.toString();
+
+    return [
+      {
+        signature,
+        type: "UNKNOWN",
+        timestamp: tx.blockTime || Math.floor(Date.now() / 1000),
+        slot: tx.slot,
+        fee: tx.meta?.fee || 5000,
+        feePayer,
+
+        // Native transfers (empty for clue)
+        nativeTransfers: [],
+
+        // Token transfers (none for clue - paid in BOOTY tokens)
+        tokenTransfers: [],
+
+        // Account data
+        accountData: [
+          {
+            account: feePayer,
+            nativeBalanceChange: -(tx.meta?.fee || 5000),
+            tokenBalanceChanges: [],
+          },
+        ],
+
+        // Description
+        description: `Clue purchased for treasure ${treasureId}`,
+
+        // Events (program-specific)
+        events: [
+          {
+            type: "GET_CLUE",
+            programId: PROGRAM_ID.toString(),
+            data: {
+              wallet: feePayer,
+              treasureId: treasureId,
             },
           },
         ],
